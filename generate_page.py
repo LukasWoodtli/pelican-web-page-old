@@ -94,7 +94,7 @@ def publish_web_page():
     repo = sh.git.bake(_cwd=userpage_local_repo)
     repo.add("*")
     repo.commit(["-m", "Update Github page automated."])
-    repo.push(["origin"])
+    repo.push(["--force", "origin", "HEAD:gh-pages"])
 
 
 if __name__ == "__main__":
