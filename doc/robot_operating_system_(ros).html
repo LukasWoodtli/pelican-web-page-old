@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Cheat Sheet, Robotics, Mechanics, " />
+
+<meta property="og:title" content="Robot Operating System (ROS) "/>
+<meta property="og:url" content="./robot_operating_system_(ros).html" />
+<meta property="og:description" content="Currently I’m using Melodic Morenia. rosbash There is tab-completion for almost everything Load ROS Environment For Bash: source /opt/ros/melodic/setup.bash or Zsh: source /opt/ros/melodic/setup.zsh Commands Command Function rosls &lt;package_name&gt; List package content roscd &lt;package_name&gt; Go to package directory rospack Command Function …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2019-04-19T09:52:35+02:00" />
+<meta property="og:article:modified_time" content="2022-04-12T07:48:05+02:00" />
+<meta name="twitter:title" content="Robot Operating System (ROS) ">
+<meta name="twitter:description" content="Currently I’m using Melodic Morenia. rosbash There is tab-completion for almost everything Load ROS Environment For Bash: source /opt/ros/melodic/setup.bash or Zsh: source /opt/ros/melodic/setup.zsh Commands Command Function rosls &lt;package_name&gt; List package content roscd &lt;package_name&gt; Go to package directory rospack Command Function …">
+
+        <title>Robot Operating System (ROS)  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./robot_operating_system_(ros).html"> Robot Operating System (<span class="caps">ROS</span>)  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#rosbash">rosbash</a><ul>
+<li><a href="#load-ros-environment">Load <span class="caps">ROS</span> Environment</a></li>
+<li><a href="#commands">Commands</a></li>
+</ul>
+</li>
+<li><a href="#rospack">rospack</a></li>
+<li><a href="#the-master-roscore">The Master (roscore)</a></li>
+<li><a href="#nodes">Nodes</a><ul>
+<li><a href="#start-a-node-rosrun">Start a node (rosrun)</a></li>
+<li><a href="#handle-multiple-nodes-roslaunch">Handle multiple nodes (roslaunch)</a><ul>
+<li><a href="#launch-file-structure-xml-tags-and-arguments">Launch File Structure (<span class="caps">XML</span> Tags and Arguments)</a></li>
+</ul>
+</li>
+<li><a href="#commands-for-handling-nodes">Commands for handling Nodes</a></li>
+</ul>
+</li>
+<li><a href="#communication-and-data-sharing">Communication and Data Sharing</a><ul>
+<li><a href="#topics-and-messages">Topics and Messages</a></li>
+<li><a href="#parameters-rosparam">Parameters (rosparam)</a></li>
+<li><a href="#services">Services</a></li>
+<li><a href="#topics-messages-and-services">Topics, Messages and Services</a></li>
+<li><a href="#overview">Overview</a></li>
+</ul>
+</li>
+<li><a href="#bag-files">Bag files</a></li>
+<li><a href="#workspaces-and-packages">Workspaces and Packages</a><ul>
+<li><a href="#creating-a-workspaces">Creating a Workspaces</a></li>
+<li><a href="#creating-a-package">Creating a Package</a></li>
+<li><a href="#building-a-workspace">Building a Workspace</a></li>
+<li><a href="#configuring-build-in-a-workspace">Configuring build in a Workspace</a><ul>
+<li><a href="#provide-arguments-to-cmake">Provide Arguments to CMake</a></li>
+</ul>
+</li>
+<li><a href="#running-a-node-from-workspace">Running a Node from Workspace</a></li>
+<li><a href="#cleaning-the-workspace">Cleaning the Workspace</a></li>
+</ul>
+</li>
+<li><a href="#client-libraries">Client Libraries</a><ul>
+<li><a href="#node-handles">Node Handles</a></li>
+<li><a href="#time-library">Time Library</a></li>
+</ul>
+</li>
+<li><a href="#urdf-and-xacro"><span class="caps">URDF</span> and Xacro</a></li>
+<li><a href="#checking-for-problems">Checking for Problems</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <blockquote>
+<p>Currently I’m using <em>Melodic Morenia</em>.</p>
+</blockquote>
+
+<h1 id="rosbash"><code>rosbash</code></h1>
+<blockquote>
+<p>There is <code>tab</code>-completion for almost everything</p>
+</blockquote>
+<h2 id="load-ros-environment">Load <span class="caps">ROS</span> Environment</h2>
+<p>For Bash:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span> /opt/ros/melodic/setup.bash
+</code></pre></div>
+<p>or Zsh:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span> /opt/ros/melodic/setup.zsh
+</code></pre></div>
+<h2 id="commands">Commands</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Command</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rosls &lt;package_name&gt;</code></td>
+<td>List package content</td>
+</tr>
+<tr>
+<td><code>roscd &lt;package_name&gt;</code></td>
+<td>Go to package directory</td>
+</tr>
+</tbody>
+</table>
+<h1 id="rospack"><code>rospack</code></h1>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Command</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rospack list</code></td>
+<td>List installed packages</td>
+</tr>
+<tr>
+<td><code>rospack find &lt;package-name&gt;</code></td>
+<td>Search for a package</td>
+</tr>
+</tbody>
+</table>
+<p>Each package is defined by a package directory that contains a manifest
+file called <code>package.xml</code>.</p>
+<p>Package executables are not stored in the package directory.
+They are placed in a separate standardized directory hierarchy.</p>
+<h1 id="the-master-roscore">The Master (<code>roscore</code>)</h1>
+<ul>
+<li><code>roscore</code> starts the master. There are no command line arguments.</li>
+</ul>
+<h1 id="nodes">Nodes</h1>
+<h2 id="start-a-node-rosrun">Start a node (<code>rosrun</code>)</h2>
+<div class="highlight"><pre><span></span><code>rosrun &lt;package-name&gt; &lt;executable-name&gt;
+</code></pre></div>
+<ul>
+<li><code>package-name</code>: the name of the node’s package</li>
+<li><code>executable-name</code>: the executable name in that package</li>
+</ul>
+<h2 id="handle-multiple-nodes-roslaunch">Handle multiple nodes (<code>roslaunch</code>)</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Command</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>roslaunch &lt;package-name&gt; &lt;launch-file-name&gt;</code></td>
+<td>Launch nodes from launch file in package</td>
+</tr>
+<tr>
+<td><code>roslaunch &lt;launch-file-path&gt;</code></td>
+<td>Launch nodes from launch file given with full path</td>
+</tr>
+</tbody>
+</table>
+<h3 id="launch-file-structure-xml-tags-and-arguments">Launch File Structure (<span class="caps">XML</span> Tags and Arguments)</h3>
+<ul>
+<li><code>&lt;launch&gt;</code>: Root element of launch file</li>
+<li><code>&lt;node name="listener" pkg="roscpp_tutorials" type="listener" output="screen" /&gt;</code>: A <span class="caps">ROS</span> node to be launched<ul>
+<li><code>name</code>: Name of the node (free to choose)</li>
+<li><code>pkg</code>: The <span class="caps">ROS</span> package name containing the node executable</li>
+<li><code>type</code>: Type of the node in the package</li>
+<li><code>output</code>: Where to output log messages (<code>screen</code> or <code>log</code>)</li>
+</ul>
+</li>
+<li><code>&lt;arg name="arg_name" default="default_value"/&gt;</code>: Define arguments (variables)<ul>
+<li><code>$(arg arg_name)</code>: Reference arguments</li>
+<li><code>roslaunch launch_file.launch arg_name:=value</code>: Provide arguments when running a launchfile</li>
+</ul>
+</li>
+<li><code>&lt;include file="package_name"/&gt;</code>: Include other launchfile<ul>
+<li><code>$(find package_name)</code>: Find other package in workspace</li>
+</ul>
+</li>
+</ul>
+<p>Notes about how to writ launch files can be found at <a href="http://wiki.ros.org/roslaunch/XML">roslaunch/<span class="caps">XML</span></a> and
+<a href="http://wiki.ros.org/ROS/Tutorials/Roslaunch%20tips%20for%20larger%20projects">Roslaunch tips for large projects</a></p>
+<p>Flags:</p>
+<ul>
+<li><code>-v</code>: Print verbose output</li>
+<li><code>--screen</code>: Display output for all nodes in launch file</li>
+</ul>
+<h2 id="commands-for-handling-nodes">Commands for handling Nodes</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Command</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rosnode list</code></td>
+<td>Print the running nodes</td>
+</tr>
+<tr>
+<td><code>rosnode info &lt;node-name&gt;</code></td>
+<td>Inspect a running node</td>
+</tr>
+<tr>
+<td><code>rosnode kill &lt;node-name&gt;</code></td>
+<td>Stop and remove a running node</td>
+</tr>
+<tr>
+<td><code>rosnode cleanup</code></td>
+<td>Remove killed nodes from the list</td>
+</tr>
+</tbody>
+</table>
+<h1 id="communication-and-data-sharing">Communication and Data Sharing</h1>
+<h2 id="topics-and-messages">Topics and Messages</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Command</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rostopic list</code></td>
+<td>Print all topics currently published or subscribed</td>
+</tr>
+<tr>
+<td><code>rostopic list -v</code></td>
+<td>Print also publishers and subscribers</td>
+</tr>
+<tr>
+<td><code>rostopic echo &lt;topic&gt;</code></td>
+<td>Print data published on a topic</td>
+</tr>
+<tr>
+<td><code>rostopic info &lt;topic&gt;</code></td>
+<td>Print message type, publishers and subscribers</td>
+</tr>
+<tr>
+<td><code>rostopic type &lt;topic&gt;</code></td>
+<td>Get the message type published on a topic</td>
+</tr>
+<tr>
+<td><code>rosmsg show &lt;msg-type&gt;</code></td>
+<td>Get the fields of a message type</td>
+</tr>
+<tr>
+<td><code>rostopic pub &lt;topic&gt; &lt;msg-type&gt; -- &lt;args&gt;</code></td>
+<td>Publish on a topic (use <code>TAB</code> completion to get a template message)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="parameters-rosparam">Parameters (<code>rosparam</code>)</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Command</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rosparam list</code></td>
+<td>Print a list of all parameters</td>
+</tr>
+<tr>
+<td><code>rosparam get &lt;parameter-name&gt;</code></td>
+<td>Ask for the value of a parameter</td>
+</tr>
+<tr>
+<td><code>rosparam get &lt;namespace&gt;</code></td>
+<td>Ask for all values of all parameters in a namespace</td>
+</tr>
+<tr>
+<td><code>rosparam set &lt;parameter-name&gt; &lt;value&gt;</code></td>
+<td>Set the value of a parameter</td>
+</tr>
+<tr>
+<td><code>rosparam set &lt;namespace&gt; &lt;values&gt;</code></td>
+<td>Set the values of parameters in a namespace using <span class="caps">YAML</span></td>
+</tr>
+<tr>
+<td><code>rosparam dump &lt;filename&gt; &lt;namespace&gt;</code></td>
+<td>Save all parameters from a namespace in a <span class="caps">YAML</span> file</td>
+</tr>
+<tr>
+<td><code>rosparam load &lt;filename&gt; &lt;namespace&gt;</code></td>
+<td>Load all parameters from a <span class="caps">YAML</span> file into a namespace</td>
+</tr>
+</tbody>
+</table>
+<h2 id="services">Services</h2>
+<p>A <em>client</em> node sends a <strong>request</strong> to a <em>server</em> node and waits for a <strong>response</strong>.</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Command</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rosservice list</code></td>
+<td>Get a list of currently active services</td>
+</tr>
+<tr>
+<td><code>rosservice node &lt;service-name&gt;</code></td>
+<td>Print the node that offers a given service</td>
+</tr>
+<tr>
+<td><code>rosservice info &lt;service-name&gt;</code></td>
+<td>Finding the data type of a service</td>
+</tr>
+<tr>
+<td><code>rossrv show &lt;service-data-type-name&gt;</code></td>
+<td>Show the data fields of the request and the response</td>
+</tr>
+<tr>
+<td><code>rosservice call &lt;service-name&gt; &lt;request&gt;</code></td>
+<td>Get a response from a service</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>rosservice</code>: interacting with services that are currently offered by a node</li>
+<li><code>rossrv</code>: information about service data types</li>
+</ul>
+<p>Information about writing services and clients in C++ can be found here
+<a href="http://wiki.ros.org/ROS/Tutorials/WritingServiceClient(c++)">Writing a Simple Service and Client (C++)</a>.</p>
+<h2 id="topics-messages-and-services">Topics, Messages and Services</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th>Topics</th>
+<th>Services</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>active entities</td>
+<td><code>rostopic</code></td>
+<td><code>rosservice</code></td>
+</tr>
+<tr>
+<td>data types</td>
+<td><code>rosmsg</code></td>
+<td><code>rossrv</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="overview">Overview</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th>Topics</th>
+<th>Services</th>
+<th>Actions</th>
+<th>Parameters</th>
+<th>Dynamic Reconfigure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Description</td>
+<td>Continuous data streams</td>
+<td>Blocking call for processing requests</td>
+<td>Non-blocking, preemptable, goal oriented</td>
+<td>Global constant parameters</td>
+<td>Local, changeable parameters</td>
+</tr>
+<tr>
+<td>Application</td>
+<td>One-way data flow</td>
+<td>Short triggers or calculations</td>
+<td>Task executions and robot actions</td>
+<td>Constant settings</td>
+<td>Tuning parameters</td>
+</tr>
+<tr>
+<td>Examples</td>
+<td>Sensor data, robot state</td>
+<td>Trigger change, request state, compute quantity</td>
+<td>Navigation, grasping, motion execution</td>
+<td>Topic names, camera settings, calibration data, robot setup</td>
+<td>Controller parameters</td>
+</tr>
+</tbody>
+</table>
+<h1 id="bag-files">Bag files</h1>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Command</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rosbag record -O &lt;filename&gt; &lt;topic-names&gt;</code></td>
+<td>Record all messages of the given topics (stop with <code>Ctrl-C</code>)</td>
+</tr>
+<tr>
+<td><code>rosrun rosbag record -O &lt;filename&gt; &lt;topic-names&gt;</code></td>
+<td>Alternative to be used in launch files</td>
+</tr>
+<tr>
+<td><code>rosbag play &lt;filename&gt;</code></td>
+<td>Replay bag file</td>
+</tr>
+<tr>
+<td><code>rosrun rosbag play &lt;filename&gt;</code></td>
+<td>Alternative to be used in launch files</td>
+</tr>
+<tr>
+<td><code>rosbag info &lt;filename&gt;</code></td>
+<td>Inspect bag file</td>
+</tr>
+</tbody>
+</table>
+<p>Flags:</p>
+<ul>
+<li><code>-j</code>: Compress bag files</li>
+</ul>
+<h1 id="workspaces-and-packages">Workspaces and Packages</h1>
+<p>All packages belonging to one project should be placed in one workspace.</p>
+<h2 id="creating-a-workspaces">Creating a Workspaces</h2>
+<div class="highlight"><pre><span></span><code>mkdir -p &lt;workspace-name&gt;/src    <span class="c1"># don't forget the `src` subdirectory</span>
+<span class="nb">cd</span>  &lt;workspace-name&gt;/
+catkin build  <span class="c1"># don't use catkin_make</span>
+<span class="nb">source</span> devel/setup.zsh
+</code></pre></div>
+<h2 id="creating-a-package">Creating a Package</h2>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span>  &lt;workspace-name&gt;/src
+catkin_create_pkg &lt;package-name&gt; <span class="o">[</span>list of dependencies<span class="o">]</span>
+</code></pre></div>
+<h2 id="building-a-workspace">Building a Workspace</h2>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span>  &lt;workspace-name&gt;/
+catkin build  <span class="c1"># don't use catkin_make</span>
+<span class="nb">source</span> devel/setup.zsh
+</code></pre></div>
+<h2 id="configuring-build-in-a-workspace">Configuring build in a Workspace</h2>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span>  &lt;workspace-name&gt;/
+catkin config
+<span class="nb">source</span> devel/setup.zsh
+</code></pre></div>
+<h3 id="provide-arguments-to-cmake">Provide Arguments to CMake</h3>
+<div class="highlight"><pre><span></span><code>catkin config --cmake-args -DCMAKE_BUILD_TYPE<span class="o">=</span>Debug
+</code></pre></div>
+<h2 id="running-a-node-from-workspace">Running a Node from Workspace</h2>
+<p>A master is required to run before running any nodes.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span>  &lt;workspace-name&gt;/
+<span class="nb">source</span> devel/setup.zsh
+rosrun &lt;package-name&gt; &lt;executable-name&gt;
+</code></pre></div>
+<h2 id="cleaning-the-workspace">Cleaning the Workspace</h2>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span>  &lt;workspace-name&gt;/
+catkin clean --all
+</code></pre></div>
+<h1 id="client-libraries">Client Libraries</h1>
+<h2 id="node-handles">Node Handles</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Node Handle</th>
+<th>C++ Code</th>
+<th>Namespace for Topics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Default (public)</td>
+<td><code>nh_ = ros::NodeHandle();</code></td>
+<td><code>/namespace/topic</code></td>
+</tr>
+<tr>
+<td>Private</td>
+<td><code>nh_private_ = ros::NodeHandle("~");</code></td>
+<td><code>/namespace/node/topic</code></td>
+</tr>
+<tr>
+<td>Namespaced</td>
+<td><code>nh_eth_ = ros::NodeHandle("eth");</code></td>
+<td><code>/namespace/eth/topic</code></td>
+</tr>
+</tbody>
+</table>
+<p>It’s also possible to use global node handlers. But it is not recomended.</p>
+<h2 id="time-library">Time Library</h2>
+<p>It’s recomended to always use the <span class="caps">ROS</span> Time APIs (and not the standard library).</p>
+<p>This allows to handle simulated time properly.</p>
+<ul>
+<li><code>ros::Time</code>:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">ros</span><span class="o">::</span><span class="n">Time</span><span class="w"> </span><span class="n">begin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ros</span><span class="o">::</span><span class="n">Time</span><span class="o">::</span><span class="n">now</span><span class="p">();</span><span class="w"></span>
+<span class="kt">double</span><span class="w"> </span><span class="n">secs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">begin</span><span class="p">.</span><span class="n">toSec</span><span class="p">();</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li><code>ros::Duration</code>:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">duration</span><span class="p">(</span><span class="mf">0.5</span><span class="p">);</span><span class="w"> </span><span class="c1">// 0.5s</span>
+<span class="n">ros</span><span class="o">::</span><span class="n">Duration</span><span class="w"> </span><span class="n">passed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ros</span><span class="o">::</span><span class="n">Time</span><span class="p">()</span><span class="o">::</span><span class="n">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">begin</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li><code>ros::Rate</code>:</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">ros</span><span class="o">::</span><span class="n">Rate</span><span class="w"> </span><span class="nf">rate</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// 10Hz</span>
+</code></pre></div>
+<p>If wall time is required, use <code>ros::WallTime</code>, <code>ros::WallDuration</code> and <code>ros::WallRate</code></p>
+<h1 id="urdf-and-xacro"><span class="caps">URDF</span> and Xacro</h1>
+<p>To generate an <span class="caps">URFD</span> file from a xacro file:</p>
+<div class="highlight"><pre><span></span><code>xacro input.xacro &gt; output.urdf
+</code></pre></div>
+<p>Checking <span class="caps">URDF</span> files:</p>
+<div class="highlight"><pre><span></span><code>check_urdf file.urdf
+</code></pre></div>
+<p>Create graph for <span class="caps">URDF</span>:</p>
+<div class="highlight"><pre><span></span><code>urdf_to_graphiz file.urdf  <span class="c1"># note the missing 'v' in graphiz</span>
+</code></pre></div>
+<h1 id="checking-for-problems">Checking for Problems</h1>
+<ul>
+<li><code>roswtf</code>: Perform sanity checks for the running <span class="caps">ROS</span> system</li>
+<li><code>rosnode info</code>: Get information about nodes</li>
+<li><code>rostopic echo</code>: Show data published on a topic</li>
+<li><code>rqt_graph</code>: Show nodes and topics as graphs</li>
+<li><code>rviz</code>: Visualize data</li>
+<li><code>rqt</code>: Generic <span class="caps">GUI</span> with a lot of plugins</li>
+</ul>
+<h1 id="references">References</h1>
+<ul>
+<li><a href="https://cse.sc.edu/~jokane/agitr/">A Gentle Introduction to <span class="caps">ROS</span></a></li>
+<li><a href="http://wiki.ros.org/"><span class="caps">ROS</span> Wiki</a></li>
+</ul>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./vim.html" title="Previous: vim">vim</a></li>
+                <li class="next-article"><a href="./notes_on_std.html" title="Next: Notes on std">Notes on std</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2019-04-19T09:52:35+02:00">Apr 19, 2019</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-12T07:48:05+02:00">Apr 12, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#mechanics-ref">Mechanics</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#cheat_sheet-ref">Cheat Sheet
+                    <span>6</span>
+</a></li>
+                <li><a href="./tags#robotics-ref">Robotics
+                    <span>15</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="C++, Programming, " />
+
+<meta property="og:title" content="Modern C++ Design "/>
+<meta property="og:url" content="./modern_cpp_design.html" />
+<meta property="og:description" content="Part I. Techniques Policy-Based Class Design The Benefit of Templates “Templates are a good candidate for coping with combinatorial behaviors because they generate code at compile time based on the types (and/or constant values) provided by the user. Class templates are customizable in ways not supported by regular classes …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2017-01-03T14:03:19+01:00" />
+<meta property="og:article:modified_time" content="2022-04-10T21:39:06+02:00" />
+<meta name="twitter:title" content="Modern C++ Design ">
+<meta name="twitter:description" content="Part I. Techniques Policy-Based Class Design The Benefit of Templates “Templates are a good candidate for coping with combinatorial behaviors because they generate code at compile time based on the types (and/or constant values) provided by the user. Class templates are customizable in ways not supported by regular classes …">
+
+        <title>Modern C++ Design  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./modern_cpp_design.html"> Modern C++&nbsp;Design  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            
+            <h1 id="part-i-techniques">Part I. Techniques</h1>
+<h2 id="policy-based-class-design">Policy-Based Class Design</h2>
+<h3 id="the-benefit-of-templates">The Benefit of Templates</h3>
+<p><em><span class="dquo">“</span>Templates are a good candidate for coping with combinatorial behaviors because they generate code at compile time based on the types (and/or constant values) provided by the user.
+Class templates are customizable in ways not supported by regular classes.”</em></p>
+<p><em><span class="dquo">“</span>Furthermore, for class templates you can use partial template specialization […]. Partial template specialization gives you the ability to specialize a class template for only some of its arguments.”</em></p>
+<p><em><span class="dquo">“</span>[…] several problems that are not self-evident:</em></p>
+<ol>
+<li><em>You cannot specialize structure. Using templates alone, you cannot specialize the structure of a class (its data members). You can only specialize functions.</em></li>
+<li><em>Partial specialization of member functions does not scale. You can specialize any member function of a class template with one template parameter, but you cannot specialize individual member functions for templates with multiple template parameters.</em></li>
+<li><em><span class="dquo">“</span>The library writer cannot provide multiple default values. At best, a class template implementer can provide a single default implementation for each member function. You cannot provide several defaults for a template member function.”</em></li>
+</ol>
+<p>Member functions can be only fully specialized:</p>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Widget</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">Fun</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="n">generic</span><span class="w"> </span><span class="n">implementation</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// ok: specialization allowed</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">Widget</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;::</span><span class="n">Fun</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="n">specialized</span><span class="w"> </span><span class="n">implementation</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>Partial specialization is not allowed:</p>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Gadget</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">Fun</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="n">generic</span><span class="w"> </span><span class="n">implementation</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
+
+<span class="c1">// error: member functions can't be specialized partially</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">Gadget</span><span class="o">&lt;</span><span class="kt">char</span><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="o">&gt;::</span><span class="n">Fun</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="n">specialized</span><span class="w"> </span><span class="n">implementation</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h3 id="policies-and-policy-classes">Policies and Policy Classes</h3>
+<p><em><span class="dquo">“</span>A </em><em>policy</em><em> defines a class interface or a class template interface. The interface consists of one or all of the following: inner type definitions, member functions, and member variables.”</em></p>
+<p><em><span class="dquo">“</span>Policies have much in common with </em><em>traits</em><em> but differ in that they put less emphasis on type and more emphasis on behavior. Also, policies are reminiscent of the </em><em>Strategy design pattern</em><em>, with the twist that policies are bound at compilation time.”</em></p>
+<p><em><span class="dquo">“</span>For a given policy, there can be an unlimited number of implementations. The implementations of a policy are called </em><em>policy classes</em><em>”</em></p>
+<p><em><span class="dquo">“</span>Policy classes are not intended for stand-alone use […]”</em></p>
+<p><em><span class="dquo">“</span>Policies are syntax oriented, not signature oriented.”</em></p>
+<p><em><span class="dquo">“</span>[A] policy does not specify that [a member function] must be static or virtual—the only requirement is that the class template define a [coresponding (with the expected signature)] member function.”</em></p>
+<p><em><span class="dquo">“</span>The classes that use one or more policies are called </em><em>hosts</em><em> or </em><em>host classes</em><em>”</em></p>
+<h3 id="implementing-policy-classes-with-template-template-parameters">Implementing Policy Classes with Template Template Parameters</h3>
+<p><em><span class="dquo">“</span>Library code can use template template parameters for specifying policies”</em></p>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Created</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CreationPolicy</span><span class="o">&gt;</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">WidgetManager</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">CreationPolicy</span><span class="o">&lt;</span><span class="n">Widget</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="p">};</span><span class="w"></span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>The <code>Created</code> symbol does not contribute to the definition of <code>WidgetManager</code>. You cannot use <code>Created</code> inside <code>WidgetManager</code> - it is a formal argument for <code>CreationPolicy</code> (not <code>WidgetManager</code>) and can be simply omitted.”</em></p>
+<p><em><span class="dquo">“</span>First, you can change policies </em><em>from the outside</em><em> as easily as changing a template argument […]. Second, you can provide your own policies that are specific to your concrete application.”</em></p>
+<p><em><span class="dquo">“</span>[The author might] provide a default template argument for the policy that’s most commonly used:”</em></p>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="o">&gt;</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">CreationPolicy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OpNewCreator</span><span class="o">&gt;</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">WidgetManager</span><span class="w"> </span><span class="p">...</span><span class="w"></span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>Policies are quite different from mere virtual functions. […] policies come with […] static binding.”</em></p>
+<p><em><span class="dquo">“</span>policies’ features also make them </em><em>unsuitable</em><em> for </em><em>dynamic binding</em><em> and </em><em>binary interfaces</em><em>, so in essence policies and classic interfaces do not compete.”</em></p>
+<h3 id="destructors-of-policy-classes">Destructors of Policy Classes</h3>
+<p><em><span class="dquo">“</span>Defining a virtual destructor for a policy […] works against its static nature and hurts performance.”</em></p>
+<p><em><span class="dquo">“</span>The lightweight, effective solution that policies should use is to define a </em><em>nonvirtual protected destructor</em><em>”</em></p>
+<h3 id="optional-functionality-through-incomplete-instantiation">Optional Functionality Through Incomplete Instantiation</h3>
+<p><em><span class="dquo">“</span>If a member function of a class template is never used, it is not even instantiated - the compiler does not look at it at all, except perhaps for syntax checking. This gives the host class a chance to specify and use optional features of a policy class.”</em></p>
+<h3 id="combining-policy-classes">Combining Policy Classes</h3>
+<p><em><span class="dquo">“</span>The greatest usefulness of policies is apparent when you combine them. Typically, a highly configurable class uses several policies for various aspects of its workings. Then the library user selects the desired high-level behavior by combining several policy classes.”</em></p>
+<h3 id="decomposing-a-class-into-policies">Decomposing a Class into Policies</h3>
+<p><em><span class="dquo">“</span>[To] decompose the functionality of a class in policies. The rule of thumb is to identify and name the design decisions that take part in a class’s behavior. Anything that can be done in more than one way should be identified and migrated from the class to a policy. Don’t forget: Design constraints buried in a class’s design are as bad as magic constants buried in code.”</em></p>
+<p><em><span class="dquo">“</span>When you decompose a class in policies, it is very important to find an orthogonal decomposition. An orthogonal decomposition yields policies that are completely independent of each other. You can easily spot a nonorthogonal decomposition when various policies need to know about each other.”</em></p>
+<h3 id="summary">Summary</h3>
+<p><em><span class="dquo">“</span>The mechanics of policies consist of a combination of templates with multiple inheritance. A class that uses policies - a host class - is a template with many template parameters (often, template template parameters), each parameter being a policy. The host class “indirects” parts of its functionality through its policies and acts as a receptacle that combines several policies in a coherent aggregate.”</em></p>
+<p><em><span class="dquo">“</span>Policy-based classes support flexibility when it comes to conversions. If you use policy-by-policy copying, each policy can control which other policies it accepts, or converts to, by providing the appropriate conversion constructors, conversion operators, or both.”</em></p>
+<p><em><span class="dquo">“</span>Two important guidelines.”</em></p>
+<ol>
+<li><em><span class="dquo">“</span>One is to localize, name, and isolate design decisions in your class - things that are subject to a trade-off or could be sensibly implemented in various ways.”</em></li>
+<li><em><span class="dquo">“</span>The other guideline is to look for orthogonal policies, that is, policies that don’t need to interact with each other and that can be changed independently.”</em></li>
+</ol>
+<h2 id="techniques">Techniques</h2>
+<h3 id="partial-template-specialization">Partial Template Specialization</h3>
+<p><em><span class="dquo">“</span>In a partial specialization of a class template, you specify only some of the template arguments and leave the other ones generic.”</em></p>
+<p><em><span class="dquo">“</span>When you instantiate a template, the compiler does a pattern matching of existing partial and total specializations to find the best candidate; this gives you enormous flexibility.”</em></p>
+<p><em><span class="dquo">“</span>Unfortunately, partial template specialization does not apply to functions - be they member or nonmember - which somewhat reduces the flexibility and the granularity of what you can do.”</em></p>
+<ul>
+<li><em><span class="dquo">“</span>Although you can totally specialize member functions of a class template, you </em><em>cannot partially specialize member functions</em><em>.”</em></li>
+<li><em><span class="dquo">“</span>You cannot partially specialize namespace-level (nonmember) template functions. The closest thing to partial specialization for namespace-level template functions is overloading. For practical purposes, this means that you have fine-grained specialization abilities only for the </em><em>function parameters</em><em> - </em><em>not</em><em> for the </em><em>return value</em><em> or for internally used types.”</em></li>
+</ul>
+<p>Overloading is the closest to partial specialization for functions:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// primary template</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">T</span><span class="w"> </span><span class="n">Fun</span><span class="p">(</span><span class="n">U</span><span class="w"> </span><span class="n">obj</span><span class="p">);</span><span class="w"></span>
+
+<span class="c1">// illegal partial specialization</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">U</span><span class="o">&gt;</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="n">Fun</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">,</span><span class="w"> </span><span class="n">U</span><span class="o">&gt;</span><span class="p">(</span><span class="n">U</span><span class="w"> </span><span class="n">obj</span><span class="p">);</span><span class="w"></span>
+
+<span class="c1">// specialization legal (overloading)</span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">T</span><span class="w"> </span><span class="n">Fun</span><span class="w"> </span><span class="p">(</span><span class="n">Window</span><span class="w"> </span><span class="n">obj</span><span class="p">);</span><span class="w"></span>
+</code></pre></div>
+<h3 id="local-classes">Local Classes</h3>
+<p>Local (nested) classes can be used (defined) inside of template functions:</p>
+<p><em><span class="dquo">“</span>What makes local classes truly interesting is that you can use them in template functions. Local classes defined inside template functions can use the template parameters of the enclosing function.”</em></p>
+<p><em><span class="dquo">“</span>Local classes do have a unique feature, though: They are </em><em>final</em><em>. Outside users cannot derive from a class hidden in a function.”</em></p>
+<h3 id="detecting-convertibility-and-inheritance-at-compile-time">Detecting Convertibility and Inheritance at Compile Time</h3>
+<p>See also <a href="http://en.cppreference.com/w/cpp/language/sfinae"><span class="caps">SFINAE</span></a></p>
+<p><em><span class="dquo">“</span>How can we write a function that accepts ‘anything else’? […] We need a match that’s ‘worse’ than an automatic conversion - that is, a conversion that kicks in if and only if there’s no automatic conversion. A quick look through the conversion rules applied for a function call yields the ellipsis match, which is the worst of all - the bottom of the list”</em></p>
+<p><em><span class="dquo">“</span>Passing a C++ object to a function with ellipses has undefined results, but this doesn’t matter. Nothing actually calls the function. It’s not even implemented. Recall that sizeof does not evaluate its argument.)”</em></p>
+<p>See also: <a href="https://stackoverflow.com/questions/3634564/type-safety-by-using-the-ellipsis-notation/3634934#3634934">stackoverflow</a></p>
+<p><em><span class="dquo">“</span>[…] how much you can do with functions […], that not only don’t do anything but don’t even really exist at all [(just declared but not defined)]?”</em></p>
+<p><em><span class="dquo">“</span>If template code applies const twice (to a type that’s already const), the second const is ignored.”</em></p>
+<h3 id="optimized-parameter-types">Optimized Parameter Types</h3>
+<p><em><span class="dquo">“</span>A detail that must be carefully handled is that C++ does not allow references to references. Thus, if <code>T</code> is already a reference, you should not add one more reference to it.”</em></p>
+<h2 id="typelists">Typelists</h2>
+<p><em><span class="dquo">“</span>templates cannot have a variable number of parameters”</em></p>
+<p><em><span class="dquo">“</span>virtual functions cannot be templates”</em></p>
+<h3 id="intermezzo">Intermezzo</h3>
+<p>About “meta functions” (like <code>Length</code>) for <code>Typelist</code>s that are implemented in a functional way:</p>
+<p><em><span class="dquo">“</span>Couldn’t we develop a version of Length that’s iterative, instead of recursive? After all, iteration is more natural to C++ than recursion.”</em></p>
+<p><em><span class="dquo">“</span>template specialization [..] provide the equivalent of if statements at compile time.”</em></p>
+<p><em><span class="dquo">“</span>All compile-time values are </em><em>immutable</em><em>. After you’ve defined an integral constant, say an enumerated value, you cannot change it (that is, assign another value to it).”</em></p>
+<p><em><span class="dquo">“</span>Type definitions (<code>typedef</code>s) can be seen as introducing named type constants. Again, after definition, they are frozen - you cannot later redefine a <code>typedef</code>d symbol to hold another type.”</em></p>
+<h3 id="erasing-a-type-from-a-typelist">Erasing a Type from a Typelist</h3>
+<p><em><span class="dquo">“</span>[If] there is no default version of [a] template […] you can instantiate [it] only with certain types.”</em></p>
+<h1 id="components">Components</h1>
+<h2 id="generalized-functors">Generalized Functors</h2>
+<p><em><span class="dquo">“</span>Generalized functors, [are] a powerful abstraction that allows decoupled interobject communication.”</em></p>
+<ul>
+<li><em><span class="dquo">“</span></em><em>Encapsulates</em><em> any processing invocation”</em></li>
+<li><em><span class="dquo">“</span>Is </em><em>typesafe</em><em>”</em></li>
+<li><em><span class="dquo">“</span>Is an </em><em>object with value semantics</em><em>: copying, assignment, and pass by value, does not expose virtual member functions”</em></li>
+<li><em><span class="dquo">“</span>Can store state and invoke member functions”</em></li>
+</ul>
+<p><em><span class="dquo">“</span>Two important aspects of the Command pattern:</em></p>
+<ul>
+<li><em>Interface separation. The invoker is isolated from the receiver.</em></li>
+<li><em>Time separation. Command stores a ready-to-go processing request that’s to be started later.</em>”</li>
+</ul>
+<h3 id="c-callable-entities">C++ Callable Entities</h3>
+<p><em><span class="dquo">“</span>In addition to simple callbacks [function pointers], C++ defines many more entities that support the function-call operator. Let’s enumerate all the things that support <code>operator()</code> in C++.”</em></p>
+<ul>
+<li><em><span class="dquo">“</span>C-like functions”</em></li>
+<li><em><span class="dquo">“</span>C-like pointers to functions”</em></li>
+<li><em><span class="dquo">“</span>References to functions (which essentially act like const pointers to functions)”</em></li>
+<li><em><span class="dquo">“</span>Functors, that is, objects that define an <code>operator()</code><span class="dquo">“</span></em></li>
+<li><em><span class="dquo">“</span>The result of applying <code>operator.*</code> or <code>operator-&gt;*</code> having a pointer to a member function in the right-hand side of the expression”</em></li>
+</ul>
+<p><em><span class="dquo">“</span>You can add a pair of parentheses to the right of any of the enumerated items, put an appropriate list of arguments inside, and get some processing done. No other objects in C++ allow this except the ones just listed.”</em> (before C++11)</p>
+<h3 id="the-functor-class-template-skeleton">The Functor Class Template Skeleton</h3>
+<p><em><span class="dquo">“</span>In C++ a bald pointer to a polymorphic type does not strictly have first-class semantics because of the ownership issue.”</em></p>
+<p><em><span class="dquo">“</span>C++ does not instantiate member functions for templates until they are </em><em>actually used</em><em>.”</em></p>
+<p><em><span class="dquo">“</span>Good C++ libraries sport this interesting feature: Whenever something ambiguous may appear, they allow the user to disambiguate it by writing some explicit code. At the other end of the spectrum are libraries that misuse silent C++ features (especially conversions and pointer ownership). They allow the user to type less, but at the cost of making dubious assumptions and decisions on the user’s behalf.”</em></p>
+<h3 id="handling-functors">Handling Functors</h3>
+<div class="highlight"><pre><span></span><code><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">R</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">TList</span><span class="o">&gt;</span><span class="w"></span>
+<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Fun</span><span class="o">&gt;</span><span class="w"></span>
+<span class="n">Functor</span><span class="o">&lt;</span><span class="n">R</span><span class="p">,</span><span class="w"> </span><span class="n">TList</span><span class="o">&gt;::</span><span class="n">Functor</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Fun</span><span class="o">&amp;</span><span class="w"> </span><span class="n">fun</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="n">spImpl_</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">FunctorHandler</span><span class="o">&lt;</span><span class="n">Functor</span><span class="p">,</span><span class="w"> </span><span class="n">Fun</span><span class="o">&gt;</span><span class="p">(</span><span class="n">fun</span><span class="p">))</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>The two template parameter sets are necessary: The <code>template &lt;typename R, class TList&gt;</code> stands for the class template <code>Functor</code>, and <code>template &lt;typename Fun&gt;</code> stands for the parameter that the constructor itself takes. […] is known as an ‘out-of-class member template definition’.”</em></p>
+<h3 id="argument-and-return-type-conversions">Argument and Return Type Conversions</h3>
+<p><em><span class="dquo">“</span>Template processing predates compiling, allowing you to operate at source-code level. In object-oriented programming, in contrast, the power comes from late (after compilation) binding of names to values. Thus, object-oriented programming fosters reuse in the form of binary components, whereas generic programming fosters reuse at the source-code level. […] The two techniques complement each other.”</em></p>
+<p><em><span class="dquo">“</span>pointers to member functions and their two related operators - <code>.*</code> and <code>-&gt;*</code> - reveals strange features. There is no C++ type for the result of <code>geronimo.*pActivity</code> and <code>pGeronimo-&gt;*pActivity</code>. Both are binary operators [that] return something to which you can apply the function-call operator immediately, but that ‘something’ does not have a type.”</em></p>
+<p><em><span class="dquo">“</span>The standard says, ‘If the result of <code>.*</code> or <code>-&gt;*</code> is a function, then that result can be used only as the operand for the function call <code>operator()</code>.”</em></p>
+<p><em><span class="dquo">“</span>You cannot store the result of <code>operator.*</code> or <code>operator-&gt;*</code> in any way, although there is an entity that holds the fusion between your object and the pointer to a member function”</em></p>
+<p><em><span class="dquo">“</span>pointers to member functions and the two related operators are a curiously half-baked concept in C++. And by the way, you cannot have references to member functions (although you can have references to regular functions).”</em></p>
+<h3 id="real-world-issues-ii-heap-allocation">Real-World Issues <span class="caps">II</span>: Heap Allocation</h3>
+<p><em><span class="dquo">“</span>You might expect a pointer to a member function to occupy 4 bytes, just as pointers to functions do. However, pointers to methods are actually little tagged unions. They deal with multiple virtual inheritance and virtual/nonvirtual functions.”</em></p>
+<h2 id="implementing-singletons">Implementing Singletons</h2>
+<h3 id="addressing-the-dead-reference-problem-ii-singletons-with-longevity">Addressing the Dead Reference Problem (<span class="caps">II</span>): Singletons with Longevity</h3>
+<p><em><span class="dquo">“</span>The concept emerging here is that of </em><em>longevity control</em><em> and is independent of the concept of a singleton: The greater longevity an object has, the later it will be destroyed. It doesn’t matter whether the object is a singleton or some global dynamically allocated object.”</em></p>
+<h3 id="the-double-checked-locking-pattern">The Double-Checked Locking Pattern</h3>
+<p><em><span class="dquo">“</span>Very experienced multithreaded programmers know that even the Double-Checked Locking pattern, although correct on paper, is not always correct in practice. In certain symmetric multiprocessor environments (the ones featuring the so-called relaxed memory model), the writes are committed to the main memory in bursts, rather than one by one. The bursts occur in increasing order of addresses, not in chronological order.”</em></p>
+<p><em><span class="dquo">“</span>Thus, sadly, the Double-Checked Locking pattern is known to be defective for such systems.”</em></p>
+<p><em><span class="dquo">“</span>Usually the platform offers alternative, nonportable concurrency-solving primitives, such as memory barriers, which ensure ordered access to memory.”</em></p>
+<p><em><span class="dquo">“</span>A reasonable compiler should generate correct, nonspeculative code around <code>volatile</code> objects.”</em></p>
+<h2 id="smart-pointers">Smart Pointers</h2>
+<p><em><span class="dquo">“</span>Smart pointers are C++ objects that simulate simple pointers by implementing <code>operator-&gt;</code> and the unary <code>operator*</code>. In addition to sporting pointer syntax and semantics, smart pointers often perform useful tasks - such as memory management or locking - under the covers, thus freeing the application from carefully managing the lifetime of pointed-to objects.”</em></p>
+<h3 id="the-deal">The Deal</h3>
+<p><em><span class="dquo">“</span>Smart pointers have value semantics, whereas some simple pointers do not. An object with value semantics is an object that you can </em><em>copy</em><em> and </em><em>assign</em><em> to. A plain <code>int</code> is the perfect example of a first-class object. You can create, copy, and change integer values freely. A pointer that you use to iterate in a buffer also has value semantics - you initialize it to point to the beginning of the buffer, and you bump it until you reach the end. Along the way, you can copy its value to other variables to hold temporary results. With pointers that hold values allocated with <code>new</code>, however, the story is very different. Once you have written</em></p>
+<div class="highlight"><pre><span></span><code><span class="n">Widget</span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Widget</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<p><em>the variable <code>p</code> not only points to, but also </em><em>owns</em><em>, the memory allocated for the <code>Widget</code> object. This is because later you must issue <code>delete p</code> to ensure that the <code>Widget</code> object is destroyed and its memory is released.”</em></p>
+<p><em><span class="dquo">“</span>In short, in the smart pointers’ world, ownership is an important topic. By providing ownership management, smart pointers are able to support integrity guarantees and full value semantics. Because ownership has much to do with constructing, copying, and destroying smart pointers, it’s easy to figure out that these are the most vital functions of a smart pointer.”</em></p>
+<h3 id="storage-of-smart-pointers">Storage of Smart Pointers</h3>
+<p><em><span class="dquo">“</span>Each type that’s hardcoded in a piece of generic code decreases the genericity of the code. Hardcoded types are to generic code what magic constants are to regular code.”</em></p>
+<p><em><span class="dquo">“</span>When you apply <code>operator-&gt;</code> to a type that’s not a built-in pointer, the compiler does an interesting thing. After looking up and applying the user-defined <code>operator-&gt;</code> to that type, it applies <code>operator-&gt;</code> again to the result. The compiler keeps doing this recursively until it reaches a native pointer, and only then proceeds with member access. It follows that a smart pointer’s <code>operator-&gt;</code> does not have to return a pointer. It can return an object that in turn implements <code>operator-&gt;</code>, without changing the use syntax.”</em></p>
+<p><em><span class="dquo">“</span>If you return an object of type <code>PointerType</code> by value from <code>operator-&gt;</code>, the sequence of execution is as follows:</em></p>
+<ol>
+<li><em>Constructor of <code>PointerType</code></em></li>
+<li><em><code>PointerType::operator-&gt;</code> called; likely returns a pointer to an object of type <code>PointeeType</code></em></li>
+<li><em>Member access for <code>PointeeType</code> - likely a function call</em></li>
+<li><em>Destructor of <code>PointerType</code></em></li>
+</ol>
+<p><em><span class="dquo">“</span>In a nutshell, you have a nifty way of implementing locked function calls. This idiom has broad uses with multithreading and locked resource access. You can have <code>PointerType</code><span class="quo">‘</span>s constructor lock the resource, and then you can access the resource; finally, <code>PointerType</code><span class="quo">‘</span>s destructor unlocks the resource.”</em></p>
+<h3 id="ownership-handling-strategies">Ownership-Handling Strategies</h3>
+<p><em><span class="dquo">“</span>A smart pointer is a first-class value that takes care of deleting the pointed-to object under the covers. The client can intervene in the pointee object’s lifetime by issuing calls to helper management functions.”</em></p>
+<p><em><span class="dquo">“</span>self-ownership, smart pointers must carefully track the pointee object, especially during copying, assignment, and destruction.”</em></p>
+<h3 id="copy-on-write">Copy on Write</h3>
+<p><em><span class="dquo">“</span>The idea that underlies <span class="caps">COW</span> is to clone the pointee object at the first attempt of modification; until then, several pointers can share the same object. Smart pointers, however, are not the best place to implement <span class="caps">COW</span>, because smart pointers cannot differentiate between calls to const and non- const member functions of the pointee object.”</em></p>
+<p><em><span class="dquo">“</span>Function invocations for the pointee object happen somewhere beyond the reach of the smart pointer.”</em></p>
+<h3 id="reference-counting">Reference Counting</h3>
+<p><em><span class="dquo">“</span>You should not keep dumb pointers and smart pointers to the same object.”</em></p>
+<p><em><span class="dquo">“</span>The actual counter must be shared among smart pointer objects”</em></p>
+<p><em><span class="dquo">“</span>Reference management - be it counting or linking - is a victim of the resource leak known as </em><em>cyclic reference</em><em>.”</em></p>
+<h3 id="destructive-copy">Destructive Copy</h3>
+<p><em><span class="dquo">“</span>C++ etiquette calls for the right-hand side of the copy constructor and the assignment operator to be a reference to a <code>const</code> object. Classes that foster destructive copy break this convention for obvious reasons. Because etiquette exists for a reason, you should expect negative consequences if you break it.”</em></p>
+<p><em><span class="dquo">“</span>Because they do not support value semantics, smart pointers with destructive copy cannot be stored in standard containers and in general must be handled with almost as much care as raw pointers.”</em></p>
+<p><em><span class="dquo">“</span>On the bright side, smart pointers with destructive copy have significant advantages:</em></p>
+<ul>
+<li><em>They incur almost no overhead.</em></li>
+<li><em>They are good at enforcing ownership transfer semantics.</em></li>
+<li><em>They are good as return values from functions.</em></li>
+<li><em>They are excellent as stack variables in functions that have multiple return paths.</em>”</li>
+</ul>
+<h3 id="the-address-of-operator">The Address-of Operator</h3>
+<p><em><span class="dquo">“</span>There are two reasons why overloading unary <code>operator&amp;</code> is not a very good idea. One reason is that exposing the address of the pointed-to object implies giving up any automatic ownership management. […] The second reason, a more pragmatic one, is that overloading unary <code>operator&amp;</code> makes the smart pointer unusable with <span class="caps">STL</span> containers. Actually, overloading unary <code>operator&amp;</code> for a type pretty much makes generic programming impossible for that type, because the address of an object is too fundamental a property to play with naively. Most generic code assumes that applying <code>&amp;</code> to an object of type <code>T</code> returns an object of type <code>T*</code> […] address-of is a fundamental concept. If you defy this concept, generic code behaves strangely either at compile time or - worse - at runtime.”</em></p>
+<h3 id="putting-it-all-together">Putting It All Together</h3>
+<p><em><span class="dquo">“</span>A rule for all policies is that they must have value semantics; that is, they must define a proper copy constructor and assignment operator.”</em></p>
+<h2 id="object-factories">Object Factories</h2>
+<p><em><span class="dquo">“</span>[…] subject to the paradox of ‘virtual constructors’. You need virtual constructors when the information about the object to be created is inherently dynamic and cannot be used directly with C++ constructs.”</em></p>
+<p><em><span class="dquo">“</span>This marks a fundamental difference between creating objects and invoking virtual member functions in C++. Virtual member functions are fluid, dynamic - you can change their behavior without changing the call site. In contrast, each object creation is a stumbling block of statically bound, rigid code.”</em></p>
+<h3 id="the-need-for-object-factories">The Need for Object Factories</h3>
+<p><em><span class="dquo">“</span>[…] an object factory may be needed. When you save an object to a file, you must save its actual type in the form of a string, an integral value, an identifier of some sort. Thus, although the type information exists, its </em><em>form</em><em> does not allow you to create C++ objects.”</em></p>
+<h3 id="object-factories-in-c-classes-and-objects">Object Factories in C++: Classes and Objects</h3>
+<p><em><span class="dquo">“</span>In C++, classes and objects are different beasts. Classes are what the programmer creates, and objects are what the program creates. You cannot create a new class at runtime, and you cannot create an object at compile time. Classes don’t have first-class status: You cannot copy a class, store it in a variable, or return it from a function.”</em></p>
+<p><em><span class="dquo">“</span>In C++ there is a fracture between types and values: A value has a type attribute, but a type cannot exist on its own. If you want to create an object in a totally dynamic way, you need a means to express and pass around a ‘pure’ type and build a value from it on demand. Because you cannot do this, you somehow must represent types as objects - integers, strings, and so on. Then, you must employ some trick to exchange the value for the right type, and finally to use that type to create an object.”</em></p>
+<h2 id="abstract-factory">Abstract Factory</h2>
+<p><em><span class="dquo">“</span>However, the more you reduce dependencies, the more you also reduce type knowledge, and consequently the more you undermine the type safety of your design. This is yet another instance of the classic dilemma of better type safety versus lesser dependencies that often appears in C++”</em></p>
+<p><em><span class="dquo">“</span><code>Type2Type</code> is a simple template whose unique purpose is to disambiguate overloaded functions.”</em></p>
+<h2 id="visitor">Visitor</h2>
+<p><em><span class="dquo">“</span>Visitor gives you a surprising amount of flexibility in a certain area: You can add virtual functions to a class hierarchy without recompiling them or their existing clients. However, this flexibility comes at the expense of disabling features that designers take for granted: You cannot add a new leaf class to the hierarchy without recompiling the hierarchy and all its clients.”</em></p>
+<p><em><span class="dquo">“</span>Visitor’s operational area is limited to very stable hierarchies (you seldom add new classes) and heavy processing needs (you often add new virtual functions).”</em></p>
+<p><em><span class="dquo">“</span>Visitor goes against programmers’ intuition; therefore, a careful implementation and rigorous discipline are essential to using it successfully.”</em></p>
+<h3 id="visitor-basics">Visitor Basics</h3>
+<p><em><span class="dquo">“</span>In a nutshell, from a dependency standpoint, new classes are easy to add, and new virtual member functions are difficult to add.”</em></p>
+<p><em><span class="dquo">“</span>Visitor applies best when operations on objects are distinct and unrelated.”</em></p>
+<p><em><span class="dquo">“</span>A </em><em>type switch</em><em> occurs whenever you query a polymorphic object on its concrete type and perform different operations with it depending on what that concrete type is.”</em></p>
+<h3 id="back-to-the-cyclic-visitor">Back to the “Cyclic” Visitor</h3>
+<p><em><span class="dquo">“</span>If you use <code>dynamic_cast</code> against some object, the runtime support has quite a few things to do. The <span class="caps">RTTI</span> code must figure out whether the conversion to the target type is legal and, if it is, must compute a pointer to that target type.”</em></p>
+<p><em><span class="dquo">“</span>Let’s detail a bit how a compiler writer can achieve this. One reasonable solution is to assign a unique integral identifier to each type in the program. The integral identifier also comes in handy when it comes to exception handling, so it’s quite a wise integrating solution. Then in each class’s virtual table, the compiler puts (a pointer to) a table of identifiers of all its subtypes. Together with these identifiers, the compiler has to store the offsets of the relative positions of the subobjects within the big object. This would be enough information to perform a dynamic cast correctly.”</em></p>
+<p><em><span class="dquo">“</span>Details - such as multiple inheritance - render the dynamic cast code even more complicated and slower.”</em></p>
+<p><em><span class="dquo">“</span><code>dynamic_cast</code> does have a cost, which is unpredictable and can become unacceptable for some particular needs of an application.”</em></p>
+<h3 id="summary_1">Summary</h3>
+<p><em><span class="dquo">“</span>Essentially, Visitor allows you to add virtual functions to a class hierarchy without modifying the classes in that hierarchy. In some cases, Visitor can lead to a clever, extensible design.”</em></p>
+<h2 id="multimethods">Multimethods</h2>
+<p><em><span class="dquo">“</span>The C++ virtual function mechanism allows dispatching of a call depending on the dynamic type of one object. The multimethods feature allows dispatching of a function call depending on the types of </em><em>multiple</em><em> objects. A universally good implementation requires language support, which is the route that languages such as <span class="caps">CLOS</span>, <span class="caps">ML</span>, Haskell, and Dylan have taken. C++ lacks such support, so its emulation is left to library writers.”</em></p>
+<h3 id="what-are-multimethods">What Are Multimethods?</h3>
+<p><em><span class="dquo">“</span>Two types of polymorphism are implemented in C++:</em></p>
+<ul>
+<li><em>Compile-time polymorphism, supported by overloading and template functions</em></li>
+<li><em>Runtime polymorphism, implemented with virtual functions</em>”</li>
+</ul>
+<p><em><span class="dquo">“</span>Overloading and template functions scale to multiple objects naturally.”</em></p>
+<p><em><span class="dquo">“</span>Unfortunately, virtual functions - the only mechanism that implements runtime polymorphism in C++ - are tailored for one object only. Even the call syntax - <code>obj.Fun(arguments)</code> - gives <code>obj</code> a privileged role over <code>arguments</code><span class="dquo">“</span></em></p>
+<h3 id="the-logarithmic-dispatcher-and-casts">The Logarithmic Dispatcher and Casts</h3>
+<p><em><span class="dquo">“</span>A template can accept a pointer to a function as a nontype template parameter. […] A template is allowed to accept pointers to global objects, including functions, as nontype template parameters. The only condition is that the function whose address is used as a template argument must have external linkage.”</em></p>
+<p><em><span class="dquo">“</span>You can easily transform static functions into functions with external linkage by removing <code>static</code> and putting them into unnamed namespaces.”</em></p>
+<h3 id="converting-arguments-static_cast-or-dynamic_cast">Converting Arguments: <code>static_cast</code> or <code>dynamic_cast</code>?</h3>
+<p><em><span class="dquo">“</span>Virtual inheritance provides a means for several derived classes to share the same base class object.”</em></p>
+<p><em><span class="dquo">“</span>you must use <code>dynamic_cast</code> if you have a hierarchy using virtual inheritance.”</em></p>
+<p><em><span class="dquo">“</span>The `dynamic_cast operator is designed to reach the right object in a class hierarchy, no matter how intricate its structure is.”</em></p>
+<p><em><span class="dquo">“</span><code>dynamic_cast</code> is much slower than <code>static_cast</code>. Its power comes at a cost.”</em></p>
+<p><em><span class="dquo">“</span>What is double dispatching? You can see it as finding a handler function (or functor) in a two-dimensional space. On one axis are the types of the left-hand operator. On the other axis are the types of the right-hand operator. At the intersection between two types, you find their respective handler function.”</em></p>
+<h3 id="summary_2">Summary</h3>
+<p><em><span class="dquo">“</span>Multimethods are dispatched depending on multiple classes simultaneously. This allows you to implement virtual functions for collections of types instead of one type at a time.”</em></p>
+<p><em><span class="dquo">“</span>Multimethods are needed in applications that call algorithms that depend on the type of two or more objects. Typical examples include collisions between polymorphic objects, intersections, and displaying objects on various target devices.”</em></p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./structure_and_interpretation_of_computer_programs.html" title="Previous: Structure and Interpretation of Computer Programs">Structure and Interpretation of Computer Programs</a></li>
+                <li class="next-article"><a href="./parsers_and_lexers.html" title="Next: Parsers and Lexers">Parsers and Lexers</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2017-01-03T14:03:19+01:00">Jan 3, 2017</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-10T21:39:06+02:00">Apr 10, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#cpp-ref">C++
+                    <span>19</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

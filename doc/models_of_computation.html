@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, ETH, Programming, " />
+
+<meta property="og:title" content="Models of Computation "/>
+<meta property="og:url" content="./models_of_computation.html" />
+<meta property="og:description" content="Boolean Circuits AND/OR/NOT gates Gate: function Inputs: arguments to function In-/Outputs: wires Circuits: combination of gates Truth table: all possible combination (look-up table) XOR Parity: odd/even 0: even 1: odd 0 is even number, 1 is odd number works with more than 2 inputs X Y …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2016-02-29T22:48:36+01:00" />
+<meta property="og:article:modified_time" content="2022-04-08T21:27:48+02:00" />
+<meta name="twitter:title" content="Models of Computation ">
+<meta name="twitter:description" content="Boolean Circuits AND/OR/NOT gates Gate: function Inputs: arguments to function In-/Outputs: wires Circuits: combination of gates Truth table: all possible combination (look-up table) XOR Parity: odd/even 0: even 1: odd 0 is even number, 1 is odd number works with more than 2 inputs X Y …">
+
+        <title>Models of Computation  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./models_of_computation.html"> Models of&nbsp;Computation  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#boolean-circuits">Boolean Circuits</a><ul>
+<li><a href="#xor"><span class="caps">XOR</span></a></li>
+</ul>
+</li>
+<li><a href="#finite-state-machines-fsm">Finite State Machines (<span class="caps">FSM</span>)</a><ul>
+<li><a href="#deterministic-non-deterministic-fsm">Deterministic / Non-Deterministic <span class="caps">FSM</span></a></li>
+<li><a href="#acceptor-recognizer">Acceptor (Recognizer)</a></li>
+<li><a href="#classifier">Classifier</a></li>
+<li><a href="#transducer">Transducer</a></li>
+</ul>
+</li>
+<li><a href="#register-machines">Register Machines</a></li>
+<li><a href="#fractran">Fractran</a></li>
+<li><a href="#tilings">Tilings</a><ul>
+<li><a href="#tiles-as-turing-machine">Tiles as Turing Machine</a></li>
+</ul>
+</li>
+<li><a href="#cellular-automata">Cellular Automata</a><ul>
+<li><a href="#the-model">The Model</a></li>
+<li><a href="#variants">Variants</a></li>
+</ul>
+</li>
+<li><a href="#lambda-calculus">Lambda Calculus</a><ul>
+<li><a href="#syntax">Syntax</a></li>
+<li><a href="#main-operations">Main Operations</a></li>
+<li><a href="#church-numerals">Church Numerals</a></li>
+<li><a href="#lambda-calculus-expressions">Lambda Calculus Expressions</a><ul>
+<li><a href="#variables">Variables</a></li>
+<li><a href="#function-application">Function Application</a></li>
+<li><a href="#function-creation">Function Creation</a></li>
+<li><a href="#evaluation">Evaluation</a></li>
+<li><a href="#examples">Examples</a><ul>
+<li><a href="#increment">Increment</a></li>
+<li><a href="#addition">Addition</a></li>
+<li><a href="#multiplication">Multiplication</a></li>
+<li><a href="#boolean-logic">Boolean Logic</a></li>
+<li><a href="#if-then-else">If-Then-Else</a></li>
+<li><a href="#pair">Pair</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#conclusion">Conclusion</a></li>
+<li><a href="#recursion">Recursion</a><ul>
+<li><a href="#y-combinator">Y-Combinator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#numbers">Numbers</a></li>
+<li><a href="#tag-systems">Tag Systems</a><ul>
+<li><a href="#2-tag-system">2-Tag System</a><ul>
+<li><a href="#example-test-for-oddeven-number">Example: Test for odd/even number</a></li>
+<li><a href="#example-power-of-two">Example: Power of Two</a></li>
+<li><a href="#simulation-of-turing-machines-with-tag-systems">Simulation of Turing Machines with Tag Systems</a></li>
+<li><a href="#cyclic-tag-systems">Cyclic Tag Systems</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#diophantine-equations">Diophantine Equations</a></li>
+<li><a href="#primitive-recursive-functions">Primitive Recursive Functions</a></li>
+<li><a href="#some-simple-models">Some Simple Models</a><ul>
+<li><a href="#chemical-reaction-networks">Chemical Reaction Networks</a></li>
+<li><a href="#petri-nets">Petri Nets</a></li>
+<li><a href="#vector-addition-systems">Vector Addition Systems</a></li>
+<li><a href="#unordered-fractran">Unordered Fractran</a></li>
+<li><a href="#broken-register-machine">Broken Register Machine</a></li>
+<li><a href="#general-notes">General Notes</a></li>
+</ul>
+</li>
+<li><a href="#halting-problem">Halting Problem</a></li>
+<li><a href="#universal-machine">Universal Machine</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            
+<h1 id="boolean-circuits">Boolean Circuits</h1>
+<ul>
+<li><span class="caps">AND</span>/<span class="caps">OR</span>/<span class="caps">NOT</span> gates</li>
+<li>Gate: function</li>
+<li>Inputs: arguments to function</li>
+<li>In-/Outputs: wires</li>
+<li>Circuits: combination of gates</li>
+<li>Truth table: all possible combination (look-up table)</li>
+</ul>
+<h2 id="xor"><span class="caps">XOR</span></h2>
+<ul>
+<li>Parity: odd/even<ul>
+<li>0: even</li>
+<li>1: odd</li>
+<li>0 is even number, 1 is odd number</li>
+</ul>
+</li>
+<li>works with more than 2 inputs</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>X</th>
+<th>Y</th>
+<th>Z</th>
+<th><span class="caps">XOR</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Cost of circuit: number of<ul>
+<li><span class="caps">AND</span> gates and</li>
+<li><span class="caps">OR</span> gates</li>
+<li>usually <span class="caps">NOT</span> gates are not counted (they are too simple)</li>
+</ul>
+</li>
+</ul>
+<p>Truth table:</p>
+<ul>
+<li>for <span class="math">\(n\)</span> inputs: <span class="math">\(2^n\)</span> combinations</li>
+</ul>
+<p>Number of functions:</p>
+<ul>
+<li>for <span class="math">\(n\)</span> inputs: <span class="math">\(2^{2^n}\)</span> functions (circuits)</li>
+</ul>
+<p>General of <strong><span class="caps">XOR</span></strong>:</p>
+<ul>
+<li>for <span class="math">\(n\)</span> inputs <span class="math">\(2^{n-1}+1\)</span> gates needed</li>
+</ul>
+<!-- Notes Week 1 End -->
+<!-- Notes Week 2 Start -->
+<h1 id="finite-state-machines-fsm">Finite State Machines (<span class="caps">FSM</span>)</h1>
+<ul>
+<li>Also called Finite State Automaton (<span class="caps">FSA</span>)</li>
+</ul>
+<p>See also <a href="http://www.tutorialspoint.com/automata_theory/automata_theory_introduction.htm">Tutorialspoint</a></p>
+<p>Can be represented as a 5-touple <span class="math">\((Q, \Sigma, \delta, q_0, F)\)</span>:</p>
+<ul>
+<li><span class="math">\(Q\)</span>: finite set of states</li>
+<li><span class="math">\(\Sigma\)</span>: alphabet (finite set of symbols)</li>
+<li><span class="math">\(\delta\)</span>: transition function</li>
+<li><span class="math">\(q_0\)</span>: initial state (<span class="math">\(q_0 \in Q\)</span>)</li>
+<li><span class="math">\(F\)</span>: set of final states (<span class="math">\(F \subseteq  Q\)</span>)</li>
+</ul>
+<h2 id="deterministic-non-deterministic-fsm">Deterministic / Non-Deterministic <span class="caps">FSM</span></h2>
+<ul>
+<li>Deterministic<ul>
+<li>For each arriving event it’s clear what the next state is</li>
+</ul>
+</li>
+<li>
+<p>Non-deterministic</p>
+<ul>
+<li>For some (or all) events the next state can be more than one (it’s not clear to which state the machine will change)</li>
+</ul>
+</li>
+<li>
+<p>Any non-deterministic <span class="caps">FSM</span> can be turned into a deterministic <span class="caps">FSM</span></p>
+</li>
+</ul>
+<h2 id="acceptor-recognizer">Acceptor (Recognizer)</h2>
+<ul>
+<li>Calculates a Boolean function</li>
+<li>All states are either <em>accepting</em> or <em>rejecting</em> for a given input</li>
+<li>In graphical notation the <em>accepting</em> states have a double circle</li>
+<li>Non-deterministic Acceptor<ul>
+<li>accepts if there is <em>any</em> way to accept</li>
+<li>methodically try all possibilities</li>
+<li><span class="quo">‘</span>Parallel World’ - try all possibilities <em>simultaneously</em> in separate copies of the machine (for complexity theory)</li>
+</ul>
+</li>
+</ul>
+<h2 id="classifier">Classifier</h2>
+<ul>
+<li>Has more than two final states</li>
+<li>gives single output when it terminates</li>
+</ul>
+<h2 id="transducer">Transducer</h2>
+<ul>
+<li>Produces outputs based on current input and on previous state</li>
+<li>2 different types<ul>
+<li>Mealy Machine: output depends only on <em>current state</em></li>
+<li>Moore Machine: output depends on <em>current state</em> and <em>current input</em></li>
+<li>They can be transformed into each other</li>
+</ul>
+</li>
+</ul>
+<h1 id="register-machines">Register Machines</h1>
+<ul>
+<li>A register machine has multiple registers that store positive integers</li>
+<li>There are only two possible operations on these registers<ol>
+<li>incrementing (<span class="math">\(+1\)</span>)</li>
+<li>decrementing (<span class="math">\(-1\)</span>)
+- Decrementing a register that holds <span class="math">\(0\)</span> fails</li>
+</ol>
+</li>
+<li>There are other (slightly different) definitions of register machines that allow different operations (e.g checking for <span class="math">\(0\)</span>)</li>
+<li>Register Machines can be graphically represented like FSMs or as a simple list of instructions (programming language)</li>
+</ul>
+<p>Example of list of instructions for a Register Machine:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th>Action</th>
+<th>Next Instruction</th>
+<th>Alternative Instruction (if actual instruction fails)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.</td>
+<td>x-</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>2.</td>
+<td>y+</td>
+<td>3</td>
+<td>-</td>
+</tr>
+<tr>
+<td>3.</td>
+<td>x-</td>
+<td>1</td>
+<td>8</td>
+</tr>
+<tr>
+<td>4.</td>
+<td>y-</td>
+<td>5</td>
+<td>6</td>
+</tr>
+<tr>
+<td>5.</td>
+<td>x+</td>
+<td>4</td>
+<td>-</td>
+</tr>
+<tr>
+<td>6.</td>
+<td>x-</td>
+<td>7</td>
+<td>5</td>
+</tr>
+<tr>
+<td>7.</td>
+<td>x-</td>
+<td>9</td>
+<td><span class="caps">HALT</span></td>
+</tr>
+<tr>
+<td>8.</td>
+<td>y-</td>
+<td>9</td>
+<td>3</td>
+</tr>
+<tr>
+<td>9.</td>
+<td>x+</td>
+<td>10</td>
+<td>-</td>
+</tr>
+<tr>
+<td>10.</td>
+<td>x+</td>
+<td>11</td>
+<td>-</td>
+</tr>
+<tr>
+<td>11.</td>
+<td>x+</td>
+<td>8</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Register Machines and Turing Machines can simulate each other in polynomial time</li>
+<li>For each Register Machine with more than 2 registers (<span class="math">\(N\)</span>) there is an equivalent Register Machine with only 2 registers<ul>
+<li>The <span class="math">\(N\)</span> registers need to be encoded</li>
+</ul>
+</li>
+<li>Whenever a loop ends (in a 2 Register Machine)<ul>
+<li>one register is <span class="math">\(0\)</span></li>
+<li>in the other register is some information available</li>
+</ul>
+</li>
+</ul>
+<!-- Notes Week 2 End -->
+<!-- Notes Week 4 Start -->
+<h1 id="fractran">Fractran</h1>
+<p>See also <a href="https://en.wikipedia.org/wiki/FRACTRAN">Wikipedia:Fractran</a></p>
+<p>Example <span class="caps">PRIMEGAME</span>:</p>
+<div class="math">$${\frac  {17}{91}},{\frac  {78}{85}},{\frac  {19}{51}},{\frac  {23}{38}},{\frac  {29}{33}},{\frac  {77}{29}},{\frac  {95}{23}},{\frac  {77}{19}},{\frac  {1}{17}},{\frac  {11}{13}},{\frac  {13}{11}},{\frac  {15}{2}},{\frac  {1}{7}},{\frac  {55}{1}}$$</div>
+<p>State/Memory: an Integer</p>
+<p>Computation: multiply by first fraction that yields an integer</p>
+<p>Start with <span class="math">\(2\)</span>: calculate primes.</p>
+<p>Implementation in racket:</p>
+<script src="https://gist.github.com/LukasWoodtli/c391e391dcc9f9c9e9231a8c6fb954a4.js"></script>
+<p>Fractran is similar to stack machines.</p>
+<h1 id="tilings">Tilings</h1>
+<p>See also <a href="https://en.wikipedia.org/wiki/Wang_tile">Wikipedia:Wang tile</a></p>
+<ul>
+<li>Graphical model of computation</li>
+<li>The edges of each tile have special form/color</li>
+<li>Tiles can be arranged on plain so that edges match</li>
+</ul>
+<h2 id="tiles-as-turing-machine">Tiles as Turing Machine</h2>
+<ul>
+<li>Tiled plain can be seen as Turing Machine over time<ul>
+<li>one dimension (horizontal, x) is tape</li>
+<li>other dimension (vertical, y) is time</li>
+<li>so each row shows the tape at a given time
+3 kind of tiles needed</li>
+</ul>
+</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Kind of Tile</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="caps">TAPE</span></td>
+<td>One for each symbol in the alphabet</td>
+</tr>
+<tr>
+<td><span class="caps">ACTION</span></td>
+<td>One tile for each transition of the <span class="caps">TM</span></td>
+</tr>
+<tr>
+<td><span class="caps">PREPARE</span></td>
+<td>Two for each (symbol, state) pair</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Seed row: initial configuration</li>
+<li>We can tile the floor with the tiles if <span class="caps">TM</span> halts</li>
+</ul>
+<!-- Notes Week 4 End -->
+<!-- Notes Week 6 Start -->
+<h1 id="cellular-automata">Cellular Automata</h1>
+<ul>
+<li>Inspired by natural cells</li>
+<li>World is grid of cells</li>
+<li>Cells have state (e.g. dead/alive)</li>
+<li>Next state of a cell is calculated by<ul>
+<li>actual state of the cell</li>
+<li>actual state of the neighbor cells</li>
+</ul>
+</li>
+<li>All cells work with same rules</li>
+<li>Time is discrete (round based)</li>
+<li>Often used in physics</li>
+<li>Good model for unreliability</li>
+<li>parallel, local comuptation</li>
+<li>can model a Turing Machine</li>
+</ul>
+<h2 id="the-model">The Model</h2>
+<ul>
+<li><span class="math">\(N\)</span>-dimensional array of cells (infinitely large)</li>
+<li>Finite number of states<ul>
+<li>each cell is in some state</li>
+</ul>
+</li>
+<li>At each time step, each cell updates its state based on<ul>
+<li>it’s own state</li>
+<li>the states of its neighbors</li>
+</ul>
+</li>
+<li>Variations:<ul>
+<li>number of dimensions</li>
+<li>neighborhood size (and geometry)</li>
+<li>asynchronouns</li>
+<li>error-prone (add randomness)</li>
+<li>finite size</li>
+<li>grid type</li>
+</ul>
+</li>
+</ul>
+<h2 id="variants">Variants</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway’s Game of Life</a><ul>
+<li><a href="https://github.com/LukasWoodtli/GameOfLife">My implementation (Qt, C++)</a></li>
+</ul>
+</li>
+<li><a href="https://en.wikipedia.org/wiki/Toom%27s_rule">Toom’s rule</a><ul>
+<li>asymetrc rule</li>
+</ul>
+</li>
+</ul>
+<!-- Notes Week 6 End -->
+<!-- Notes Week 7 Start -->
+<h1 id="lambda-calculus">Lambda Calculus</h1>
+<ul>
+<li>Meta-Mathematics</li>
+<li>Turing Machines simulate a person that calculate (State: Mind, Tape: Paper)</li>
+<li>Lambda Calculus: about functions</li>
+</ul>
+<h2 id="syntax">Syntax</h2>
+<p>Traditional Syntax:</p>
+<div class="math">$$f(x) = \frac{e^x - sin(x)}{x+3}$$</div>
+<p>Lambda Syntax:</p>
+<div class="math">$$\lambda x.  \frac{e^x - sin(x)}{x+3}$$</div>
+<ul>
+<li>
+<p>Functions in lambda calculus don’t have names</p>
+<ul>
+<li>Just put the function completely, where it is used</li>
+<li>Anonymous functions</li>
+</ul>
+</li>
+<li>
+<p>Functions: ‘Plugging in’ arguments</p>
+</li>
+<li>Functions return other functions (Currying)</li>
+</ul>
+<p>For example:</p>
+<div class="math">$$((\lambda xy. 2x + y) 2 ) 3 = (\lambda y. 4 + y) 3 = 4 + 3 = 7$$</div>
+<ul>
+<li>Can get rid of<ul>
+<li>function names</li>
+<li>multi-argument functions</li>
+</ul>
+</li>
+</ul>
+<h2 id="main-operations">Main Operations</h2>
+<ul>
+<li><span class="math">\(\beta\)</span>-reduction: apply a function to an argument using substitution<ul>
+<li>Reduction is an optimistic term since the result of the <span class="math">\(\beta\)</span>-reduction can be bigger then the expression before</li>
+</ul>
+</li>
+<li><span class="math">\(\alpha\)</span>-conversion: changing a functions ‘argument symbol’ (<span class="math">\(\lambda x.x \equiv \lambda y.y\)</span>)</li>
+<li><span class="math">\(\eta\)</span>-conversion: <span class="math">\(\lambda v. f v \equiv f\)</span> because <span class="math">\((\lambda v. f v) a \equiv f a\)</span></li>
+</ul>
+<h2 id="church-numerals">Church Numerals</h2>
+<ul>
+<li>Numbers can be encoded as functions</li>
+<li>Arbitrary encoding of numbers suggested by church</li>
+</ul>
+<p>Each number is a function that takes 2 arguments: <span class="math">\(f\)</span> and <span class="math">\(x\)</span>:</p>
+<div class="math">$$
+\begin{align*}
+0 :&amp;= \lambda f.\lambda x. x\\
+1 :&amp;= \lambda f.\lambda x. f x\\
+2 :&amp;= \lambda f.\lambda x. f (f x)\\
+3 :&amp;= \lambda f.\lambda x. f (f (f x))\\
+\cdots \\
+n :&amp;= \lambda f.\lambda x. f^n x
+\end{align*}
+$$</div>
+<blockquote>
+<p>The number <span class="math">\(n\)</span> is a function that takes a function <span class="math">\(f\)</span> as argument and applies it <span class="math">\(n\)</span>-times to the second argument <span class="math">\(x\)</span></p>
+</blockquote>
+<p>Example: <span class="math">\((5 inc) x\)</span>: apply function <span class="math">\(inc\)</span> <span class="math">\(5\)</span>-times to <span class="math">\(x\)</span></p>
+<p><img alt="Church Numerals" class="img-fluid" src="/images/lambda_calculus/church_numerals.png"/></p>
+<h2 id="lambda-calculus-expressions">Lambda Calculus Expressions</h2>
+<ul>
+<li>Using just <em>substitution step</em> to calculate<ul>
+<li>seems complex, but only one operation needed: substitution</li>
+</ul>
+</li>
+</ul>
+<h3 id="variables">Variables</h3>
+<ul>
+<li><span class="math">\(a\)</span>, <span class="math">\(b\)</span>, <span class="math">\(c\)</span> …</li>
+<li>representing functions</li>
+</ul>
+<h3 id="function-application">Function Application</h3>
+<p><span class="math">\((a b)\)</span>: <span class="math">\(a\)</span> applied to <span class="math">\(b\)</span></p>
+<p><img alt="Function Application" class="img-fluid" src="/images/lambda_calculus/function_application.png"/></p>
+<h3 id="function-creation">Function Creation</h3>
+<p><span class="math">\(\lambda a. aa\)</span></p>
+<p><img alt="Function Creation" class="img-fluid" src="/images/lambda_calculus/function_creation.png"/></p>
+<h3 id="evaluation">Evaluation</h3>
+<p><img alt="Evaluation" class="img-fluid" src="/images/lambda_calculus/function_evaluation.png"/></p>
+<p>Example:</p>
+<p><img alt="Evaluation Example" class="img-fluid" src="/images/lambda_calculus/function_evaluation_example.png"/></p>
+<h3 id="examples">Examples</h3>
+<h4 id="increment">Increment</h4>
+<div class="math">$$
+\lambda k f x. f ( k f x)
+$$</div>
+<p>Example:</p>
+<p>increment <span class="math">\(2\)</span></p>
+<div class="math">$$
+\begin{align*}
+\underbrace{(\lambda k f x. f ( k f x))}_{inc}\underbrace{(\lambda f x. f ( f x))}_{2} &amp;= \\
+(\lambda f x. f ( (\lambda f x. f ( f x)) f x)) &amp;= \\
+(\lambda f x. f ( f ( f x)))
+\end{align*}
+$$</div>
+<p><img alt="Increment" class="img-fluid" src="/images/lambda_calculus/increment.png"/></p>
+<h4 id="addition">Addition</h4>
+<p><img alt="Addition" class="img-fluid" src="/images/lambda_calculus/addition.png"/></p>
+<h4 id="multiplication">Multiplication</h4>
+<p><img alt="Multiplication" class="img-fluid" src="/images/lambda_calculus/multiplication.png"/></p>
+<h4 id="boolean-logic">Boolean Logic</h4>
+<p><img alt="Boolean Logic" class="img-fluid" src="/images/lambda_calculus/boolean_logic.png"/></p>
+<h4 id="if-then-else">If-Then-Else</h4>
+<p><img alt="If Then Else" class="img-fluid" src="/images/lambda_calculus/if_then_else.png"/></p>
+<h4 id="pair">Pair</h4>
+<p><img alt="Pair" class="img-fluid" src="/images/lambda_calculus/pair.png"/></p>
+<p><img alt="Shift Pair" class="img-fluid" src="/images/lambda_calculus/pair_shifting.png"/></p>
+<h2 id="conclusion">Conclusion</h2>
+<ul>
+<li>No distinction between code and data: everything is code!</li>
+<li>No structure is safe from substitution (safety issue)</li>
+<li>Data has to be run, can’t be examined</li>
+</ul>
+<!-- Notes Week 7 End -->
+<!-- Notes Week 8 Start -->
+<h2 id="recursion">Recursion</h2>
+<ul>
+<li>in <span class="math">\(\lambda\)</span>-calculus a function can’t reference (call) itself since there are no names for functions</li>
+<li>
+<p><a href="https://en.wikipedia.org/wiki/Tail_call">Tail-call</a> recursion: in some cases the same stack frame can be reused for recursive functions</p>
+</li>
+<li>
+<p>How can we build an infinite loop (recursion)?</p>
+</li>
+</ul>
+<p>This structure rebuilds itself infinitely:</p>
+<div class="math">$$
+\Omega = (\lambda w. w w) (\lambda w. w w)
+$$</div>
+<h3 id="y-combinator">Y-Combinator</h3>
+<p>See <a href="https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus">Wikipedia</a></p>
+<p>and <a href="https://medium.com/@ayanonagon/the-y-combinator-no-not-that-one-7268d8d9c46#.c11j5arpk">The Y Combinator (no, not that one)</a>.</p>
+<div class="math">$$
+Y = \lambda f. (\lambda x. f (x\; x))(\lambda x. f (x \;x))
+$$</div>
+<p>Beta recursion gives:</p>
+<div class="math">$$
+\begin{align*}
+Y g &amp;= \lambda f. (\lambda x. f (x\; x))(\lambda x. f (x\; x)) g \\
+ &amp;= (\lambda x. g (x\; x)) (\lambda x. g (x\; x)) \\
+ &amp;= g ((\lambda x. g (x\; x)) (\lambda x. g (x\; x)))  \\
+ &amp;= g (Y\; g)
+\end{align*}
+$$</div>
+<ul>
+<li>Only way to do a loop if you don’t know in advance how many iterations the loop needs to be done</li>
+<li>Functions can’t see their own structure<ul>
+<li>Needs to be provided as argument so the function can reproduce itself: ‘twin’-functions</li>
+</ul>
+</li>
+</ul>
+<h1 id="numbers">Numbers</h1>
+<ul>
+<li>Numbers are an abstract concept</li>
+<li>It’s only possible to manipulate <em>representations</em> of numbers</li>
+</ul>
+<p>There Are a lot of different representations of numbers.</p>
+<p>Each representation has it’s pros and cons.</p>
+<ul>
+<li>Decimal</li>
+<li>Roman Numerals</li>
+<li>Binary</li>
+<li><a href="https://en.wikipedia.org/wiki/Two's_complement">Two’s complement</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Redundant_binary_representation">Binary with digits up to 2 (Redundant binary representation)</a><ul>
+<li>Addition can be faster</li>
+<li>Logical operation are slower</li>
+</ul>
+</li>
+<li>Ternary</li>
+<li>Church Numerals</li>
+<li>Prime Factorization: <span class="math">\(1, 2, 3, 2^2, 5, 2\cdot 3, 7, 2^3, 3^2, \ldots\)</span><ul>
+<li>Multiplication and Factorization is easy</li>
+<li>Increment by one is hard</li>
+</ul>
+</li>
+<li><a href="https://en.wikipedia.org/wiki/Chinese_remainder_theorem">Chinese remainder theorem</a><ul>
+<li>Comparing two numbers is hard</li>
+</ul>
+</li>
+<li><a href="https://en.wikipedia.org/wiki/P-adic_number">p-adic number</a><ul>
+<li>related to two’s complement</li>
+</ul>
+</li>
+</ul>
+<!-- Notes Week 8 End -->
+<!-- Notes Week 10 Begin -->
+<h1 id="tag-systems">Tag Systems</h1>
+<ul>
+<li>Tape with a starting string</li>
+<li>Reading and deleting at the beginning (left)</li>
+<li>Appending (writing) at the end (right)</li>
+</ul>
+<h2 id="2-tag-system">2-Tag System</h2>
+<ol>
+<li>reads <em>1</em> symbol at the beginning of the tape</li>
+<li>appends a string at the end of the type<ul>
+<li>appended string depends on read symbol</li>
+</ul>
+</li>
+<li>removes <em>2</em> symbols at the beginning of the tape</li>
+</ol>
+<h3 id="example-test-for-oddeven-number">Example: Test for odd/even number</h3>
+<ul>
+<li>Alphabet: <span class="math">\(\Sigma = \{C_1, C_2,C_3\}\)</span></li>
+<li>Rules:<ul>
+<li><span class="math">\(C_3 \rightarrow \epsilon\)</span></li>
+<li><span class="math">\(C_1 \rightarrow C_2 \; O\)</span></li>
+<li><span class="math">\(C_2 \rightarrow E\)</span></li>
+</ul>
+</li>
+<li><span class="math">\(\epsilon\)</span>: empty word</li>
+<li><span class="math">\(O\)</span>: Odd</li>
+<li>
+<p><span class="math">\(E\)</span>: Even</p>
+</li>
+<li>
+<p><span class="math">\(C_1 \; C_1 \; (C_3)^x\)</span></p>
+</li>
+<li><span class="math">\(a^x\)</span>: symbol a is repeated <span class="math">\(x\)</span> times</li>
+<li>the given rules show if <span class="math">\(x\)</span> is odd or even</li>
+</ul>
+<p>Example even:
+</p>
+<div class="math">$$
+\begin{align*}
+C_1 C_1 C_3 C_3 C_3 C_3 \rightarrow  \\
+C_3 C_3 C_3 C_3 C_2 O \rightarrow \\
+C_3 C_3 C_2 O \rightarrow \\
+C_2 O \rightarrow \\
+E
+\end{align*}
+$$</div>
+<p>Example odd:</p>
+<div class="math">$$
+\begin{align*}
+C_1 C_1 C_3 C_3 C_3 \rightarrow  \\
+C_3 C_3 C_3 C_2 O \rightarrow \\
+C_3 C_2 O \rightarrow \\
+O
+\end{align*}
+$$</div>
+<h3 id="example-power-of-two">Example: Power of Two</h3>
+<div class="math">$$
+\begin{align*}
+2^n &amp;\rightarrow  n \\
+C_1 &amp;\rightarrow C_1 C_2 C_4 C_5 \\
+C_2 &amp;\rightarrow \epsilon \\
+C_3 &amp;\rightarrow C_3 \\
+C_4 &amp;\rightarrow C_4 C_5 \\
+C_5 &amp;\rightarrow C_6
+\end{align*}
+$$</div>
+<p>Starting with:</p>
+<div class="math">$$
+(C_3)^{2n}C_1C_1 \rightarrow (C_6)^n
+$$</div>
+<p>For <span class="math">\(n=2\)</span>:</p>
+<div class="math">$$
+\begin{align*}
+C_3 C_3 C_3 C_3 C_1 C_1 \rightarrow \\
+C_3 C_3 C_1 C_1 C_3 \rightarrow \\
+C_1 C_1 C_3 C_3 \rightarrow \\
+C_3 C_3 C_1 C_2 C_4 C_5\rightarrow \\
+C_1 C_2 C_4 C_5 C_3 \rightarrow \\
+C_4 C_5 C_3 C_1 C_2 C_4 C_5 \rightarrow \\
+C_2 C_4 C_5 C_4 C_5 C_3 \rightarrow \\
+C_5 C_4 C_5 C_3 \rightarrow \\
+C_5 C_3 C_6 \rightarrow \\
+C_6 C_6
+\end{align*}
+$$</div>
+<h3 id="simulation-of-turing-machines-with-tag-systems">Simulation of Turing Machines with Tag Systems</h3>
+<p>Some of the notes here are taken from ‘Understanding Computation’ by Tom Stuart.</p>
+<ol>
+<li>Tape uses only 2 characters: <span class="math">\(0\)</span> and <span class="math">\(1\)</span><ul>
+<li><span class="math">\(0\)</span> is the blank character</li>
+</ul>
+</li>
+<li>Split the tape into two pieces<ul>
+<li>left part<ul>
+<li>character under the head</li>
+<li>all characters left of the head</li>
+</ul>
+</li>
+<li>right part<ul>
+<li>all characters right of the head</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Interpret left part as binary number</li>
+<li>Interpret right part as binary number written <em>backwards</em></li>
+<li>Encode those 2 numbers as string (suitable to be used for Tag System)</li>
+<li>Simple operations:<ul>
+<li>Simulate<ul>
+<li><em>reading</em> from tape</li>
+<li><em>writing</em> to tape</li>
+<li><em>moving</em> the head</li>
+</ul>
+</li>
+<li>with simple operations<ul>
+<li>doubling / halfing</li>
+<li>incrementing / decrementing</li>
+<li>odd / even (parity) check</li>
+<li>…</li>
+</ul>
+</li>
+<li>e.g<ul>
+<li>move head to right:<ul>
+<li>doubling left number</li>
+<li>halving right number</li>
+</ul>
+</li>
+<li>reading from tape<ul>
+<li>check if left number is even/odd</li>
+</ul>
+</li>
+<li>writing<ul>
+<li><span class="math">\(1\)</span>: incrementing number</li>
+<li><span class="math">\(0\)</span>: decrementing number</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Current <em>state</em> of simulated Turing machine represented by different encoding<ul>
+<li>e. g<ul>
+<li>State 1: use <em>a</em>, <em>b</em>, <em>c</em></li>
+<li>State 2: use <em>d</em>, <em>e</em>, <em>f</em></li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Convert each Turing Machine rule into a Tag Systems that rewrites the current string in the expected way</li>
+<li>Combine all the Tag Systems to make a large one the simulates every rule of the Turing Machine</li>
+</ol>
+<h3 id="cyclic-tag-systems">Cyclic Tag Systems</h3>
+<p>This are simplified Tag Systems</p>
+<ul>
+<li>The tape is allowed only to have 2 symbols <span class="math">\(0\)</span> and <span class="math">\(1\)</span></li>
+<li>A string is only appended if a <span class="math">\(1\)</span> is read</li>
+<li>The rules for appending strings is ordered</li>
+<li>The deletion number is <span class="math">\(1\)</span></li>
+</ul>
+<p>Algorithm:</p>
+<p>In each round:</p>
+<ul>
+<li>Read next rule in rule-set</li>
+<li>Read next symbol on tape<ul>
+<li>if <span class="math">\(1\)</span>: append the string from the rule set to the tape</li>
+<li>if <span class="math">\(0\)</span>: ignore the rule</li>
+</ul>
+</li>
+<li>Remove the last read symbol from the tape</li>
+<li>Start from the beginning with reading the next rule</li>
+</ul>
+<p>A Cyclic Tag System can simulate a normal Tag System. See ‘Understanding Computation’ by Tom Stuart on how to do that.</p>
+<!-- End Notes Week 10 -->
+<!-- Begin Notes Week 11 -->
+<h1 id="diophantine-equations">Diophantine Equations</h1>
+<p>See also <a href="https://en.wikipedia.org/wiki/Diophantine_equation">Wikipedia:Diophantine equation</a></p>
+<ul>
+<li>Polynomal equations</li>
+<li>Only integer solutions are sought</li>
+<li>Properties<ul>
+<li>no state</li>
+<li>no dynamics</li>
+<li>no time</li>
+<li>no loops</li>
+<li>no ‘<span class="caps">IF</span>’/’<span class="caps">THEN</span>’</li>
+<li>just <em>equations</em> which all must be true</li>
+</ul>
+</li>
+</ul>
+<p>How to compute?</p>
+<ul>
+<li>Consider a space-time history</li>
+<li>Solve it in the digits of a large number</li>
+<li>Use equations to force it to be valid</li>
+</ul>
+<!-- End Notes Week 11 -->
+<!-- Begin Notes Week 12 -->
+<h1 id="primitive-recursive-functions">Primitive Recursive Functions</h1>
+<ul>
+<li>Recursion can do a lot!</li>
+<li>Functions are defined using itselves or other functions</li>
+<li>Each function has 2 definition:<ol>
+<li>Definition for argument <span class="math">\(0\)</span></li>
+<li>General definition</li>
+</ol>
+</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Function</th>
+<th>Name</th>
+<th>Definition (<span class="math">\(\text{if } n=0\)</span>)</th>
+<th>Definition (<span class="math">\(\text{if } n=S(m)\)</span>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="math">\(S(n) = n + 1\)</span></td>
+<td>Successor</td>
+<td>intrinsic/primitive</td>
+<td>-</td>
+</tr>
+<tr>
+<td><span class="math">\(A(n,a)=n+a\)</span></td>
+<td>Addition</td>
+<td><span class="math">\(a\)</span></td>
+<td><span class="math">\(S(A(m,a))\)</span></td>
+</tr>
+<tr>
+<td><span class="math">\(M(n,a)=n\cdot a\)</span></td>
+<td>Multiplication</td>
+<td><span class="math">\(0\)</span></td>
+<td><span class="math">\(A(a,M(m,a))\)</span></td>
+</tr>
+<tr>
+<td><span class="math">\(E(n,a)=a^n\)</span></td>
+<td>Exponentiation</td>
+<td><span class="math">\(1\)</span></td>
+<td><span class="math">\(M(a,E(m,a))\)</span></td>
+</tr>
+<tr>
+<td><span class="math">\(V(n)=sign(n)\)</span></td>
+<td>Positivity</td>
+<td><span class="math">\(0\)</span></td>
+<td><span class="math">\(1\)</span></td>
+</tr>
+<tr>
+<td><span class="math">\(P(n) = n-1\)</span></td>
+<td>Predecessor</td>
+<td><span class="math">\(0\)</span></td>
+<td><span class="math">\(m\)</span></td>
+</tr>
+<tr>
+<td><span class="math">\(D(a,n) = a-n\)</span></td>
+<td>Subtraction</td>
+<td><span class="math">\(a\)</span></td>
+<td><span class="math">\(P(D(n,m))\)</span></td>
+</tr>
+<tr>
+<td><span class="math">\(R(n,a)=n \bmod a\)</span></td>
+<td>Remainder</td>
+<td><span class="math">\(0\)</span></td>
+<td><span class="math">\(M(S(R(m,a)),V(D(P(a),R(m,a))))\)</span></td>
+</tr>
+<tr>
+<td><span class="math">\(C(n,a)=\prod_{i=2}^{n+1} a \bmod i\)</span></td>
+<td>‘mod Product’</td>
+<td><span class="math">\(0\)</span></td>
+<td><span class="math">\(M(C(m,a),R(a,(S(S(m)))))\)</span></td>
+</tr>
+<tr>
+<td><span class="math">\(Z(n)=1\)</span> if prime ; <span class="math">\(0\)</span> else</td>
+<td>Primality</td>
+<td><span class="math">\(0\)</span></td>
+<td><span class="math">\(V(M(m,(P(m),S(m))))\)</span></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Infinite loops not possible</li>
+<li>Can simulate a Turing Machine only for a given number of steps (weaker than <span class="caps">TM</span>’s)<ul>
+<li>Number of iterations of a loop need to be known from beginning</li>
+<li>Infinite loops are not possible</li>
+</ul>
+</li>
+<li><em>Not</em> considierd as universal system</li>
+</ul>
+<h1 id="some-simple-models">Some Simple Models</h1>
+<h2 id="chemical-reaction-networks">Chemical Reaction Networks</h2>
+<ul>
+<li>Inspired by chemical reaction equations</li>
+</ul>
+<div class="math">$$
+\begin{matrix}
+A &amp; \rightarrow  &amp; B \\ 
+C &amp; \rightarrow &amp; D \\ 
+B + C &amp; \rightarrow &amp; A \\ 
+A + D &amp; \rightarrow &amp; A + 2E\\ 
+B + E &amp; \rightarrow &amp; B + D
+\end{matrix}
+$$</div>
+<ul>
+<li>Nondeterministic: any reaction can happen at any time</li>
+<li>Primitive Recursive Functions can always compute this in bounded time, even if answer is <span class="math">\(\infty\)</span>.</li>
+<li>Chemical Reaction Networks are not stronger than Primitive Recursive Functions.</li>
+</ul>
+<h2 id="petri-nets">Petri Nets</h2>
+<ul>
+<li>A lot of different form of <a href="https://en.wikipedia.org/wiki/Petri_net">Petri Nets</a></li>
+<li>Components<ul>
+<li>Transition (edges)</li>
+<li>Places (nodes)</li>
+<li>Tokens (arcs) travel from transitions to places (or vice versa)</li>
+</ul>
+</li>
+<li>Nondeterministic</li>
+<li>Similar to (and as powerful as) Chemical Transition Networks</li>
+<li>Used to simulate concurrency in distributed systems (but not turing-complete)</li>
+</ul>
+<h2 id="vector-addition-systems">Vector Addition Systems</h2>
+<ul>
+<li>Rules: Starting position and list of possible moves (like a knight in chess)</li>
+<li>no coordinate ca go negative</li>
+<li>N-dimensional is posible</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+<th>F</th>
+<th>G</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0</td>
+<td>-1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>-1</td>
+<td>-1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>-1</td>
+<td>0</td>
+<td>0</td>
+<td>-1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>-1</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>-1</td>
+<td>0</td>
+<td>0</td>
+<td>-1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>-1</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>7 moves for 7 dimensions</li>
+<li>Non-deterministic</li>
+<li>Same as Chemical Reduction Networks<ul>
+<li>Put equations in vectors (linear combination)</li>
+</ul>
+</li>
+</ul>
+<h2 id="unordered-fractran">Unordered Fractran</h2>
+<ul>
+<li>Similar to fractran</li>
+<li>Choose any fraction randomly that yields an integer when multiplied with given number</li>
+<li>non-deterministic</li>
+</ul>
+<h2 id="broken-register-machine">Broken Register Machine</h2>
+<ul>
+<li>decrementing a register might fail even if register could be decremented</li>
+</ul>
+<h2 id="general-notes">General Notes</h2>
+<ul>
+<li>A lot of these systems get more powerful if they allow prioritizing</li>
+<li>determinism: turing complete</li>
+</ul>
+<!-- End Notes Week 13 -->
+<!-- Beginn Notes Week 14 -->
+<h1 id="halting-problem">Halting Problem</h1>
+<p>Suppose a Turing Machine “A” can take <span class="math">\(Enc_1(table)\)</span>, <span class="math">\(Enc_2(tape)\)</span> and <em>decide</em> wether a <span class="caps">TM</span> with the given table will ever halt, if started on the given tape.</p>
+<p>This is impossible! </p>
+<p>Idea (proof):</p>
+<ol>
+<li>Make a machine that does the opposite of whatever machine you give it (halt or not halt)</li>
+<li>The goal is to feed this machine to itself</li>
+<li>Analyze what machines do when they are fed to themselves</li>
+</ol>
+<h1 id="universal-machine">Universal Machine</h1>
+<p>It’s possible to create a “universal” machine, which just (slowly) does the same
+thing that the machine described to it would do.</p>
+<ul>
+<li>a programmable Turing Machine</li>
+<li>see <a href="https://en.wikipedia.org/wiki/Universal_Turing_machine">Universal Turing machine</a></li>
+</ul>
+<!-- End Notes Week 14 -->
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./systemc.html" title="Previous: SystemC">SystemC</a></li>
+                <li class="next-article"><a href="./synchronization_primitives_(read-modify-write).html" title="Next: Synchronization Primitives (Read-Modify-Write)">Synchronization Primitives (Read-Modify-Write)</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2016-02-29T22:48:36+01:00">Feb 29, 2016</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-08T21:27:48+02:00">Apr 8, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+                <li><a href="./tags#eth-ref">ETH
+                    <span>7</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

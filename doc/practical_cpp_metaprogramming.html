@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="C++, Programming, " />
+
+<meta property="og:title" content="Practical C++ Metaprogramming "/>
+<meta property="og:url" content="./practical_cpp_metaprogramming.html" />
+<meta property="og:description" content="Notes taken from: Practical C++ Metaprogramming Edouard Alligand and Joel Falcou O’Reilly Media, Inc. My repository with examples on Github Chapter 1. Introduction The Early History of Metaprogramming “LISP macros were able to be used to extend the languages from within.” “[In C/C++] An X-macro is, in fact …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2018-10-17T16:37:12+02:00" />
+<meta property="og:article:modified_time" content="2022-04-10T21:39:06+02:00" />
+<meta name="twitter:title" content="Practical C++ Metaprogramming ">
+<meta name="twitter:description" content="Notes taken from: Practical C++ Metaprogramming Edouard Alligand and Joel Falcou O’Reilly Media, Inc. My repository with examples on Github Chapter 1. Introduction The Early History of Metaprogramming “LISP macros were able to be used to extend the languages from within.” “[In C/C++] An X-macro is, in fact …">
+
+        <title>Practical C++ Metaprogramming  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./practical_cpp_metaprogramming.html"> Practical C++&nbsp;Metaprogramming  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            
+            <p>Notes taken from:</p>
+<p>Practical C++ Metaprogramming
+Edouard Alligand and Joel Falcou
+O’Reilly Media, Inc.</p>
+<p>My repository with examples on <a href="https://github.com/LukasWoodtli/PracticalCppMetaprogramming">Github</a></p>
+<h1 id="chapter-1-introduction">Chapter 1. Introduction</h1>
+<h2 id="the-early-history-of-metaprogramming">The Early History of Metaprogramming</h2>
+<p><em><span class="dquo">“</span><span class="caps">LISP</span> macros were able to be used to extend the languages from within.”</em></p>
+<p><em><span class="dquo">“</span>[In C/C++] An X-macro is, in fact, a header file containing a list of similar macro invocations—often called the components—which can be included multiple times. Each inclusion is prefixed by the redefinition of said macro to generate different code fragments for the same list of components.”</em></p>
+<h2 id="enter-c-templates">Enter C++ Templates</h2>
+<p><em><span class="dquo">“</span>It was quickly discovered that by supporting partial specialization, compile-time equivalents of recursion or conditional statements were feasible.”</em></p>
+<p><em><span class="dquo">“</span>We could turn templates into a very crude and syntactically impractical functional language, which [is] Turing-complete.”</em></p>
+<p><em><span class="dquo">“</span>Applications of C++ template metaprogramming includes the following:</em></p>
+<ul>
+<li><em>Complex constant computations</em></li>
+<li><em>Programmatic type constructions</em></li>
+<li><em>Code fragment generation and replication”</em></li>
+</ul>
+<p><em><span class="dquo">“</span>Those applications are usually backed up by some libraries, like Boost.<span class="caps">MPL</span> or Boost.Fusion, and a set of patterns including tag dispatching, recursive inheritance, and <span class="caps">SFINAE</span>.”</em></p>
+<h1 id="chapter-2-c-metaprogramming-in-practice">Chapter 2. C++ Metaprogramming in Practice</h1>
+<h2 id="the-stdtuple-pattern">The <code>std::tuple&lt;&gt;</code> pattern</h2>
+<p><em><span class="dquo">“</span>”return a bunch of otherwise unrelated stuff.” This is a common pattern in modern C++”</em></p>
+<h2 id="returning-auto">Returning auto`</h2>
+<p><em><span class="dquo">“</span>In template metaprogramming, there is no iterative construct.”</em></p>
+<p><em><span class="dquo">“</span>You can, however, use recursion to apply a callable on every member of the tuple.”</em></p>
+<p><em><span class="dquo">“</span>Whenever you can, you should use the <code>...</code> operator to apply a callable to every member of a list. This is faster, it doesn’t generate all the unneeded intermediate types, and the code is often more concise.”</em></p>
+<p><code>std :: index_sequence</code>: <em>“The trick is to create an index sequence - whose sole purpose is to give us an index on which to apply the <code>...</code> operator - of the right size. This is done as follows:”</em></p>
+<div class="highlight"><pre><span></span><code><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">params_count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">sizeof</span><span class="p">...(</span><span class="n">Params</span><span class="p">);</span><span class="w"></span>
+<span class="n">std</span><span class="o">::</span><span class="n">make_index_sequence</span><span class="o">&lt;</span><span class="n">params_count</span><span class="o">&gt;</span><span class="p">();</span><span class="w"></span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>At compile time, when you need to know how many elements you have in your list, you use sizeof…().”</em></p>
+<h1 id="chapter-3-c-metaprogramming-and-application-design">Chapter 3. C++ Metaprogramming and Application Design</h1>
+<h1 id="meta-axiom-1">Meta-Axiom #1</h1>
+<p><em><span class="dquo">“</span>Types are first-class values inside compile-time programs.”</em></p>
+<h1 id="meta-axiom-2">Meta-Axiom #2</h1>
+<p><em><span class="dquo">“</span>Any template class accepting a variable number of type parameters can be considered a type container.”</em></p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./rotation_matrix.html" title="Previous: Rotation Matrix">Rotation Matrix</a></li>
+                <li class="next-article"><a href="./pose_and_position.html" title="Next: Pose and Position">Pose and Position</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2018-10-17T16:37:12+02:00">Okt 17, 2018</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-10T21:39:06+02:00">Apr 10, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#cpp-ref">C++
+                    <span>19</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

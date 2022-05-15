@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, Assembler, Programming, " />
+
+<meta property="og:title" content="Intel Architecture "/>
+<meta property="og:url" content="./intel_architecture.html" />
+<meta property="og:description" content="On this page I write down some notes about the Intel architecture (x86). I learned most of it in school few years ago. Part of the notes here are for Intel 80186. But some sections are extend with information about modern Intel processors (IA-32, x86-64). Some information (especially about …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2015-06-22T21:28:32+02:00" />
+<meta property="og:article:modified_time" content="2022-04-10T19:27:29+02:00" />
+<meta name="twitter:title" content="Intel Architecture ">
+<meta name="twitter:description" content="On this page I write down some notes about the Intel architecture (x86). I learned most of it in school few years ago. Part of the notes here are for Intel 80186. But some sections are extend with information about modern Intel processors (IA-32, x86-64). Some information (especially about …">
+
+        <title>Intel Architecture  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./intel_architecture.html"> Intel&nbsp;Architecture  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#general">General</a></li>
+<li><a href="#operation-modes">Operation Modes</a></li>
+<li><a href="#memory-models">Memory Models</a><ul>
+<li><a href="#real-mode-memory-models-16-bit">Real Mode Memory Models (16-bit)</a><ul>
+<li><a href="#tiny">Tiny</a></li>
+<li><a href="#small">Small</a></li>
+<li><a href="#medium">Medium</a></li>
+<li><a href="#compact">Compact</a></li>
+<li><a href="#large">Large</a></li>
+<li><a href="#huge">Huge</a></li>
+</ul>
+</li>
+<li><a href="#protected-mode-memory-models-16-bit">Protected Mode Memory Models (16-bit)</a></li>
+<li><a href="#32-bit-memory-models">32-bit Memory Models</a></li>
+<li><a href="#64-bit-memory-models">64-bit Memory Models</a><ul>
+<li><a href="#windows">Windows</a></li>
+<li><a href="#linux-and-bsd">Linux and <span class="caps">BSD</span></a><ul>
+<li><a href="#small_1">Small</a></li>
+<li><a href="#medium_1">Medium</a></li>
+<li><a href="#large_1">Large</a></li>
+<li><a href="#kernel">Kernel</a></li>
+</ul>
+</li>
+<li><a href="#os-x-darwin"><span class="caps">OS</span> X (Darwin)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#registers">Registers</a><ul>
+<li><a href="#general-purpose-registers">General-Purpose Registers</a></li>
+<li><a href="#segment-registers">Segment Registers</a></li>
+<li><a href="#special-registers">Special Registers</a></li>
+<li><a href="#values-after-reset">Values after Reset</a></li>
+<li><a href="#xmm-registes"><span class="caps">XMM</span> Registes</a></li>
+<li><a href="#flags-register">Flags Register</a></li>
+</ul>
+</li>
+<li><a href="#segmentation">Segmentation</a></li>
+<li><a href="#addressing">Addressing</a><ul>
+<li><a href="#immediate">Immediate</a></li>
+<li><a href="#implicit">Implicit</a></li>
+<li><a href="#register">Register</a></li>
+<li><a href="#direct">Direct</a></li>
+<li><a href="#register-indirect">Register-Indirect</a><ul>
+<li><a href="#address">Address</a><ul>
+<li><a href="#real-mode">Real Mode</a></li>
+<li><a href="#segment-prefix">Segment Prefix</a></li>
+<li><a href="#x86-64">x86-64</a></li>
+<li><a href="#operand-size-word-dword">Operand Size (<span class="caps">WORD</span>, <span class="caps">DWORD</span>…)</a></li>
+<li><a href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#addressing-memory">Addressing Memory</a></li>
+</ul>
+</li>
+<li><a href="#data-transfer-commands">Data Transfer Commands</a><ul>
+<li><a href="#move-command-mov">Move Command (<span class="caps">MOV</span>)</a></li>
+<li><a href="#exchange-command-xchg">Exchange Command (<span class="caps">XCHG</span>)</a></li>
+<li><a href="#input-output-commands-inout">Input-/Output Commands (<span class="caps">IN</span>/<span class="caps">OUT</span>)</a></li>
+<li><a href="#load-effective-address-lea">Load Effective Address (<span class="caps">LEA</span>)</a></li>
+</ul>
+</li>
+<li><a href="#conversion-instructions">Conversion Instructions</a><ul>
+<li><a href="#narrowing-conversions">Narrowing Conversions</a></li>
+<li><a href="#widening-conversions">Widening Conversions</a><ul>
+<li><a href="#unsigned-conversions-movzx">Unsigned Conversions (<span class="caps">MOVZX</span>)</a></li>
+<li><a href="#signed-conversions-cbw-cwd">Signed Conversions (<span class="caps">CBW</span>, <span class="caps">CWD</span>, …)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#arithmetic-commands">Arithmetic Commands</a><ul>
+<li><a href="#addition-add">Addition (<span class="caps">ADD</span>)</a><ul>
+<li><a href="#affected-flags">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#addition-with-carry-adc">Addition with Carry (<span class="caps">ADC</span>)</a><ul>
+<li><a href="#affected-flags_1">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#increment-inc">Increment (<span class="caps">INC</span>)</a><ul>
+<li><a href="#affected-flags_2">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#subtraction-sub">Subtraction (<span class="caps">SUB</span>)</a><ul>
+<li><a href="#affected-flags_3">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#subtraction-with-borrow-sbb">Subtraction with Borrow (<span class="caps">SBB</span>)</a><ul>
+<li><a href="#affected-flags_4">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#decrement-dec">Decrement (<span class="caps">DEC</span>)</a><ul>
+<li><a href="#affected-flags_5">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#negate-a-signed-number-neg">Negate a signed Number (<span class="caps">NEG</span>)</a><ul>
+<li><a href="#affected-flags_6">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#multiplication-mul-imul">Multiplication (<span class="caps">MUL</span>, <span class="caps">IMUL</span>)</a><ul>
+<li><a href="#affected-flags_7">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#division-div-idiv">Division (<span class="caps">DIV</span>, <span class="caps">IDIV</span>)</a><ul>
+<li><a href="#affected-flags_8">Affected Flags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#floating-point-instructions">Floating Point Instructions</a><ul>
+<li><a href="#values">Values</a></li>
+<li><a href="#registers_1">Registers</a></li>
+<li><a href="#data-transfer-commands-movss-movsd">Data Transfer Commands (movss, movsd)</a></li>
+<li><a href="#conversion-instructions_1">Conversion Instructions</a></li>
+<li><a href="#arithmetic-instructions">Arithmetic Instructions</a><ul>
+<li><a href="#addition-addss-addsd">Addition (addss, addsd)</a></li>
+<li><a href="#substraction-subss-subsd">Substraction (subss, subsd)</a></li>
+<li><a href="#multiplication-mulss-mulsd">Multiplication (mulss, mulsd)</a></li>
+<li><a href="#division-divss-divsd">Division (divss, divsd)</a></li>
+<li><a href="#square-root-sqrtss-sqrtsd">Square Root (sqrtss, sqrtsd)</a></li>
+<li><a href="#control-instructions">Control Instructions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#logical-commands">Logical Commands</a><ul>
+<li><a href="#and-or-and-xor-and-or-xor">And, Or and Xor (<span class="caps">AND</span>, <span class="caps">OR</span>, <span class="caps">XOR</span>)</a><ul>
+<li><a href="#affected-flags_9">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#not-not">Not (<span class="caps">NOT</span>)</a><ul>
+<li><a href="#affected-flags_10">Affected Flags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#rotation-commands">Rotation Commands</a><ul>
+<li><a href="#rotate-rol-ror">Rotate (<span class="caps">ROL</span>, <span class="caps">ROR</span>)</a><ul>
+<li><a href="#affected-flags_11">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#rotate-with-carry-rcl-rcr">Rotate with Carry (<span class="caps">RCL</span>, <span class="caps">RCR</span>)</a><ul>
+<li><a href="#affected-flags_12">Affected Flags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#manipulate-the-carry-flag-clc-stc-cmc">Manipulate the Carry Flag (<span class="caps">CLC</span>, <span class="caps">STC</span>, <span class="caps">CMC</span>)</a></li>
+<li><a href="#shift-commands">Shift Commands</a><ul>
+<li><a href="#left-shift-commands-shl-sal">Left Shift Commands (<span class="caps">SHL</span>, <span class="caps">SAL</span>)</a><ul>
+<li><a href="#affected-flags_13">Affected Flags</a></li>
+</ul>
+</li>
+<li><a href="#right-shift-commands-shr-sar">Right Shift Commands (<span class="caps">SHR</span>, <span class="caps">SAR</span>)</a><ul>
+<li><a href="#affected-flags_14">Affected Flags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#jump-commands">Jump Commands</a><ul>
+<li><a href="#conditionalunconditional-jumps">Conditional/Unconditional Jumps</a></li>
+<li><a href="#short-near-and-far-jumps">Short, Near and Far Jumps</a></li>
+<li><a href="#direct-and-indirect-jumps">Direct and Indirect Jumps</a></li>
+<li><a href="#absolute-and-relative-jumps">Absolute and Relative Jumps</a></li>
+<li><a href="#intra-and-inter-segment-jumps">Intra- and Inter-Segment Jumps</a><ul>
+<li><a href="#intra-segment-jump">Intra-Segment Jump</a><ul>
+<li><a href="#near-jump">Near Jump</a></li>
+<li><a href="#short-jump">Short Jump</a></li>
+</ul>
+</li>
+<li><a href="#inter-segment-jump">Inter-Segment Jump</a></li>
+</ul>
+</li>
+<li><a href="#unconditional-jumps-jmp">Unconditional Jumps (<span class="caps">JMP</span>)</a></li>
+<li><a href="#conditional-jumps">Conditional Jumps</a><ul>
+<li><a href="#arithmetic-jumps">Arithmetic Jumps</a><ul>
+<li><a href="#arithmetic-unsigned-jumps">Arithmetic “unsigned” Jumps</a></li>
+<li><a href="#arithmetic-signed-jumps">Arithmetic “signed” Jumps</a></li>
+</ul>
+</li>
+<li><a href="#flag-oriented-jumps">Flag oriented Jumps</a></li>
+</ul>
+</li>
+<li><a href="#comparing-commands-cmp-test">Comparing Commands (<span class="caps">CMP</span>, <span class="caps">TEST</span>)</a></li>
+</ul>
+</li>
+<li><a href="#loop-commands-loopx-jcxz">Loop Commands (LOOPx, <span class="caps">JCXZ</span>)</a><ul>
+<li><a href="#loop-loop">Loop (<span class="caps">LOOP</span>)</a></li>
+<li><a href="#loop-while-equal-and-loop-while-zero-loope-loopz">Loop while equal and Loop while zero (<span class="caps">LOOPE</span>, <span class="caps">LOOPZ</span>)</a></li>
+<li><a href="#loop-while-not-equal-and-loop-while-not-zero-loopne-loopnz">Loop while not equal and Loop while not zero (<span class="caps">LOOPNE</span>, <span class="caps">LOOPNZ</span>)</a></li>
+<li><a href="#jump-if-cx-zero-jcxz">Jump if <span class="caps">CX</span> zero (<span class="caps">JCXZ</span>)</a></li>
+</ul>
+</li>
+<li><a href="#stack-and-function-calls">Stack and Function calls</a><ul>
+<li><a href="#push-and-pop-push-pushf-pusha-pop-popf-popa">Push and Pop (<span class="caps">PUSH</span>, <span class="caps">PUSHF</span>, <span class="caps">PUSHA</span>, <span class="caps">POP</span>, <span class="caps">POPF</span>, <span class="caps">POPA</span>)</a><ul>
+<li><a href="#push"><span class="caps">PUSH</span></a></li>
+<li><a href="#pop"><span class="caps">POP</span></a></li>
+<li><a href="#pusha-and-popa"><span class="caps">PUSHA</span> and <span class="caps">POPA</span></a></li>
+<li><a href="#pushf-and-popf"><span class="caps">PUSHF</span> and <span class="caps">POPF</span></a></li>
+<li><a href="#examples_1">Examples</a></li>
+</ul>
+</li>
+<li><a href="#call-and-ret"><span class="caps">CALL</span> and <span class="caps">RET</span></a></li>
+<li><a href="#defining-a-function">Defining a Function</a><ul>
+<li><a href="#function-prologue">Function Prologue</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#string-operations">String Operations</a><ul>
+<li><a href="#commands">Commands</a></li>
+<li><a href="#direction">Direction</a></li>
+<li><a href="#repeat-prefix">Repeat Prefix</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <p>On this page I write down some notes about the Intel architecture (x86). I learned most of it in <a href="http://www.vdf.ethz.ch/info/showDetails.asp?isbnNr=3255">school</a> few years ago.</p>
+<p>Part of the notes here are for Intel 80186. But some sections are extend with information about modern <a href="http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html">Intel processors</a> (<a href="https://en.wikipedia.org/wiki/IA-32"><span class="caps">IA</span>-32</a>, <a href="https://en.wikipedia.org/wiki/X86-64">x86-64</a>).</p>
+<p>Some information (especially about x86-64) is taken from <a href="http://www.egr.unlv.edu/~ed/x86.html">x86-64 Assembly Language Programming with Ubuntu</a> by Ed Jorgensen.</p>
+<p>I’m trying to keep all code examples in <a href="http://www.nasm.us"><span class="caps">NASM</span></a> syntax.</p>
+<p>There is a good overview of the <a href="https://en.wikipedia.org/wiki/X86_instruction_listings">x86 instructions</a> on Wikipedia.</p>
+<p>I keep some examples on <a href="https://github.com/LukasWoodtli/LinuxAssemblyProgramming">GitHub</a>.</p>
+
+<h1 id="general">General</h1>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="caps">CPU</span> Design</td>
+<td><a href="https://en.wikipedia.org/wiki/Complex_instruction_set_computing"><span class="caps">CISC</span></a></td>
+</tr>
+<tr>
+<td>Endianness</td>
+<td><a href="https://en.wikipedia.org/wiki/Endianness">little</a></td>
+</tr>
+<tr>
+<td>Type</td>
+<td><a href="https://en.wikipedia.org/wiki/Register_memory_architecture">Register-memory</a></td>
+</tr>
+</tbody>
+</table>
+<h1 id="operation-modes">Operation Modes</h1>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Mode</th>
+<th>Introduced in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Real Mode</td>
+<td>8086</td>
+</tr>
+<tr>
+<td>Protected Mode</td>
+<td>80286</td>
+</tr>
+<tr>
+<td>Virtual 8086 mode</td>
+<td>80386</td>
+</tr>
+<tr>
+<td>Long Mode</td>
+<td>x86-64</td>
+</tr>
+</tbody>
+</table>
+<h1 id="memory-models">Memory Models</h1>
+<p>The memory models define how data and code is manged in memory.</p>
+<p>Most information in this section is from
+<a href="http://www.agner.org/optimize/#manuals">Calling conventions for different C++ compilers and operating systems</a>.</p>
+<p>There is also a good <a href="https://en.m.wikipedia.org/wiki/Intel_Memory_Model">Wikipedia page</a>.</p>
+<p>The memory is byte addressable. Data is stored in little endian format. This means that the
+least significant byte (<span class="caps">LSB</span>) is saved on the smallest memory address.</p>
+<h2 id="real-mode-memory-models-16-bit">Real Mode Memory Models (16-bit)</h2>
+<p>This memory models are used in <span class="caps">DOS</span> for example.</p>
+<h3 id="tiny">Tiny</h3>
+<p>Code and data in the same segment (64 kB). Code starts at
+<code>0x100</code> relative to segment.</p>
+<p>Executable has ending <em>.com</em> (instead of <em>.exe</em>).</p>
+<h3 id="small">Small</h3>
+<p>One segment for code and one segment for data and stack.
+Both segments have max. size of 64 kB.</p>
+<h3 id="medium">Medium</h3>
+<p>The code can exceed 64 kB (multiple segments). <em>Far</em> function calls are needed.</p>
+<p>One segment (of max. 64 kB) for data and stack.</p>
+<h3 id="compact">Compact</h3>
+<p>Code is limited to one segment (64 kB).</p>
+<p>Stack is limited to one segment (64 kB).</p>
+<p>Data can exceed 64 kB. <em>Far</em> pointers are needed for data.</p>
+<h3 id="large">Large</h3>
+<p>Code can exceed 64 kB.</p>
+<p>Data can exceed 64 kB.</p>
+<p>Stack is limited to one segment (64 kB).</p>
+<p><em>Far</em> pointers are needed for code and data.</p>
+<h3 id="huge">Huge</h3>
+<p>Same as large. A data structure can exceed 64 kB by
+modifying segment and offset when a pointer is incremented.</p>
+<h2 id="protected-mode-memory-models-16-bit">Protected Mode Memory Models (16-bit)</h2>
+<p>Win 3.x uses <em>Protected Mode</em> and similar memory models as in Real Mode.</p>
+<p>Segment registers contain <em>Segment Selectors</em> instead of physical addresses.</p>
+<p>To access data structures bigger than 64 kB the <em>8</em> has to be 
+added to the segment descriptor for each 64 kB increment.</p>
+<p>On a 32-bit processor a 32-bit offset is used.</p>
+<h2 id="32-bit-memory-models">32-bit Memory Models</h2>
+<p>32-bit <span class="caps">OS</span>’s (Windows, Linux, <span class="caps">BSD</span>, Intel-Mac) use the <em>Flat</em> memory
+model. Application code uses only one (max. 2 <span class="caps">GB</span>) segment.</p>
+<p>Pointers are 32-bit <em>signed</em> addresses. Negative addresses are
+reseved for kernel and drivers.</p>
+<h2 id="64-bit-memory-models">64-bit Memory Models</h2>
+<h3 id="windows">Windows</h3>
+<p>The size of code and static data together is limited to 2 <span class="caps">GB</span>.
+So it’s possible to use <span class="caps">RIP</span>-relative addresses.
+The image base of an executable binary is usually below <span class="math">\(2^{31}\)</span>.
+Absolute 32-bit addresses are not often used.</p>
+<p>Stack and dynamically allocated data (data on heap) can exceed 2 <span class="caps">GB</span>.</p>
+<p>Pointers are usually 64 bits (sometimes 32 bits).</p>
+<p>Negative addresses are reserved for the kernel.</p>
+<h3 id="linux-and-bsd">Linux and <span class="caps">BSD</span></h3>
+<h4 id="small_1">Small</h4>
+<p>Code an static data is limited to 2 <span class="caps">GB</span> and stored at addresses below <span class="math">\(2^{31}\)</span>.
+The compiler can use absolte signed 32-bit addresses.</p>
+<p>Stack and dynamically allocated data can exceed 2 <span class="caps">GB</span>.</p>
+<p>Pointers are 64 bits.</p>
+<p>Default memory model in Linux (x64) and <span class="caps">BSD</span>.</p>
+<h4 id="medium_1">Medium</h4>
+<p>Static data bigger than the ‘large-data-threshold’ is stored in a
+data section that can exceed 2 <span class="caps">GB</span>.</p>
+<p>Code and smaller static data are limited to addresses below 
+<span class="math">\(2^{31}\)</span>.</p>
+<h4 id="large_1">Large</h4>
+<p>Code and data can exceed 2 <span class="caps">GB</span>. Addresses are 64 bits.</p>
+<h4 id="kernel">Kernel</h4>
+<p>Used to compile the kernel and device drivers.</p>
+<p>Addresses must be negative between <span class="math">\(-2^{31}\)</span> and <span class="math">\(0\)</span>.</p>
+<h3 id="os-x-darwin"><span class="caps">OS</span> X (Darwin)</h3>
+<p>The default memory model of the intel-based darwin kernel 
+limits code and static data together to 2 <span class="caps">GB</span>.
+So 32-bit <span class="caps">RIP</span>-relative addresses can be used.</p>
+<p>Code is loaded to addresses above <span class="math">\(2^{32}\)</span> by default.
+Addresses below <span class="math">\(2^{32}\)</span> are blocked (pagezero).</p>
+<p>Stack and dynamically allocated data can exceed 2 <span class="caps">GB</span>.</p>
+<p>Pointers are 64 bits. Pointer tables can use 32-bit
+signed addresses relative to any reference point.</p>
+<p>Certain system functions can be accessed in the <em>commpage</em>.</p>
+<p>It’s possible to reduce the size of <em>pagezero</em> to place
+code below <span class="math">\(2^{31}\)</span> so that absolute 32-bit addresses can be used.</p>
+<h1 id="registers">Registers</h1>
+<h2 id="general-purpose-registers">General-Purpose Registers</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>64-bit</th>
+<th>32-bit</th>
+<th>16-bit</th>
+<th>8-bit</th>
+<th>Purpose</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rax</td>
+<td>eax</td>
+<td>ax</td>
+<td>al</td>
+<td>General-Purpose Register (<span class="caps">GPR</span>)</td>
+<td>Accumulator for <code>IN</code>/<code>OUT</code> (<span class="caps">AX</span> or <span class="caps">AL</span>). Can be used as 8-bit registers (<span class="caps">AH</span>/<span class="caps">AL</span>).</td>
+</tr>
+<tr>
+<td>rbx</td>
+<td>ebx</td>
+<td>bx</td>
+<td>bl</td>
+<td>General-Purpose Register (<span class="caps">GPR</span>)</td>
+<td>Base index (array). Can be used as 8-bit registers (<span class="caps">BH</span>/<span class="caps">BL</span>).</td>
+</tr>
+<tr>
+<td>rcx</td>
+<td>ecx</td>
+<td>cx</td>
+<td>cl</td>
+<td>General-Purpose Register (<span class="caps">GPR</span>)</td>
+<td>Only register that can be used for <code>LOOP</code>. Can be used as 8-bit registers (<span class="caps">CH</span>/<span class="caps">CL</span>).</td>
+</tr>
+<tr>
+<td>rdx</td>
+<td>edx</td>
+<td>dx</td>
+<td>dl</td>
+<td>General-Purpose Register (<span class="caps">GPR</span>)</td>
+<td>Needs to contain port address for <code>IN</code>/<code>OUT</code>. Extend precision of accumulator. Can be used as 8-bit registers (<span class="caps">DH</span>/<span class="caps">DL</span>).</td>
+</tr>
+<tr>
+<td>rdi</td>
+<td>edi</td>
+<td>di</td>
+<td>dil</td>
+<td>Destination Index</td>
+<td>Destination for string operations.</td>
+</tr>
+<tr>
+<td>rsi</td>
+<td>esi</td>
+<td>si</td>
+<td>sil</td>
+<td>Source Index</td>
+<td>Source for string operations.</td>
+</tr>
+<tr>
+<td>rbp</td>
+<td>ebp</td>
+<td>bp</td>
+<td>bpl</td>
+<td>Base Pointer</td>
+<td>Often used as Frame Pointer (pointing to current stack frame).</td>
+</tr>
+<tr>
+<td>rsp</td>
+<td>esp</td>
+<td>sp</td>
+<td>spl</td>
+<td>Stack Pointer</td>
+<td>Points to the top of the stack.</td>
+</tr>
+<tr>
+<td>r8-r15</td>
+<td>r8d-r15d</td>
+<td>r8w-r15w</td>
+<td>r8w-r15w</td>
+<td>GPRs</td>
+<td>x86-64 adds new GPRs.</td>
+</tr>
+</tbody>
+</table>
+<p>The first four <em>GPRs</em> can be accessed as two 8 bit registers. i. e:
+<em>bx’s</em> high byte can be accessed as <em>bh</em> and low byte as <em>bl</em>.</p>
+<h2 id="segment-registers">Segment Registers</h2>
+<p>These registers are used in real mode and protected mode for memory segmentation.</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Register</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cs</td>
+<td>Code Segment</td>
+</tr>
+<tr>
+<td>ds</td>
+<td>Data Segment</td>
+</tr>
+<tr>
+<td>ss</td>
+<td>Stack Segment</td>
+</tr>
+<tr>
+<td>es</td>
+<td>Extra Segment</td>
+</tr>
+</tbody>
+</table>
+<h2 id="special-registers">Special Registers</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Register</th>
+<th>Purpose</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rFlags</td>
+<td>Status Register</td>
+<td>Carry Flag, Overflow Flag, Zero flag…</td>
+</tr>
+<tr>
+<td>rip</td>
+<td>Instruction Pointer</td>
+<td>Points to the <em>next</em> instruction (cannot be directly accessed)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="values-after-reset">Values after Reset</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Register</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="caps">IP</span></td>
+<td><code>0x0000</code></td>
+</tr>
+<tr>
+<td><span class="caps">CS</span></td>
+<td><code>0xffff</code></td>
+</tr>
+<tr>
+<td><span class="caps">DS</span></td>
+<td><code>0x0000</code></td>
+</tr>
+<tr>
+<td><span class="caps">ES</span></td>
+<td><code>0x0000</code></td>
+</tr>
+<tr>
+<td><span class="caps">SS</span></td>
+<td><code>0x0000</code></td>
+</tr>
+</tbody>
+</table>
+<p>All other registers have a random value after reset.</p>
+<h2 id="xmm-registes"><span class="caps">XMM</span> Registes</h2>
+<p>There are registers for 64-bit and 32-bit floating point operations, for
+single Instruction Multiple Data (<span class="caps">SIMD</span>) and <span class="caps">SSE</span>.</p>
+<p>There are 16 <span class="caps">XMM</span> registers with a size of 128 bits.
+They are called xmm0-xmm15.</p>
+<h2 id="flags-register">Flags Register</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Bit</th>
+<th>Mnemonic</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>15</td>
+<td>-</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td>14</td>
+<td><span class="caps">NT</span></td>
+<td>Nested Task Flag (286+)</td>
+</tr>
+<tr>
+<td>13 and 12</td>
+<td><span class="caps">IOPL</span></td>
+<td>I/O Privilege Level (286+)</td>
+</tr>
+<tr>
+<td>11</td>
+<td><span class="caps">OF</span></td>
+<td>Overflow Flag</td>
+</tr>
+<tr>
+<td>10</td>
+<td><span class="caps">DF</span></td>
+<td>Direction Flag</td>
+</tr>
+<tr>
+<td>9</td>
+<td><span class="caps">IF</span></td>
+<td>Interrupt Enable Flag</td>
+</tr>
+<tr>
+<td>8</td>
+<td><span class="caps">TF</span></td>
+<td>Trap Flag (single step)</td>
+</tr>
+<tr>
+<td>7</td>
+<td><span class="caps">SF</span></td>
+<td>Sign Flag</td>
+</tr>
+<tr>
+<td>6</td>
+<td><span class="caps">ZF</span></td>
+<td>Zero Flag</td>
+</tr>
+<tr>
+<td>5</td>
+<td>-</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td>4</td>
+<td><span class="caps">AF</span></td>
+<td>Adjust Flag</td>
+</tr>
+<tr>
+<td>3</td>
+<td>-</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td>2</td>
+<td><span class="caps">PF</span></td>
+<td>Parity Flag</td>
+</tr>
+<tr>
+<td>1</td>
+<td>-</td>
+<td>Reserved</td>
+</tr>
+<tr>
+<td>0</td>
+<td><span class="caps">CF</span></td>
+<td>Carry Flag</td>
+</tr>
+</tbody>
+</table>
+<h1 id="segmentation">Segmentation</h1>
+<p>To allow access to 20-bit addresses with 16-bit registers the 8086 uses segmentation.</p>
+<div class="math">$$physical\_ address = segment\_ register \times 10_{hex} + offset$$</div>
+<ul>
+<li><span class="math">\(\times 10_{hex}\)</span> means a 4-bit shift to left</li>
+<li>Each addressable segment is 64 kB big.</li>
+<li>20-bit address bus: Total <span class="math">\(2^{20}\)</span> bytes addressable (1‘048‘576 bytes = 1 <span class="caps">MB</span>).</li>
+<li>16-bit offset: <span class="math">\(2^{16}\)</span> bytes addressable (65‘536 bytes = 64 kB) per segment.</li>
+<li>Needed segments: <span class="math">\(2^{20}/2^{16} = 2^4 = 16\)</span> segments needed to access complete address space.</li>
+<li>Segments can overlap or there can be gaps between them.</li>
+</ul>
+<h1 id="addressing">Addressing</h1>
+<p>Intel processors have 5 different addressing modes.</p>
+<h2 id="immediate">Immediate</h2>
+<p>The operand (constant) is given with the command. i.e:</p>
+<pre>MOV CL, <strong>42</strong>; move the value 42 to register CL</pre>
+<h2 id="implicit">Implicit</h2>
+<p>Some commands work always with the same register/address. i.e:</p>
+<p><code>PUSH</code>/<code>POP</code> work always with <span class="caps">SP</span> register.</p>
+<h2 id="register">Register</h2>
+<p>The operand is held in a register</p>
+<pre>INC <strong>CH</strong>; Increment value in CH register</pre>
+<h2 id="direct">Direct</h2>
+<p>The address of the operand value comes directly after the command. i. e:</p>
+<pre>MOV CX, <strong>counter</strong>; counter holds the address of the value</pre>
+<h2 id="register-indirect">Register-Indirect</h2>
+<p>The operand is given indirectly by one or two registers. A segment register and a constant offset value can be supplied.</p>
+<p>The calculated value acts as a pointer (address to a memory location).</p>
+<p>i.e:</p>
+<pre>MOV <strong>[BX + DI]</strong>, CH; calculate the operand with the values from BX and DI</pre>
+<h3 id="address">Address</h3>
+<h4 id="real-mode">Real Mode</h4>
+<p>To calculate an address in processors with segmentation the following scheme is used:</p>
+<div class="math">$$Offset := \begin{Bmatrix}-\\CS:\\DS:\\SS:\\ES:\end{Bmatrix}\begin{Bmatrix}-\\BX\\BP\end{Bmatrix} +\begin{Bmatrix}-\\SI\\DI\end{Bmatrix} + \begin{Bmatrix}-\\displacement_8\\displacement_{16}\end{Bmatrix}$$</div>
+<p><span class="math">\(-\)</span> means that this element is not used.</p>
+<p>The three possible address parts are:</p>
+<ol>
+<li>Basis Register (<span class="caps">BX</span> or <span class="caps">BP</span>): Contains usually the start address of a data structure. A segment prefix can be given.</li>
+<li>Index Register (<span class="caps">SI</span> or <span class="caps">DI</span>): Can contain an index (i.e Array index) that can be calculated at run-time. It’s 16-bit unsigned.</li>
+<li>Displacement: A <em>signed</em> constant value (8-bit or 16-bit) that gives an offset.</li>
+</ol>
+<p>This addressing scheme gives a total of 27 addressing combinations. But only <em>24</em> combinations are allowed. The following three are <strong>not allowed</strong>:</p>
+<ul>
+<li>No address at all: <pre><strike>MOV AX, [];</strike></pre> or <pre><strike>MOV AX, ;</strike></pre></li>
+<li>Only 8-bit displacement: Only memory 0-255 could be addressed.</li>
+<li>Only <span class="caps">BP</span>: <span class="caps">BP</span> points to stack. No practical use. <pre><strike>MOV AX, [BP];</strike></pre></li>
+</ul>
+<h4 id="segment-prefix">Segment Prefix</h4>
+<p>A segment prefix (<strong><span class="caps">CS</span>:</strong>, <strong><span class="caps">DS</span>:</strong>, <strong><span class="caps">ES</span>:</strong> or <strong><span class="caps">SS</span>:</strong>) defines which segment register will be used for calculating the address.
+Default for most registers is <span class="caps">DS</span>. But for <span class="caps">BP</span> the default is <span class="caps">SS</span>.</p>
+<h4 id="x86-64">x86-64</h4>
+<p>The general for calculating a memory address is:</p>
+<div class="math">$$[baseAddress + (indexRegister \cdot scaleValue) + displacement]$$</div>
+<p>Where:</p>
+<ul>
+<li><em>baseAddress</em>: any <span class="caps">GP</span> register or variable name</li>
+<li><em>indexRegister</em>: any <span class="caps">GP</span> register</li>
+<li><em>scaleValue</em>: immediate value of <em>1</em>, <em>2</em>, <em>4</em> or <em>8</em> (<em>1</em> does nothing)</li>
+<li><em>displacement</em>: 8-bit or 32-bit constant</li>
+</ul>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">mov</span><span class="w"> </span><span class="nb">eax</span><span class="p">,</span><span class="w"> </span><span class="kt">dword</span><span class="w"> </span><span class="p">[</span><span class="nv">var</span><span class="p">]</span><span class="w"></span>
+<span class="nf">mov</span><span class="w"> </span><span class="nb">rax</span><span class="p">,</span><span class="w"> </span><span class="kt">qword</span><span class="w"> </span><span class="p">[</span><span class="nb">rbx</span><span class="o">+</span><span class="nb">rsi</span><span class="p">]</span><span class="w"></span>
+<span class="nf">mov</span><span class="w"> </span><span class="nb">ax</span><span class="p">,</span><span class="w"> </span><span class="kt">word</span><span class="w"> </span><span class="p">[</span><span class="nv">lst</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span><span class="w"></span>
+<span class="nf">mov</span><span class="w"> </span><span class="nb">bx</span><span class="p">,</span><span class="w"> </span><span class="kt">word</span><span class="w"> </span><span class="p">[</span><span class="nv">lst</span><span class="o">+</span><span class="nb">rdx</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="w"></span>
+<span class="nf">mov</span><span class="w"> </span><span class="nb">rcx</span><span class="p">,</span><span class="w"> </span><span class="kt">qword</span><span class="w"> </span><span class="p">[</span><span class="nv">lst</span><span class="o">+</span><span class="p">(</span><span class="nb">rsi</span><span class="o">*</span><span class="mi">8</span><span class="p">)]</span><span class="w"></span>
+<span class="nf">mov</span><span class="w"> </span><span class="nb">al</span><span class="p">,</span><span class="w"> </span><span class="kt">byte</span><span class="w"> </span><span class="p">[</span><span class="nv">buffer</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="nb">rcx</span><span class="p">]</span><span class="w"></span>
+<span class="nf">mov</span><span class="w"> </span><span class="nb">eax</span><span class="p">,</span><span class="w"> </span><span class="kt">dword</span><span class="w"> </span><span class="p">[</span><span class="nb">rbx</span><span class="o">+</span><span class="p">(</span><span class="nb">rsi</span><span class="o">*</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="mi">16</span><span class="p">]</span><span class="w"></span>
+</code></pre></div>
+<p>Because addresses are always of 64-bit size (<code>qword</code>), a 64-bit 
+register is needed for memory addressing. Even when accessing 
+smaller sized values.</p>
+<h4 id="operand-size-word-dword">Operand Size (<code>WORD</code>, <code>DWORD</code>…)</h4>
+<p>In some cases the size of an operand can be given (for some cases it is even mandatory). Size types:</p>
+<p><code>BYTE</code>, <code>WORD</code>, <code>DWORD</code>, <code>QWORD</code>, <code>TBYTE</code>, <code>FAR</code>…</p>
+<p>Even if the operand size is not mandatory it’s good programming 
+practice to incule it.</p>
+<h4 id="examples">Examples</h4>
+<div class="highlight"><pre><span></span><code><span class="nf">MOV</span><span class="w"> </span><span class="nb">DX</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="nb">BX</span><span class="p">]</span><span class="c1">;</span><span class="w"></span>
+<span class="nf">MOV</span><span class="w"> </span><span class="nb">AL</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="nb">BX</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span><span class="c1">;</span><span class="w"></span>
+<span class="nf">MOV</span><span class="w"> </span><span class="nb">CX</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="nb">CS</span><span class="p">:</span><span class="nb">BX</span><span class="o">+</span><span class="nb">SI</span><span class="p">]</span><span class="c1">;</span><span class="w"></span>
+<span class="nf">MOV</span><span class="w"> </span><span class="nb">ES</span><span class="p">,</span><span class="w"> </span><span class="p">[</span><span class="nb">BX</span><span class="o">+</span><span class="nb">DI</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span><span class="c1">;</span><span class="w"></span>
+<span class="nf">MOV</span><span class="w"> </span><span class="kt">WORD</span><span class="w"> </span><span class="p">[</span><span class="nb">ES</span><span class="p">:</span><span class="nb">BX</span><span class="o">+</span><span class="nb">DI</span><span class="o">+</span><span class="mi">8</span><span class="p">],</span><span class="w"> </span><span class="nb">AX</span><span class="c1">;</span><span class="w"></span>
+</code></pre></div>
+<h2 id="addressing-memory">Addressing Memory</h2>
+<p>For addressing the memory the immediate, direct and indirect method can be used.</p>
+<p>A variable name without brackets is used to get the address of the variable.
+With brackets the value stored in the variable is taken.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">mov</span><span class="w"> </span><span class="nb">rax</span><span class="p">,</span><span class="w"> </span><span class="kt">qword</span><span class="w"> </span><span class="p">[</span><span class="nv">var1</span><span class="p">]</span><span class="w"> </span><span class="c1">; value of var1 in rax</span><span class="w"></span>
+<span class="nf">mov</span><span class="w"> </span><span class="nb">rax</span><span class="p">,</span><span class="w"> </span><span class="nv">var1</span><span class="w">         </span><span class="c1">; address of var1 in rax</span><span class="w"></span>
+</code></pre></div>
+<h1 id="data-transfer-commands">Data Transfer Commands</h1>
+<h2 id="move-command-mov">Move Command (<code>MOV</code>)</h2>
+<p>Moves (copies) a value from a source to a destination.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">MOV</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li><code>dest</code> can be a memory variable or a register (but not <span class="caps">CS</span> or <span class="caps">IP</span>) and not an immediate.</li>
+<li><code>src</code> can be a memory variable, a register or a constant.</li>
+<li>Only one memory operand can be used. Then the other one needs to be a register or a constant.</li>
+<li>destination and source operands must be of the same size.</li>
+</ul>
+<blockquote>
+<p>For <em>double-word</em> destination and source operands the upper part of the <em>quad-word</em> destination register is set to 0!</p>
+</blockquote>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">qFirstVal</span><span class="w">  </span><span class="nv">dq</span><span class="w">  </span><span class="mh">0xffffffffffffffff</span><span class="w"> </span><span class="c1">; inital 64-bit value</span><span class="w"></span>
+<span class="nf">dVar32</span><span class="w">     </span><span class="nv">dd</span><span class="w">  </span><span class="mh">0xabcdefab</span><span class="w">         </span><span class="c1">; 32-bit value</span><span class="w"></span>
+<span class="nf">wVar16</span><span class="w">     </span><span class="nv">dw</span><span class="w">  </span><span class="mh">0xbdbd</span><span class="w">             </span><span class="c1">; 16-bit value</span><span class="w"></span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="p">;</span><span class="w"> </span><span class="mi">16</span><span class="o">-</span><span class="nc">bit</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
+<span class="n">mov</span><span class="w">     </span><span class="n">rax</span><span class="p">,</span><span class="w"> </span><span class="n">qword</span><span class="w"> </span><span class="o">[</span><span class="n">qFirstVal</span><span class="o">]</span><span class="w">    </span><span class="p">;</span><span class="w"> </span><span class="k">initialize</span><span class="w"> </span><span class="n">rax</span><span class="w"></span>
+<span class="n">mov</span><span class="w">     </span><span class="n">ax</span><span class="p">,</span><span class="w"> </span><span class="n">word</span><span class="w"> </span><span class="o">[</span><span class="n">wVar16</span><span class="o">]</span><span class="w">         </span><span class="p">;</span><span class="w"> </span><span class="k">write</span><span class="w"> </span><span class="n">lowest</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="nc">bit</span><span class="w"></span>
+<span class="p">;</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="n">rax</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="k">value</span><span class="w"> </span><span class="mh">0xffffffffffffbdbd</span><span class="err">:</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="nf">upper</span><span class="w"> </span><span class="n">part</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">kept</span><span class="w"></span>
+
+<span class="p">;</span><span class="w"> </span><span class="mi">32</span><span class="o">-</span><span class="nc">bit</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
+<span class="n">mov</span><span class="w">     </span><span class="n">rax</span><span class="p">,</span><span class="w"> </span><span class="n">qword</span><span class="w"> </span><span class="o">[</span><span class="n">qFirstVal</span><span class="o">]</span><span class="w">    </span><span class="p">;</span><span class="w"> </span><span class="k">initialize</span><span class="w"> </span><span class="n">rax</span><span class="w"></span>
+<span class="n">mov</span><span class="w">     </span><span class="n">eax</span><span class="p">,</span><span class="w"> </span><span class="n">dword</span><span class="w"> </span><span class="o">[</span><span class="n">dVar32</span><span class="o">]</span><span class="w">       </span><span class="p">;</span><span class="w"> </span><span class="k">write</span><span class="w"> </span><span class="n">lowest</span><span class="w"> </span><span class="mi">32</span><span class="w"> </span><span class="nc">bit</span><span class="w"></span>
+<span class="p">;</span><span class="w"> </span><span class="n">now</span><span class="w"> </span><span class="n">rax</span><span class="w"> </span><span class="n">has</span><span class="w"> </span><span class="k">value</span><span class="w"> </span><span class="mh">0x00000000abcdefab</span><span class="err">:</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="nf">upper</span><span class="w"> </span><span class="n">part</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">register</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">cleared</span><span class="err">!</span><span class="w"></span>
+</code></pre></div>
+<h2 id="exchange-command-xchg">Exchange Command (<code>XCHG</code>)</h2>
+<p>Exchanges the values of the two operands (memory/registers).</p>
+<div class="highlight"><pre><span></span><code><span class="nf">XCHG</span><span class="w"> </span><span class="nv">op1</span><span class="p">,</span><span class="w"> </span><span class="nv">op2</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Addressing memory/register is same as with <code>MOV</code>.</li>
+<li>Segment Register and Immediate addressing is not possible.</li>
+</ul>
+<h2 id="input-output-commands-inout">Input-/Output Commands (<code>IN</code>/<code>OUT</code>)</h2>
+<p>For reading and writing data to/from ports</p>
+<p>Input/Output can only be done with accumulator register (<span class="caps">AX</span>/<span class="caps">AL</span>).</p>
+<p>Port address needs to be written to <span class="caps">DX</span> before calling the <span class="caps">IN</span>-/<span class="caps">OUT</span>-Command. As special case a 8-bit port address can be given directly.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">IN</span><span class="w"> </span><span class="nb">AL</span><span class="p">,</span><span class="w"> </span><span class="nb">DX</span><span class="c1">;</span><span class="w"></span>
+<span class="nf">OUT</span><span class="w"> </span><span class="nb">DX</span><span class="p">,</span><span class="w"> </span><span class="nb">AX</span><span class="c1">;</span><span class="w"></span>
+<span class="nf">IN</span><span class="w"> </span><span class="nb">AX</span><span class="p">,</span><span class="w"> </span><span class="mh">42h</span><span class="c1">;</span><span class="w"></span>
+<span class="nf">OUT</span><span class="w"> </span><span class="mh">16h</span><span class="p">,</span><span class="w"> </span><span class="nb">AL</span><span class="c1">;</span><span class="w"></span>
+</code></pre></div>
+<p>It’s not possible communicate directly between memory and ports. For this a <span class="caps">DMA</span> (Direct Memory Access) Hardware would be needed.</p>
+<h2 id="load-effective-address-lea">Load Effective Address (<code>LEA</code>)</h2>
+<p>Loads an address:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">lea</span><span class="w">   </span><span class="o">&lt;</span><span class="nv">reg64</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="o">&lt;</span><span class="nv">mem</span><span class="o">&gt;</span><span class="w"> </span><span class="c1">; address of &lt;mem&gt; in reg64</span><span class="w"></span>
+</code></pre></div>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">lea</span><span class="w">   </span><span class="nb">rcx</span><span class="p">,</span><span class="w"> </span><span class="kt">byte</span><span class="w"> </span><span class="p">[</span><span class="nv">bvar</span><span class="p">]</span><span class="w"></span>
+<span class="nf">lea</span><span class="w">   </span><span class="nb">rsi</span><span class="p">,</span><span class="w"> </span><span class="kt">dword</span><span class="w"> </span><span class="p">[</span><span class="nv">dVar</span><span class="p">]</span><span class="w"></span>
+</code></pre></div>
+<h1 id="conversion-instructions">Conversion Instructions</h1>
+<h2 id="narrowing-conversions">Narrowing Conversions</h2>
+<ul>
+<li>No special instructions are needed</li>
+<li><code>mov</code> instruction is used</li>
+<li>Programmer is responsible that narrowing conversions are sane</li>
+<li>The instruction will just strip upper part of register or variable</li>
+</ul>
+<h2 id="widening-conversions">Widening Conversions</h2>
+<p>Upper-order bit (sign) must be set based on original value</p>
+<h3 id="unsigned-conversions-movzx">Unsigned Conversions (<code>MOVZX</code>)</h3>
+<ul>
+<li>Upper part of register or memory location must be set to zero</li>
+<li>Instruction <code>movzx</code> can be used</li>
+<li><code>movzx</code> does not allow a quad-word destination with double-word source operand<ul>
+<li>A <code>mov</code> with a double-word destination register and with double-word source operand will zero out the upper double-word of the quad-word destination register (s.a. <code>MOV</code>)</li>
+</ul>
+</li>
+<li>Only one memory operand is allowed</li>
+<li>Destination can not be an immediate</li>
+</ul>
+<h3 id="signed-conversions-cbw-cwd">Signed Conversions (<code>CBW</code>, <code>CWD</code>, …)</h3>
+<ul>
+<li>Widening conversion for singed values need adjustment of the upper order bits</li>
+<li>This is needed to keep the
+<a href="https://en.wikipedia.org/wiki/Two%27s_complement">two’s complement</a> format</li>
+<li>The upper order bits must be set to 0’s or 1’s depending if original value was negative or positive</li>
+<li>There are general instructions: <code>movsx</code> and <code>movsxd</code><ul>
+<li>Only one operand can be memory</li>
+<li>Destination can not be immediate</li>
+<li><code>movsxd</code> required for 32-bit to 64-bit extension</li>
+</ul>
+</li>
+<li>There are special instructions that convert values in a register : <em>convert byte to word</em> <code>cbw</code>, <em>convert word to double-word</em> <code>cwd</code>, …<ul>
+<li>These work only on the <code>A</code> register sometimes using <code>D</code> register for result</li>
+</ul>
+</li>
+</ul>
+<p>Instructions <code>movsx</code> and <code>movsxd</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">movsx</span><span class="w"> </span><span class="o">&lt;</span><span class="nv">dest</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="o">&lt;</span><span class="nv">src</span><span class="o">&gt;</span><span class="w"></span>
+<span class="nf">movsxd</span><span class="w"> </span><span class="o">&lt;</span><span class="nv">dest</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="o">&lt;</span><span class="nv">src</span><span class="o">&gt;</span><span class="w"></span>
+</code></pre></div>
+<p>Special instructions:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Instruction</th>
+<th>Source Size</th>
+<th>Implicit Source</th>
+<th>Destination Size</th>
+<th>Implicit destination</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cbw</code></td>
+<td>byte</td>
+<td><code>al</code></td>
+<td>word</td>
+<td><code>ax</code></td>
+</tr>
+<tr>
+<td><code>cwd</code></td>
+<td>word</td>
+<td><code>ax</code></td>
+<td>double-word</td>
+<td><code>dx:ax</code></td>
+</tr>
+<tr>
+<td><code>cwde</code></td>
+<td>word</td>
+<td><code>ax</code></td>
+<td>double-word</td>
+<td><code>eax</code></td>
+</tr>
+<tr>
+<td><code>cdq</code></td>
+<td>double-word</td>
+<td><code>eax</code></td>
+<td>quadword</td>
+<td><code>edx:eax</code></td>
+</tr>
+<tr>
+<td><code>cdqe</code></td>
+<td>double-word</td>
+<td><code>eax</code></td>
+<td>quad-word</td>
+<td><code>rax</code></td>
+</tr>
+<tr>
+<td><code>cqo</code></td>
+<td>quadword</td>
+<td><code>rax</code></td>
+<td>double-quadword</td>
+<td><code>rdx:rax</code></td>
+</tr>
+</tbody>
+</table>
+<h1 id="arithmetic-commands">Arithmetic Commands</h1>
+<ul>
+<li>The result of arithmetic commands is written to the first operand (the original value is lost).</li>
+<li>Both operands (of binary arithmetic commands) need to be of same size.</li>
+<li>Only one operand is allowed to be a memory operand.</li>
+</ul>
+<h2 id="addition-add">Addition (<code>ADD</code>)</h2>
+<p>Adds the two operands and writes the result into the first one.</p>
+<ul>
+<li>The first operand can not be a constant (immediate)</li>
+<li>Both operands need to be of same size</li>
+<li>Only one operand can be memory</li>
+</ul>
+<h3 id="affected-flags">Affected Flags</h3>
+<ul>
+<li>Carry: with unsigned operands</li>
+<li>Overflow: with signed operands</li>
+<li>Zero: if result is zero</li>
+<li>Sign: if signed result is negative</li>
+<li>Parity: if parity is even</li>
+</ul>
+<h2 id="addition-with-carry-adc">Addition with Carry (<code>ADC</code>)</h2>
+<p>Adds the two operands and the carry flag. The result is written into the first operand.</p>
+<ul>
+<li>The first operand can not be a constant (immediate)</li>
+<li>Both operands need to be of same size</li>
+<li>Only one operand can be memory</li>
+<li>The <code>adc</code> instruction should directly follow an inital <code>add</code> instruction otherwise the carry bit can be lost</li>
+</ul>
+<blockquote>
+<p>Addition of big signed operands can be splitted into several <code>ADC</code> commands.</p>
+</blockquote>
+<h3 id="affected-flags_1">Affected Flags</h3>
+<ul>
+<li>Carry: with unsigned operands</li>
+<li>Overflow: with signed operands</li>
+<li>Zero: if result is zero</li>
+<li>Sign: if signed result is negative</li>
+<li>Parity: if parity is even</li>
+</ul>
+<h2 id="increment-inc">Increment (<code>INC</code>)</h2>
+<p>Adds one to the operand. The result is saved in the given operand.</p>
+<ul>
+<li>The operand can not be an immediate</li>
+</ul>
+<h3 id="affected-flags_2">Affected Flags</h3>
+<ul>
+<li>Overflow: with signed operands</li>
+<li>Zero: if result is zero</li>
+<li>Sign: if signed result is negative</li>
+<li>Parity: if parity is even</li>
+</ul>
+<blockquote>
+<p>The carry-flag is not affected! An overflow can be recognized with the zero-flag.</p>
+<p><code>INC</code> can be used to increment a control variable in a loop without affecting the carry-flag.</p>
+</blockquote>
+<h2 id="subtraction-sub">Subtraction (<code>SUB</code>)</h2>
+<p>Subtracts the second operand from the first. The result is written into the first operand. </p>
+<ul>
+<li>The first operand can not be a constant (immediate)</li>
+<li>Only one operand can be memory</li>
+<li>Subtraction work same for signed and unsigned data</li>
+</ul>
+<h3 id="affected-flags_3">Affected Flags</h3>
+<ul>
+<li>Carry: with unsigned operands</li>
+<li>Overflow: with signed operands</li>
+<li>Zero: if result is zero</li>
+<li>Sign: if signed result is negative</li>
+<li>Parity: if parity is even</li>
+</ul>
+<h2 id="subtraction-with-borrow-sbb">Subtraction with Borrow (<code>SBB</code>)</h2>
+<p>Subtracts the second operand and the carry-flag (borrow) from the first operand. The result is written into the first operand. The first operand can not be a constant.</p>
+<h3 id="affected-flags_4">Affected Flags</h3>
+<ul>
+<li>Carry: with unsigned operands</li>
+<li>Overflow: with signed operands</li>
+<li>Zero: if result is zero</li>
+<li>Sign: if signed result is negative</li>
+<li>Parity: if parity is even</li>
+</ul>
+<blockquote>
+<p>Subtraction of big signed operands can be splitted into several <code>SBB</code> commands.</p>
+</blockquote>
+<h2 id="decrement-dec">Decrement (<code>DEC</code>)</h2>
+<p>Subtracts one from the given operand.</p>
+<h3 id="affected-flags_5">Affected Flags</h3>
+<ul>
+<li>Overflow: with signed operands</li>
+<li>Zero: if result is zero</li>
+<li>Sign: if signed result is negative</li>
+<li>Parity: if parity is even</li>
+</ul>
+<blockquote>
+<p>The carry-flag is not affected! An overflow can be only recognized with checking the result for 0xFF.</p>
+<p><code>DEC</code> can be used to decrement a control variable in a loop without affecting the carry-flag.</p>
+</blockquote>
+<h2 id="negate-a-signed-number-neg">Negate a signed Number (<code>NEG</code>)</h2>
+<p>Changes a negative into a positive number and vice versa. It’s basically subtracting the operand from zero (0).</p>
+<h3 id="affected-flags_6">Affected Flags</h3>
+<ul>
+<li>Carry: set if operand wasn’t zero (not very useful)</li>
+<li>Overflow: if no positive representation exist (operand was biggest negative number)</li>
+<li>Zero: if result is zero</li>
+<li>Sign: if signed result is negative</li>
+<li>Parity: if parity is even</li>
+</ul>
+<h2 id="multiplication-mul-imul">Multiplication (<code>MUL</code>, <code>IMUL</code>)</h2>
+<p>Multiplicates unsigned (<code>MUL</code>) or signed (<code>IMUL</code>) numbers.</p>
+<p>There is a explicit operand given after the command and an implicit operand in the A (<span class="caps">AL</span>, <span class="caps">AX</span>, ..) register.</p>
+<p>The explicit operand sets the size and defines the used implicit register. It can be either a register or a memory location but not
+an immediate.</p>
+<p>The result is always twice as big as the operands. It’s either the accumulator (<em><span class="caps">AX</span></em>)
+or the <strong>extended accumulator</strong> (<em><span class="caps">DX</span>/<span class="caps">AX</span></em>).</p>
+<p><img alt="The x86 MUL/IMUL commands" class="img-fluid" src="/images/intel_mul.svg"/></p>
+<div class="highlight"><pre><span></span><code><span class="nf">MUL</span><span class="w"> </span><span class="mh">0x0</span><span class="w"> </span><span class="c1">; Use AL as implicit operand. Result is saved in AX.</span><span class="w"></span>
+<span class="nf">IMUL</span><span class="w"> </span><span class="nb">BX</span><span class="w"> </span><span class="c1">; Use AX as implicit operand. Result is saved in DX/AX.</span><span class="w"></span>
+</code></pre></div>
+<p>Sizes (<code>mul</code>):</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Size</th>
+<th>Registers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Byte</td>
+<td><code>ax = al * &lt;src&gt;</code></td>
+</tr>
+<tr>
+<td>Word</td>
+<td><code>dx:ax = ax * &lt;src&gt;</code></td>
+</tr>
+<tr>
+<td>Double-word</td>
+<td><code>edx:eax = eax * &lt;src&gt;</code></td>
+</tr>
+<tr>
+<td>Quad-word</td>
+<td><code>rdx:rax = rax * &lt;src&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>imul</code> allows more operands:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">imul</span><span class="w"> </span><span class="o">&lt;</span><span class="nv">source</span><span class="o">&gt;</span><span class="w"></span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>imul &lt;dest&gt;, &lt;src/imm&gt;
+imul &lt;dest&gt;, &lt;src&gt;, &lt;imm&gt;
+</code></pre></div>
+<p>For single operand (same as <code>mul</code>):</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Size</th>
+<th>Registers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Byte</td>
+<td><code>ax = al * &lt;src&gt;</code></td>
+</tr>
+<tr>
+<td>Word</td>
+<td><code>dx:ax = ax * &lt;src&gt;</code></td>
+</tr>
+<tr>
+<td>Double-word</td>
+<td><code>edx:eax = eax * &lt;src&gt;</code></td>
+</tr>
+<tr>
+<td>Quad-word</td>
+<td><code>rdx:rax = rax * &lt;src&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Note: <code>&lt;src&gt;</code> operand can not be immediate</p>
+<p>For two operands:</p>
+<ul>
+<li><code>&lt;reg16&gt; = &lt;reg16&gt; * &lt;op16/imm&gt;</code></li>
+<li><code>&lt;reg32&gt; = &lt;reg32&gt; * &lt;op32/imm&gt;</code></li>
+<li><code>&lt;reg64&gt; = &lt;reg64&gt; * &lt;op64/imm&gt;</code></li>
+</ul>
+<p>For three operands:</p>
+<ul>
+<li><code>&lt;reg16&gt; = &lt;op16&gt; * &lt;imm&gt;</code></li>
+<li><code>&lt;reg32&gt; = &lt;op32&gt; * &lt;imm&gt;</code></li>
+<li><code>&lt;reg64&gt; = &lt;op64&gt; * &lt;imm&gt;</code></li>
+</ul>
+<h3 id="affected-flags_7">Affected Flags</h3>
+<ul>
+<li>Carry: set if operand extended accumulator is needed for saving result (<em><span class="caps">DX</span>/<span class="caps">AX</span></em>)</li>
+<li>Zero: changed (undefined)</li>
+<li>Sign: changed (undefined)</li>
+<li>Parity: changed (undefined)</li>
+</ul>
+<blockquote>
+<p>The 8086 can not multiply with constants (immediate).</p>
+</blockquote>
+<h2 id="division-div-idiv">Division (<code>DIV</code>, <code>IDIV</code>)</h2>
+<p>There are different division operations for unsigned (<code>DIV</code>) and signed (<code>IDIV</code>) numbers.</p>
+<div class="math">$$quotient = \frac{dividend}{divisor}$$</div>
+<p>The explicit operand (given directly after the command) defines 
+the size of the operands.</p>
+<p>The dividend must be larger than the divisor.
+Setting the dividend correctly requires often to set two registers
+(<em>D</em> register for the upper part, <em>A</em> register for the lower part).</p>
+<p>For <code>idiv</code> singed conversion of the operand might be necessary.</p>
+<p>The operand can be a register or a memory location but not immediate.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">DIV</span><span class="w"> </span><span class="nb">BX</span><span class="w"> </span><span class="c1">; Use DX/AX  as implicit operand. Result is saved in AX. Remainder is saved in DX.</span><span class="w"></span>
+<span class="nf">IDIV</span><span class="w"> </span><span class="mh">0x34</span><span class="w"> </span><span class="c1">; Use AX as implicit operand. Result is saved in AL. Remainder is saved in AH.</span><span class="w"></span>
+</code></pre></div>
+<p>Unsigned and signed division (<code>div</code>, <code>idiv</code>):</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Size</th>
+<th>Registers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Byte</td>
+<td><code>al = ax / &lt;src&gt;</code>, remainder in <code>ah</code></td>
+</tr>
+<tr>
+<td>Word</td>
+<td><code>ax = dx:ax / &lt;src&gt;</code>, remainder in <code>dx</code></td>
+</tr>
+<tr>
+<td>Double-word</td>
+<td><code>eax = edx:eax / &lt;src&gt;</code>, remainder in <code>edx</code></td>
+</tr>
+<tr>
+<td>Quad-word</td>
+<td><code>rax = rdx:rax / &lt;src&gt;</code>, remainder in <code>rdx</code></td>
+</tr>
+</tbody>
+</table>
+<p><img alt="The x86 DIV/IDIV commands" class="img-fluid" src="/images/intel_div.svg"/></p>
+<blockquote>
+<p>Don’t divide by zero!</p>
+</blockquote>
+<h3 id="affected-flags_8">Affected Flags</h3>
+<ul>
+<li><strong>All</strong> flags are changed to <em>undefined</em>!</li>
+</ul>
+<blockquote>
+<p>If the result is too big for the register <em><span class="caps">AL</span></em> resp. <em><span class="caps">AX</span></em> a interrupt (<em>division error</em>) is caused.
+If it is not handled the <strong>program can crash</strong> (undefined behaviour).</p>
+</blockquote>
+<h1 id="floating-point-instructions">Floating Point Instructions</h1>
+<p>There are special instructions for floating point numbers.</p>
+<p>Here are the most important x86-64 floating point instructions
+shown. They differ from the 32-bit floating point instructions.</p>
+<h2 id="values">Values</h2>
+<ul>
+<li>32-bit: single precision (<code>float</code> in C/C++)</li>
+<li>64-bit: double precision (<code>double</code> in C/C++)</li>
+</ul>
+<p>Single precision instuctions have a <code>s</code> postfix and
+double precision instuctions have a <code>d</code> postfix.</p>
+<h2 id="registers_1">Registers</h2>
+<p>There are 16 <code>XMM</code> registers <code>xmm0</code> - <code>xmm15</code> to be used
+for floating point instructions.</p>
+<p>They are 128 bits (on later processors 256 bits) long.</p>
+<h2 id="data-transfer-commands-movss-movsd">Data Transfer Commands (<code>movss</code>, <code>movsd</code>)</h2>
+<p>Copies a value to or from a <code>XMM</code> register.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">movss</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+<span class="nf">movsd</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Only one operand can be memory</li>
+<li>Operands can not be an immediate</li>
+</ul>
+<h2 id="conversion-instructions_1">Conversion Instructions</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Conversions</th>
+<th>float (32-bit)</th>
+<th>double (64-bit)</th>
+<th>integer (32 bit)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>float (32-bit)</td>
+<td>-</td>
+<td><code>cvtss2sd</code></td>
+<td><code>cvtss2si</code></td>
+</tr>
+<tr>
+<td>double (64-bit)</td>
+<td><code>cvtsd2ss</code></td>
+<td>-</td>
+<td><code>cvtsd2si</code></td>
+</tr>
+<tr>
+<td>integer (32 bit)</td>
+<td><code>cvtsi2ss</code></td>
+<td><code>cvtsi2sd</code></td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h2 id="arithmetic-instructions">Arithmetic Instructions</h2>
+<h3 id="addition-addss-addsd">Addition (<code>addss</code>, <code>addsd</code>)</h3>
+<div class="highlight"><pre><span></span><code><span class="nf">addss</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+<span class="nf">addsd</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Destination operands must be an <code>XMM</code> register</li>
+<li>Source operand can’t be an immediate</li>
+</ul>
+<h3 id="substraction-subss-subsd">Substraction (<code>subss</code>, <code>subsd</code>)</h3>
+<div class="highlight"><pre><span></span><code><span class="nf">subss</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+<span class="nf">subsd</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Destination operands must be an <code>XMM</code> register</li>
+<li>Source operand can’t be an immediate</li>
+</ul>
+<h3 id="multiplication-mulss-mulsd">Multiplication (<code>mulss</code>, <code>mulsd</code>)</h3>
+<div class="highlight"><pre><span></span><code><span class="nf">mulss</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+<span class="nf">mulsd</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Destination operands must be an <code>XMM</code> register</li>
+<li>Source operand can’t be an immediate</li>
+</ul>
+<h3 id="division-divss-divsd">Division (<code>divss</code>, <code>divsd</code>)</h3>
+<div class="highlight"><pre><span></span><code><span class="nf">divss</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+<span class="nf">divsd</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Destination operands must be an <code>XMM</code> register</li>
+<li>Source operand can’t be an immediate</li>
+</ul>
+<h3 id="square-root-sqrtss-sqrtsd">Square Root (<code>sqrtss</code>, <code>sqrtsd</code>)</h3>
+<div class="highlight"><pre><span></span><code><span class="nf">sqrtss</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+<span class="nf">sqrtsd</span><span class="w"> </span><span class="nv">dest</span><span class="p">,</span><span class="w"> </span><span class="nv">src</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Destination operands must be an <code>XMM</code> register</li>
+<li>Source operand can’t be an immediate</li>
+</ul>
+<h3 id="control-instructions">Control Instructions</h3>
+<p>There are ordered and unordered floating point compare instructions.
+Here only the unordered floating point instructions shown.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">ucomiss</span><span class="w"> </span><span class="nv">op1</span><span class="p">,</span><span class="w"> </span><span class="nv">op2</span><span class="w"></span>
+<span class="nf">ucomisd</span><span class="w"> </span><span class="nv">op1</span><span class="p">,</span><span class="w"> </span><span class="nv">op2</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Operands are not changed</li>
+<li><code>op1</code> must be an <code>XMM</code> register</li>
+<li><code>op2</code> may be <code>XMM</code> register or memory</li>
+<li>No immediate operands are allowed</li>
+</ul>
+<h1 id="logical-commands">Logical Commands</h1>
+<h2 id="and-or-and-xor-and-or-xor">And, Or and Xor (<code>AND</code>, <code>OR</code>, <code>XOR</code>)</h2>
+<p>Bit-wise <strong>and</strong>, <strong>or</strong> or <strong>xor</strong> operation. </p>
+<ul>
+<li>The first operand can be a register or a memory address</li>
+<li>The second operand can be a register, a memory address or a constant</li>
+<li>Only one operand can be memory</li>
+</ul>
+<p>The first operand is overwritten with the result.</p>
+<h3 id="affected-flags_9">Affected Flags</h3>
+<ul>
+<li>Carry and Overflow: are always reset (0)</li>
+<li>Zero and Sign: are set according to the result</li>
+</ul>
+<h2 id="not-not">Not (<code>NOT</code>)</h2>
+<p>Bit-wise <strong>not</strong> (inverse) operation. The operand can be a register or a memory address but not an immediate.</p>
+<p>The operand is overwritten with the result.</p>
+<h3 id="affected-flags_10">Affected Flags</h3>
+<ul>
+<li><strong>No</strong> flags are changed</li>
+</ul>
+<h1 id="rotation-commands">Rotation Commands</h1>
+<h2 id="rotate-rol-ror">Rotate (<code>ROL</code>, <code>ROR</code>)</h2>
+<p>Rotate left (<code>ROL</code>) or right (<code>ROR</code>).</p>
+<p>Rotates the first operand (memory or register) by the constant <strong>1</strong> (immediate) or by the value given in <em><span class="caps">CL</span></em>.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">ROL</span><span class="w"> </span><span class="mh">0x34</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="c1">; Rotate by one.</span><span class="w"></span>
+<span class="nf">ROR</span><span class="w"> </span><span class="nb">AX</span><span class="p">,</span><span class="w"> </span><span class="nb">CL</span><span class="c1">; Rotate by value in CL.</span><span class="w"></span>
+</code></pre></div>
+<h3 id="affected-flags_11">Affected Flags</h3>
+<ul>
+<li>Overflow:<ul>
+<li>For one-bit rotation: Overflow set if <span class="caps">MSB</span> is changed by the rotation. Otherwise it’s not set.</li>
+<li>For other cases: Overflow is undefined</li>
+</ul>
+</li>
+<li>Carry has the value of the bit that was shifted from one end to the other.</li>
+</ul>
+<h2 id="rotate-with-carry-rcl-rcr">Rotate with Carry (<code>RCL</code>, <code>RCR</code>)</h2>
+<p>Rotate left (<code>RCL</code>) or right (<code>RCR</code>) with carry as <span class="caps">MSB</span>.</p>
+<p>The first operand (memory or register) is extended with the carry bit as the <span class="caps">MSB</span>.
+It is then rotated by the constant <strong>1</strong> (immediate) or by the value given in <em><span class="caps">CL</span></em>.</p>
+<h3 id="affected-flags_12">Affected Flags</h3>
+<ul>
+<li>Overflow:<ul>
+<li>For one-bit rotation: Overflow set if <span class="caps">MSB</span> is changed by the rotation. Otherwise it’s not set.</li>
+<li>For other cases: Overflow is undefined</li>
+</ul>
+</li>
+<li>Carry has the value of the bit that was shifted from one end to the other.</li>
+</ul>
+<h1 id="manipulate-the-carry-flag-clc-stc-cmc">Manipulate the Carry Flag (<code>CLC</code>, <code>STC</code>, <code>CMC</code>)</h1>
+<p>Clear Carry Flag (<code>CLC</code>): <span class="caps">CF</span> = 0.</p>
+<p>Set Carry Flag (<code>STC</code>): <span class="caps">CF</span> = 1.</p>
+<p>Complement Carry Flag (<code>CMC</code>): <span class="caps">CF</span> = !<span class="caps">CF</span>.</p>
+<h1 id="shift-commands">Shift Commands</h1>
+<p>The shift commands can be used to multiply with or divide by a
+power of two (2, 5, 8, …).</p>
+<p>For a multiplication or a division of a <em>unsigned</em> number the <em>logical
+shift operators</em> need to be used.</p>
+<p>For a multiplication or a division of a <em>signed</em> number the 
+<em>arithmetic shift operators</em> need to be used.</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Direction</th>
+<th>Logical</th>
+<th>Arithmetic</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Left</td>
+<td><code>shl</code></td>
+<td><code>sal</code></td>
+<td>Both instructions are identical</td>
+</tr>
+<tr>
+<td>Right</td>
+<td><code>shr</code></td>
+<td><code>sar</code></td>
+<td>Instructions work diffently</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Logical shift (unsigned shift): Spaces filled with zero</li>
+<li>Arithmetic shift (signed shift): Spaces filled so that sign is preserved<ul>
+<li>Right: Spaces are filled with sign bit.</li>
+<li>Left: Spaces are filled with zero (doesn’t affect sign), thus same as logical shift</li>
+</ul>
+</li>
+</ul>
+<h2 id="left-shift-commands-shl-sal">Left Shift Commands (<code>SHL</code>, <code>SAL</code>)</h2>
+<p>Both left shift operators are functional identical. They 
+muliplicate the operator by <em>2</em> or by <span class="math">\(2^{CL}\)</span>.</p>
+<p>Shifts the given operator (memory or register) left by
+the constant <strong>1</strong> (immediate) or by the value given in <em><span class="caps">CL</span></em>.</p>
+<h3 id="affected-flags_13">Affected Flags</h3>
+<ul>
+<li>Zero</li>
+<li>Sign</li>
+<li>Offset</li>
+<li>For one-bit shift:<ul>
+<li>Carry: For unsigned Operands a set carry flag means <em>overflow</em></li>
+<li>Overflow: For signed Operands a set overflow flag means <em>overflow</em></li>
+</ul>
+</li>
+</ul>
+<h2 id="right-shift-commands-shr-sar">Right Shift Commands (<code>SHR</code>, <code>SAR</code>)</h2>
+<p>The <em>logical shift right</em> (<code>SHR</code>) divides a unsigned value by <em>2</em> or by <span class="math">\(2^{CL}\)</span>.</p>
+<p>The <em>arithmetic shift right</em> (<code>SHR</code>) divides a unsigned value by <em>2</em> or by <span class="math">\(2^{CL}\)</span>.
+The sign stays unchanged.</p>
+<p>The two right shift instructions are not equivalent (not as the
+two left shift instructions).</p>
+<p>The first operand is a memory location or a register. The second operand is the
+constant <strong>1</strong> or the register <em><span class="caps">CL</span></em>.</p>
+<h3 id="affected-flags_14">Affected Flags</h3>
+<ul>
+<li><span class="caps">CF</span>: For one-bit shifts the carry flag holds the remainder of the division</li>
+<li><span class="caps">ZF</span></li>
+<li><span class="caps">SF</span></li>
+<li>(<span class="caps">OF</span>)</li>
+</ul>
+<h1 id="jump-commands">Jump Commands</h1>
+<p>Jump commands can be divided by different topics.</p>
+<h2 id="conditionalunconditional-jumps">Conditional/Unconditional Jumps</h2>
+<p>Unconditional jumps are always performed. Conditional jumps are only
+performed if a check gives an expected result (i.e flags).</p>
+<h2 id="short-near-and-far-jumps">Short, Near and Far Jumps</h2>
+<ul>
+<li>Short: signed 8-bit distance</li>
+<li>Near: unsigned 16-bit distance</li>
+<li>Far: 32-bit (Segment and Offset)</li>
+</ul>
+<h2 id="direct-and-indirect-jumps">Direct and Indirect Jumps</h2>
+<ul>
+<li>Direct: The target address is given directly after the command</li>
+<li>Indirect: The position is given indirectly by a register or a memory position</li>
+</ul>
+<h2 id="absolute-and-relative-jumps">Absolute and Relative Jumps</h2>
+<ul>
+<li>Absolute jumps: The target address is an absolute address</li>
+<li>Relative jumps: The target address is given relative to the actual position (<em><span class="caps">IP</span></em>)</li>
+</ul>
+<p>The 8086 has following possible jump commands:</p>
+<p><img alt="The Intel x86 jump commands" class="img-fluid" src="/images/intel_architecture_jump.svg"/></p>
+<h2 id="intra-and-inter-segment-jumps">Intra- and Inter-Segment Jumps</h2>
+<p>All jumps change the <em><span class="caps">IP</span></em> register.</p>
+<p>Far jumps also change the <em><span class="caps">CS</span></em> register.</p>
+<h3 id="intra-segment-jump">Intra-Segment Jump</h3>
+<p>Short- and Near-Jumps change only the <em><span class="caps">IP</span></em> register. The target
+is always inside the actual code segment (<em><span class="caps">CS</span></em>).</p>
+<h4 id="near-jump">Near Jump</h4>
+<ul>
+<li>Direct Near-Jumps are always relative to <em><span class="caps">IP</span></em>.</li>
+<li>Indirect Near-Jumps are always absolute to the actual code segment.</li>
+</ul>
+<h4 id="short-jump">Short Jump</h4>
+<p>Short Jumps are always relative to <em><span class="caps">IP</span></em>.</p>
+<h3 id="inter-segment-jump">Inter-Segment Jump</h3>
+<p>Far jumps change <em><span class="caps">CS</span></em> and <em><span class="caps">IP</span></em>.</p>
+<p>All far jumps are absolute.</p>
+<h2 id="unconditional-jumps-jmp">Unconditional Jumps (<code>JMP</code>)</h2>
+<ul>
+<li>8-bit displacement is added to <em><span class="caps">IP</span></em> as signed number:<pre><strong>JMP</strong> displ8</pre></li>
+<li>16-bit displacement is added to <em><span class="caps">IP</span></em> as unsigned number:<pre><strong>JMP</strong> displ16</pre></li>
+<li>The constant is the absolute 32-bit <span class="caps">FAR</span>-addressed:<pre><strong>JMP</strong> const32</pre></li>
+<li><em><span class="caps">IP</span></em> is loaded with the value of the register:<pre><strong>JMP</strong> reg16</pre></li>
+<li><em><span class="caps">IP</span></em> is loaded with the value given by the memory position:<pre><strong>JMP</strong> mem16</pre></li>
+<li><em><span class="caps">CS</span></em> and <em><span class="caps">IP</span></em> are loaded with the value at the memory position:<pre><strong>JMP</strong> mem32</pre></li>
+</ul>
+<p>The unconditional jump are not limited in range.</p>
+<h2 id="conditional-jumps">Conditional Jumps</h2>
+<p>Conditional jumps check one or more flags and jump to a given address if a condition is met.</p>
+<p>Before the jump can be performed the flags need to be set by a logical or arithmetic command.
+Alternatively the commands <code>CMP</code> and <code>TEST</code> can be used.</p>
+<p>Conditional jumps can be divided into following groups:</p>
+<ul>
+<li>Arithmetic jumps: The jump depends on size difference of two operands. The two operands have to be compared in advance.
+                    One or more flags have to be checked.</li>
+<li>Flag oriented jumps: A jump is performed if <em>one</em> given flag is set or deleted.</li>
+</ul>
+<h3 id="arithmetic-jumps">Arithmetic Jumps</h3>
+<p>The jump is performed if the size relation between two given operands is as expected.</p>
+<p>The relation is expressed differently for signed and unsigned operands:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Relation</th>
+<th>unsigned</th>
+<th>signed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="math">\(=\)</span></td>
+<td>equal</td>
+<td>equal</td>
+</tr>
+<tr>
+<td><span class="math">\(&lt;\)</span></td>
+<td>below</td>
+<td>less</td>
+</tr>
+<tr>
+<td><span class="math">\(&gt;\)</span></td>
+<td>above</td>
+<td>greater</td>
+</tr>
+</tbody>
+</table>
+<h4 id="arithmetic-unsigned-jumps">Arithmetic <em>“unsigned”</em> Jumps</h4>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Relation</th>
+<th>Command</th>
+<th>Explanation</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="math">\(=\)</span></td>
+<td><code>JE</code></td>
+<td>Jump if equal</td>
+<td><span class="caps">ZF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><span class="math">\(\neq\)</span></td>
+<td><code>JNE</code></td>
+<td>Jump if not equal</td>
+<td><span class="caps">ZF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><span class="math">\(&lt;\)</span></td>
+<td><code>JB</code></td>
+<td>Jump if below</td>
+<td><span class="caps">CF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><span class="math">\(\ngeq\)</span></td>
+<td><code>JNAE</code></td>
+<td>Jump if not above or equal</td>
+<td><span class="caps">CF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><span class="math">\(\ge\)</span></td>
+<td><code>JAE</code></td>
+<td>Jump if above or equal</td>
+<td><span class="caps">CF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><span class="math">\(\not&lt;\)</span></td>
+<td><code>JNB</code></td>
+<td>Jump if not below</td>
+<td><span class="caps">CF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><span class="math">\(\le\)</span></td>
+<td><code>JBE</code></td>
+<td>Jump if below or equal</td>
+<td><span class="caps">CF</span> <span class="math">\(=\)</span> 1 or <span class="caps">ZF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><span class="math">\(\not&gt;\)</span></td>
+<td><code>JNA</code></td>
+<td>Jump if not above</td>
+<td><span class="caps">CF</span> <span class="math">\(=\)</span> 1 or <span class="caps">ZF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><span class="math">\(&gt;\)</span></td>
+<td><code>JA</code></td>
+<td>Jump if above</td>
+<td><span class="caps">CF</span> <span class="math">\(=\)</span> 0 and <span class="caps">ZF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><span class="math">\(\not\le\)</span></td>
+<td><code>JNBE</code></td>
+<td>Jump if not below or equal</td>
+<td><span class="caps">CF</span> <span class="math">\(=\)</span> 0 and <span class="caps">ZF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+</tbody>
+</table>
+<h4 id="arithmetic-signed-jumps">Arithmetic <em>“signed”</em> Jumps</h4>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Relation</th>
+<th>Command</th>
+<th>Explanation</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="math">\(=\)</span></td>
+<td><code>JE</code></td>
+<td>Jump if equal</td>
+<td><span class="caps">ZF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><span class="math">\(\neq\)</span></td>
+<td><code>JNE</code></td>
+<td>Jump if not equal</td>
+<td><span class="caps">ZF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><span class="math">\(&lt;\)</span></td>
+<td><code>JL</code></td>
+<td>Jump if less</td>
+<td><span class="caps">OF</span> <span class="math">\(\neq\)</span> <span class="caps">SF</span></td>
+</tr>
+<tr>
+<td><span class="math">\(\ngeq\)</span></td>
+<td><code>JNGE</code></td>
+<td>Jump if not greater or equal</td>
+<td><span class="caps">OF</span> <span class="math">\(\neq\)</span> <span class="caps">SF</span></td>
+</tr>
+<tr>
+<td><span class="math">\(\ge\)</span></td>
+<td><code>JGE</code></td>
+<td>Jump if greater or equal</td>
+<td><span class="caps">OF</span> <span class="math">\(=\)</span> <span class="caps">SF</span></td>
+</tr>
+<tr>
+<td><span class="math">\(\not&lt;\)</span></td>
+<td><code>JNL</code></td>
+<td>Jump if not less</td>
+<td><span class="caps">OF</span> <span class="math">\(=\)</span> <span class="caps">SF</span></td>
+</tr>
+<tr>
+<td><span class="math">\(\le\)</span></td>
+<td><code>JLE</code></td>
+<td>Jump if less or equal</td>
+<td><span class="caps">OF</span> <span class="math">\(\neq\)</span> <span class="caps">SF</span> or <span class="caps">ZF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><span class="math">\(\not&gt;\)</span></td>
+<td><code>JNG</code></td>
+<td>Jump if not greater</td>
+<td><span class="caps">OF</span> <span class="math">\(\neq\)</span> <span class="caps">SF</span> or <span class="caps">ZF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><span class="math">\(&gt;\)</span></td>
+<td><code>JG</code></td>
+<td>Jump if greater</td>
+<td><span class="caps">OF</span> <span class="math">\(=\)</span> <span class="caps">SF</span> and <span class="caps">ZF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><span class="math">\(\not\le\)</span></td>
+<td><code>JNLE</code></td>
+<td>Jump if not less or equal</td>
+<td><span class="caps">OF</span> <span class="math">\(=\)</span> <span class="caps">SF</span> and <span class="caps">ZF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="flag-oriented-jumps">Flag oriented Jumps</h3>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Command</th>
+<th>Explanation</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>JZ</code></td>
+<td>Jump if zero</td>
+<td><span class="caps">ZF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><code>JNZ</code></td>
+<td>Jump if not zero</td>
+<td><span class="caps">ZF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><code>JC</code></td>
+<td>Jump if carry</td>
+<td><span class="caps">CF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><code>JNC</code></td>
+<td>Jump if no carry</td>
+<td><span class="caps">CF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><code>JS</code></td>
+<td>Jump if sign</td>
+<td><span class="caps">SF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><code>JNS</code></td>
+<td>Jump if no sign</td>
+<td><span class="caps">SF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><code>JO</code></td>
+<td>Jump if overflow</td>
+<td><span class="caps">OF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><code>JNO</code></td>
+<td>Jump if no overflow</td>
+<td><span class="caps">OF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><code>JP</code></td>
+<td>Jump if parity</td>
+<td><span class="caps">PF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><code>JNP</code></td>
+<td>Jump if no parity</td>
+<td><span class="caps">PF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+<tr>
+<td><code>JPE</code></td>
+<td>Jump if parity even</td>
+<td><span class="caps">PF</span> <span class="math">\(=\)</span> 1</td>
+</tr>
+<tr>
+<td><code>JPO</code></td>
+<td>Jump if parity odd</td>
+<td><span class="caps">PF</span> <span class="math">\(=\)</span> 0</td>
+</tr>
+</tbody>
+</table>
+<h2 id="comparing-commands-cmp-test">Comparing Commands (<code>CMP</code>, <code>TEST</code>)</h2>
+<p>Since the different jump commands depend on flags set or not there
+are special commands that only affect the flags.</p>
+<ul>
+<li><code>CMP</code> is a subtraction of the operands (8-bit or 16-bit) but it only changes the flags.
+   The result is not written anywhere.</li>
+<li><code>TEST</code> is a <em><span class="caps">AND</span></em> operation of the operands (8-bit or 16-bit) that only changes the flags.
+   The result is not written anywhere.</li>
+</ul>
+<p>Both commands accept a register or a memory location as first operand and a register, a memory location
+or a constant (immediate) as second operator.</p>
+<p>Only one memory operand is allowed.</p>
+<p>The operands need to be of the same size.</p>
+<h1 id="loop-commands-loopx-jcxz">Loop Commands (<code>LOOPx</code>, <code>JCXZ</code>)</h1>
+<p>All loop commands accept an displacement operator (8-bit).</p>
+<p>None of the loop commands affects any flags!</p>
+<h2 id="loop-loop">Loop (<code>LOOP</code>)</h2>
+<p>Decrements <em><span class="caps">RCX</span></em> by one (1). If <em><span class="caps">RCX</span></em> is not zero (<em><span class="caps">RCX</span></em> <span class="math">\(\neq\)</span> 0) it performs the jump.</p>
+<h2 id="loop-while-equal-and-loop-while-zero-loope-loopz">Loop while equal and Loop while zero (<code>LOOPE</code>, <code>LOOPZ</code>)</h2>
+<p><code>LOOPE</code> and <code>LOOPZ</code> are different mnemonics for the same command.</p>
+<p>Decrements <em><span class="caps">CX</span></em> by one (1). Performs the jump if if Zero Flag is set and <em><span class="caps">CX</span></em> is not zero (0).</p>
+<p>Jump if: <span class="caps">ZF</span> <span class="math">\(=\)</span> 1 and <span class="caps">CX</span> <span class="math">\(\neq\)</span> 0</p>
+<h2 id="loop-while-not-equal-and-loop-while-not-zero-loopne-loopnz">Loop while not equal and Loop while not zero (<code>LOOPNE</code>, <code>LOOPNZ</code>)</h2>
+<p><code>LOOPNE</code> and <code>LOOPNZ</code> are different mnemonics for the same command.</p>
+<p>Decrements <em><span class="caps">CX</span></em> by one (1). Performs the jump if if Zero Flag is not set and <em><span class="caps">CX</span></em> is not zero (0).</p>
+<p>Jump if: <span class="caps">ZF</span> <span class="math">\(=\)</span> 0 and <span class="caps">CX</span> <span class="math">\(\neq\)</span> 0</p>
+<h2 id="jump-if-cx-zero-jcxz">Jump if <em><span class="caps">CX</span></em> zero (<code>JCXZ</code>)</h2>
+<p>Performs the jump if <em><span class="caps">CX</span></em> is zero.</p>
+<p>Jump if: <span class="caps">CX</span> <span class="math">\(=\)</span> 0</p>
+<h1 id="stack-and-function-calls">Stack and Function calls</h1>
+<p>The stack on x86 is always addressed by the Stack Segment (<em><span class="caps">SS</span></em>).</p>
+<p>On 80186 stack operations are word aligned (16-bit). So <code>PUSH</code> 
+decrements <em><span class="caps">SP</span></em> by <em>2</em> and <code>POP</code> increments <em><span class="caps">SP</span></em> by <em>2</em>.</p>
+<p>On x86-64 stack operations are quad-wor (64-bit) aligned.
+So <code>PUSH</code> decrements <em><span class="caps">RSP</span></em> by <em>8</em> and <code>POP</code> increments <em><span class="caps">RSP</span></em> by <em>8</em>.</p>
+<p>It’s possible to use pop and push instructions for operands smaller than 64-bits. But it’s not recomended.</p>
+<p>The stack on x86 grow downwards (reverse in memory).</p>
+<p><em><span class="caps">RSP</span></em> points to the <em>last written</em> item. It is the top of the stack (smallest address on stack).</p>
+<h2 id="push-and-pop-push-pushf-pusha-pop-popf-popa">Push and Pop (<code>PUSH</code>, <code>PUSHF</code>, <code>PUSHA</code>, <code>POP</code>, <code>POPF</code>, <code>POPA</code>)</h2>
+<p>The different push and pop commands save/restore 16-bit words to/from the stack.</p>
+<h3 id="push"><code>PUSH</code></h3>
+<p><code>PUSH</code> can be called with all registers as as operands or a memory 
+operand. Immediate addressing is not possible with <code>PUSH</code>.</p>
+<p>The registers that can be pushed are: <em><span class="caps">AX</span></em>, <em><span class="caps">BX</span></em>, <em><span class="caps">CX</span></em>, <em><span class="caps">DX</span></em>, <em><span class="caps">SP</span></em>, <em><span class="caps">BP</span></em>, <em><span class="caps">SI</span></em>, <em><span class="caps">DI</span></em>, <em><span class="caps">ES</span></em>, <em><span class="caps">SS</span></em>, <em><span class="caps">DS</span></em> and <em><span class="caps">CS</span></em>.</p>
+<h3 id="pop"><code>POP</code></h3>
+<p><code>POP</code> can use the same operands as <code>PUSH</code> with the exception of <em><span class="caps">CS</span></em>. Memory operands are also possible.</p>
+<p>The registers that can be poped are: <em><span class="caps">AX</span></em>, <em><span class="caps">BX</span></em>, <em><span class="caps">CX</span></em>, <em><span class="caps">DX</span></em>, <em><span class="caps">SP</span></em>, <em><span class="caps">BP</span></em>, <em><span class="caps">SI</span></em>, <em><span class="caps">DI</span></em>, <em><span class="caps">ES</span></em>, <em><span class="caps">SS</span></em> and <em><span class="caps">DS</span></em>.</p>
+<h3 id="pusha-and-popa"><code>PUSHA</code> and <code>POPA</code></h3>
+<p>With the commands <code>PUSHA</code> and <code>POPA</code> (introduced with 80186) the 8 working registers are pushed to the stack and
+poped in the reversed order:</p>
+<p><em><span class="caps">AX</span></em>, <em><span class="caps">CX</span></em>, <em><span class="caps">DX</span></em>, <em><span class="caps">BX</span></em>, <em><span class="caps">SP</span>+</em>, <em><span class="caps">BP</span></em>, <em><span class="caps">SI</span></em>, <em><span class="caps">DI</span></em></p>
+<p><em><span class="caps">SP</span>+</em> is the <em><span class="caps">SP</span></em> before the first push to the stack. With <code>POPA</code> <em><span class="caps">SP</span></em> is not poped. Is is just decremented (by 2) at
+the end of all the pop operations.</p>
+<h3 id="pushf-and-popf"><code>PUSHF</code> and <code>POPF</code></h3>
+<p><code>PUSHF</code> and <code>POPF</code> push and pop the flag register to/from the stack.</p>
+<h3 id="examples_1">Examples</h3>
+<div class="highlight"><pre><span></span><code><span class="nf">PUSH</span><span class="w"> </span><span class="nv">result</span><span class="w">   </span><span class="c1">; variable result</span><span class="w"></span>
+<span class="nf">PUSH</span><span class="w"> </span><span class="p">[</span><span class="nb">BX</span><span class="o">+</span><span class="mi">7</span><span class="p">]</span><span class="w">   </span><span class="c1">; memory word at address [BX+7]</span><span class="w"></span>
+<span class="nf">PUSH</span><span class="w"> </span><span class="nv">tab</span><span class="p">[</span><span class="nb">SI</span><span class="p">]</span><span class="w">  </span><span class="c1">; memory word at address tab[SI]</span><span class="w"></span>
+<span class="nf">POP</span><span class="w"> </span><span class="nb">AX</span><span class="w">        </span><span class="c1">; value from stack to AX</span><span class="w"></span>
+</code></pre></div>
+<h2 id="call-and-ret"><code>CALL</code> and <code>RET</code></h2>
+<p><code>CALL</code> stores the return address (address of the instruction after <code>CALL</code>) on the stack, increments <em><span class="caps">SP</span></em> (by 2)
+and calls the function.</p>
+<p><code>RET</code> returns from the function by loading the stored address in to <em><span class="caps">IP</span></em> and decrements <em><span class="caps">SP</span></em> (by 2).</p>
+<h2 id="defining-a-function">Defining a Function</h2>
+<p>Functions need to be placed in the code segment.</p>
+<p>In <a href="http://left404.com/2011/01/04/converting-x86-assembly-from-masm-to-nasm-3/"><span class="caps">NASM</span></a> a function is defined as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="nl">my_func:</span><span class="w"></span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>; code of the function...
+
+ret
+</code></pre></div>
+<p>For calling the function:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">call</span><span class="w"> </span><span class="nv">far</span><span class="w"> </span><span class="nv">my_func</span><span class="w"></span>
+</code></pre></div>
+<p>The pseudo commands <code>PROC and</code><span class="caps">ENDP</span>` (as in <span class="caps">MASM</span>/<span class="caps">TASM</span>) are not supported by <span class="caps">NASM</span>.</p>
+<p>Function definitions can not be nested. </p>
+<h3 id="function-prologue">Function Prologue</h3>
+<p>At the beginning of each function some registers have to be saved. This code is called
+<a href="https://en.wikipedia.org/wiki/Function_prologue">function prologue</a>.</p>
+<p>The usual tasks in a function prologue are:</p>
+<ul>
+<li>Save old <em><span class="caps">BP</span></em> (push it on the stack).</li>
+<li>Assign <em><span class="caps">SP</span></em> to <em><span class="caps">BP</span></em> (<em><span class="caps">PB</span></em> = <em><span class="caps">SP</span></em>). So the <em><span class="caps">BP</span></em> points the the old <em><span class="caps">BP</span></em>.</li>
+<li>Save register contents to stack. So the registers can be used in the function.</li>
+<li>Allocate memory on stack for use in function.</li>
+</ul>
+<p>The the actual code of the function can run.</p>
+<p>Before the function ends it has to undo most of the things that were done in the prologue (i.e restoring registers,
+adjusting <em><span class="caps">SP</span></em>…).
+This code is called function epilogue.</p>
+<h1 id="string-operations">String Operations</h1>
+<p>The x86 architecture contains some commands that can be executed on consecutive memory location (strings, arrays…).</p>
+<p>This commands are powerful but not so easy to understand. <a href="http://www.oocities.org/codeteacher/x86asm/asml1013.html">Here</a> is a good explanation.</p>
+<h2 id="commands">Commands</h2>
+<p>Mostly <em><span class="caps">SI</span></em> is used for addressing the source operator and <em><span class="caps">DI</span></em> is used for addressing the destination operator. Hence the names.
+For some commands the accumulator (<em><span class="caps">AL</span></em>/<em><span class="caps">AX</span></em>) is used as operator.
+<em><span class="caps">SI</span></em> is <em><span class="caps">DS</span></em>-relative by default. But the segment can be overridden.
+<em><span class="caps">DI</span></em> is <em><span class="caps">ES</span></em>-relative by default. The segment can <strong>not</strong> be overridden.</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MOVSx</code></td>
+<td>Move (copy) data addressed by <em><span class="caps">SI</span></em> to position addressed by <em><span class="caps">DI</span></em>.</td>
+</tr>
+<tr>
+<td><code>STOSx</code></td>
+<td>Load data from accumulator to position addressed by <em><span class="caps">DI</span></em>.</td>
+</tr>
+<tr>
+<td><code>LODSx</code></td>
+<td>Load data addressed by <em><span class="caps">SI</span></em> into accumulator.</td>
+</tr>
+<tr>
+<td><code>CMPSx</code></td>
+<td>Compare data addressed by <em><span class="caps">SI</span></em> with data addressed by <em><span class="caps">DI</span></em>. Flags are set according to result of [<em><span class="caps">SI</span></em>] - [<em><span class="caps">DI</span></em>].</td>
+</tr>
+<tr>
+<td><code>SCASx</code></td>
+<td>Compare data from accumulator  with data addressed by <em><span class="caps">DI</span></em>. Flags are set according to result of accumulator - [<em><span class="caps">DI</span></em>].</td>
+</tr>
+</tbody>
+</table>
+<p>In the commands listed above <em>x</em> can be <em>B</em> for operation on bytes or <em>W</em> for operation on words (16-bit).</p>
+<p>Processors 80186 and newer have also the commands: <code>INS</code> and <code>OUTS</code> for string input and output from/to ports.</p>
+<h2 id="direction">Direction</h2>
+<p>The direction of the string commands can be controlled by the direction flag:</p>
+<ul>
+<li><code>CLD</code>: Clear direction flag. Index registers are incremented.</li>
+<li><code>STD</code>: Set direction flag. Index registers are decremented.</li>
+</ul>
+<h2 id="repeat-prefix">Repeat Prefix</h2>
+<ul>
+<li><code>REP</code>: Repeat the string command as long as <em><span class="caps">CX</span></em> <span class="math">\(\neq\)</span> 0. Decrement <em><span class="caps">CX</span></em> in each iteration.</li>
+<li><code>REPE</code>: Repeat while operands are equal.</li>
+<li><code>REPZ</code>: Repeat while zero (<span class="caps">ZF</span> = 1).</li>
+<li><code>REPNE</code>: Repeat while operands are <em>not</em> equal.</li>
+<li><code>REPNZ</code>: Repeat while <em>not</em> zero (<span class="caps">ZF</span> = 0).</li>
+</ul>
+<blockquote>
+<p>There is now practical use for <code>LODSx</code> with <code>REP</code>.</p>
+</blockquote>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./endianness.html" title="Previous: Endianness">Endianness</a></li>
+                <li class="next-article"><a href="./arm_cortex-m3_architecture.html" title="Next: ARM Cortex-M3 Architecture">ARM Cortex-M3 Architecture</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2015-06-22T21:28:32+02:00">Jun 22, 2015</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-10T19:27:29+02:00">Apr 10, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#assembler-ref">Assembler
+                    <span>8</span>
+</a></li>
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

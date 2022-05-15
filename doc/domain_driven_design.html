@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Agile, Scrum, XP, Software Development Methodology, Programming, " />
+
+<meta property="og:title" content="Domain Driven Design "/>
+<meta property="og:url" content="./domain_driven_design.html" />
+<meta property="og:description" content="Introduction Domain Driven Design (DDD) is a set of methodologies, tools and patterns that help to develop complex software systems. The design techniques are divided into two major groups: strategical and tactical. Strategical These ideas include the cooperation of a lot of different people participating in a project. This are …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2020-01-05T15:57:29+01:00" />
+<meta property="og:article:modified_time" content="2022-04-08T21:10:46+02:00" />
+<meta name="twitter:title" content="Domain Driven Design ">
+<meta name="twitter:description" content="Introduction Domain Driven Design (DDD) is a set of methodologies, tools and patterns that help to develop complex software systems. The design techniques are divided into two major groups: strategical and tactical. Strategical These ideas include the cooperation of a lot of different people participating in a project. This are …">
+
+        <title>Domain Driven Design  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./domain_driven_design.html"> Domain Driven&nbsp;Design  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#introduction">Introduction</a><ul>
+<li><a href="#strategical">Strategical</a></li>
+<li><a href="#tactical">Tactical</a></li>
+</ul>
+</li>
+<li><a href="#domain-model">Domain Model</a><ul>
+<li><a href="#cooperation-of-business-experts-and-developers">Cooperation of Business Experts and Developers</a></li>
+<li><a href="#ubiquitous-language">Ubiquitous Language</a></li>
+<li><a href="#model-driven-development">Model Driven Development</a></li>
+</ul>
+</li>
+<li><a href="#building-blocks-and-patterns">Building Blocks and Patterns</a><ul>
+<li><a href="#architecture">Architecture</a><ul>
+<li><a href="#layers">Layers</a></li>
+<li><a href="#building-blocks">Building Blocks</a><ul>
+<li><a href="#entities">Entities</a></li>
+<li><a href="#value-objects">Value Objects</a></li>
+<li><a href="#services">Services</a></li>
+<li><a href="#modules">Modules</a></li>
+<li><a href="#aggregates">Aggregates</a><ul>
+<li><a href="#rules-for-modeling-aggregates">Rules for Modeling Aggregates</a></li>
+</ul>
+</li>
+<li><a href="#domain-events">Domain Events</a></li>
+<li><a href="#factories">Factories</a></li>
+<li><a href="#repositories">Repositories</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#refactoring-and-model-refinement">Refactoring and Model Refinement</a></li>
+<li><a href="#bounded-context">Bounded Context</a><ul>
+<li><a href="#context-map">Context Map</a></li>
+</ul>
+</li>
+<li><a href="#common-patterns">Common Patterns</a><ul>
+<li><a href="#shared-kernel">Shared Kernel</a></li>
+<li><a href="#customer-supplier">Customer-Supplier</a></li>
+<li><a href="#anti-corruption-layer">Anti-Corruption Layer</a></li>
+<li><a href="#core-domain-and-subdomain">Core Domain and Subdomain</a><ul>
+<li><a href="#core-domain">Core Domain</a></li>
+<li><a href="#subdomains">Subdomains</a><ul>
+<li><a href="#generic-subdomains">Generic Subdomains</a></li>
+<li><a href="#supporting-subdomains">Supporting Subdomains</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            
+<h1 id="introduction">Introduction</h1>
+<p>Domain Driven Design (<span class="caps">DDD</span>) is a set of methodologies, tools and patterns that help to develop complex software systems.</p>
+<p>The design techniques are divided into two major groups: strategical and tactical.</p>
+<h2 id="strategical">Strategical</h2>
+<p>These ideas include the cooperation of a lot of different people participating in a project. This are mainly the business analysts (domain experts) and the developers.</p>
+<h2 id="tactical">Tactical</h2>
+<p>The tactical ideas contain mostly design- and architecture-patterns. As well as common best practices regarding software engineering.</p>
+<h1 id="domain-model">Domain Model</h1>
+<p>When starting to develop a complex software it helps to have a good model of the domain where the product will be used.</p>
+<p>The model is an abstraction of that domain. It is the internal representation of the domain for the software.</p>
+<p>The model can be described with various techniques including: diagrams, text documents, use cases and scenarios (<span class="caps">BDD</span>).</p>
+<p>Usually the model is not fully defined from the beginning. It is refined and improved while developing the software.</p>
+<h2 id="cooperation-of-business-experts-and-developers">Cooperation of Business Experts and Developers</h2>
+<p>To define a useful and solid model it is necessary that the software engineers (developers, architects, testers) that build the software collaborate with the business experts (analysts, users…) and figure out the essential concepts and the functionality that the software will implement.</p>
+<p>This is an iterative process where the model is constantly refined, extended and cleaned up. Also the Ubiquitous Language is evolved and refined in this process.</p>
+<p>The communication is bidirectional and defining the model is a combined effort. The resulting model needs to be understood by all participants. If a business expert doesn’t understand a part of the model then there is probably something wrong with it.</p>
+<p>The discussions are a time consuming process. But it’s important to have a good model and a common language.</p>
+<h2 id="ubiquitous-language">Ubiquitous Language</h2>
+<p>While defining the model, a common language between business experts and developers emerges. This language should be improved to be distinct and unambiguous. It is called <em>Ubiquitous Language</em> and has to be used throughout the project including:</p>
+<ul>
+<li>Source Code</li>
+<li><span class="caps">DB</span> Schema</li>
+<li>Documentation</li>
+</ul>
+<p>The ubiquitous language helps to overcome the problem that software engineers and business experts use different communication styles and languages. It connects all parts of the design.</p>
+<p>To form the ubiquitous language it might be helpful to experiment with alternative expressions to refine and improve the current model. Then the code (and database) need to be refactored and renamed to conform the new model.</p>
+<p>The model and the ubiquitous language are strongly connected to each other.</p>
+<p>Usually the nouns of the ubiquitous language become names of classes. Behavior of these classes (the methods) are often named with verbs of the ubiquitous language.
+This is a simple naming scheme that should be only used as a rule of thumb.</p>
+<p>Some behaviour (verbs) needs interaction of multiple objects and classes. This is implemented in services.</p>
+<h2 id="model-driven-development">Model Driven Development</h2>
+<p>The transformation of the model into code is an difficult process. The developers that write this code should know the model very well and are responsible for its integrity. A change in the code needs to be immediately reflected in the model.</p>
+<p>The classes and methods of the software are a direct mapping of the model and ubiquitous Language to code. If this mapping is made obvious it makes the code very readable.</p>
+<p>Anybody that works on the code needs to know how to express the model in code. It is necessary that all developers are involved into the discussions about the model with the domain experts.</p>
+<p>If the design of the system or of central components don’t reflect the model, the correctness of the software is in danger.</p>
+<h1 id="building-blocks-and-patterns">Building Blocks and Patterns</h1>
+<p>The original patterns of <span class="caps">DDD</span> are based on object oriented programming. But they can also be applied (in modified form) to other languages.</p>
+<h2 id="architecture">Architecture</h2>
+<p>The classical <span class="caps">DDD</span> system uses a layered architecture. But other architecture styles may be applied. Important concepts of an architecture is to allow decoupling in a kind of packages and to forbid cyclic dependencies.</p>
+<h3 id="layers">Layers</h3>
+<p>This is a list of traditional layers in an n-tier application:</p>
+<ul>
+<li><span class="caps">UI</span>: Represent information to the user and allow interaction.</li>
+<li>Application Layer: Coordination of application logic. It contains no business logic.</li>
+<li>Domain Layer: Business logic and objects.</li>
+<li>Infrastructure Layer: Persistency, Networking, I/O</li>
+</ul>
+<h3 id="building-blocks">Building Blocks</h3>
+<h4 id="entities">Entities</h4>
+<p>Business objects that have an identity. The identity is usually a field or a combination of fields which is unique. Two objects with the same identity are considered as the same object. Special care needs to be taken to guarantee that distinct objects don’t get the same identity.</p>
+<h4 id="value-objects">Value Objects</h4>
+<p>Value objects are domain objects that don’t have an identity. Looking at a single object, it doesn’t matter which object it is but what properties it has. Two objects with the same properties are considered to be the same value object.</p>
+<p>Value objects should be preferred over entities when designing the system.</p>
+<p>Value objects shall be immutable. If an value object needs to be updated a new object is created with the new properties. Immutability makes easy to share value objects.</p>
+<p>Value objects can contain other value objects and even constant references to entitles.</p>
+<h4 id="services">Services</h4>
+<p>Behavior that is important for a domain but doesn’t belong to only one class should be put into a service.
+Services work on multiple objects, possibly from different classes.
+They are stateless and provide simply functionality (a concept) for the domain.</p>
+<p>They should not be used to replace functionality that belong to individual classes. Instead they act as a connection point for multiple objects.</p>
+<p>Business processes should be implemented as services.</p>
+<p>Services can not only be used in the domain layer but also in the application or infrastructure layer. Domain and application services usually act on domain entities and value objects. It needs to be reassured that the layers are kept isolated from each other.</p>
+<h4 id="modules">Modules</h4>
+<p>Large and complex models are split into modules.</p>
+<p>Modules should have low coupling between each other and high cohesion inside them. Together with well defined interfaces this allows for good testing.</p>
+<p>Module names become part of the ubiquitous language.</p>
+<h4 id="aggregates">Aggregates</h4>
+<p>Aggregates are used to define ownership and boundaries of domain objects. They help to simplify relationships between objects by restricting them to be only inside the aggregate.</p>
+<p>An aggregate is also the root regarding persistence. It has to handle transactions and contract (invariant) checking.</p>
+<p>Each aggregate has one root which is the entry point for objects outside of the aggregate and it is the base entity for persistence.</p>
+<p>Only the root should be obtainable through queries from the database.</p>
+<h5 id="rules-for-modeling-aggregates">Rules for Modeling Aggregates</h5>
+<ol>
+<li>Design small aggregates</li>
+<li>Protect business invariants inside of aggregates</li>
+<li>Reference other aggregates only by identity</li>
+<li>Make a dependecy graph of the aggregates</li>
+<li>Define acceptable time frame for updates to dependent aggregates (together with domain experts)<ul>
+<li>immediate</li>
+<li>eventually (<code>n</code> seconds)</li>
+</ul>
+</li>
+<li>Put all components that need immediate update in the same aggregate</li>
+<li>The other aggregates will be updated eventually</li>
+</ol>
+<h4 id="domain-events">Domain Events</h4>
+<p>These objects model the events that the users of the system (and the domain experts) are interested in. Usually they are implemented as value objects. </p>
+<h4 id="factories">Factories</h4>
+<p>Construction of complex business objects (like aggregates and entities) should be done by factories (factory method, abstract factory, …). Usually it is not feasible to build a complete object tree in a constructor of a single class.</p>
+<p>The creation process should be atomic and raise an exception if the construction is not possible.</p>
+<p>During the construction phase all the invariants need to be enforced.</p>
+<p>Recreate persisted objects from a database needs special care. Corrupt data needs to be fixed somehow (see Repositories).</p>
+<p>Factories are pure domain objects.</p>
+<h4 id="repositories">Repositories</h4>
+<p>Repositories encapsulate the recreation objects (aggregates) from a persistent store.</p>
+<p>They can access the infrastructure layer. But this access has to be abstracted so that it can be exchanged or replaced. The repository itself is part of the domain model.</p>
+<p>Factories are used to create new object trees. Where repositories are needed to store and retrieve already created object trees to and from a persistent store.
+Internally they can use factories for creating an object tree and ensure that the invariants are met.</p>
+<h1 id="refactoring-and-model-refinement">Refactoring and Model Refinement</h1>
+<p>The code as well as the domain model need constant refinement and refactoring.</p>
+<p>Working on the model and improving it is an continuous effort. Therefore it’s important to keep all the parts of the system aligned and up to date with the model.</p>
+<p>The code needs to be flexible to allow to introduce new concepts. If the code is not flexible enough it needs to be refactored and improved.</p>
+<p>Rich and useful domain models are developed in an iterative manner by refactoring, improvement and refinement.</p>
+<h1 id="bounded-context">Bounded Context</h1>
+<p>A Bounded Context is a part of the domain. It is built with one model using its Ubiquitous Language. Each Bounded context has its own model.</p>
+<p>Ideally each Bounded Context is developed and maintained by one team.</p>
+<p>The boundaries of the Context (and its model) need to be explicit. The model has to be contained completely in the Bounded Context. It’s also important to define whant isn’t part  of a bounded context.</p>
+<p>A Bounded Context contains usually multiple modules.</p>
+<p>It‘s important to keep the borders of the bonded contexts consistent. There needs to be a means of communication between them.</p>
+<p>All the Bounded Contexts need to be continuously be integrated in the system.</p>
+<p>It’s also important to check the correctness of the system with automated tests.</p>
+<p>Bounded Contexts have a name that is part of the ubiquitous language.</p>
+<h2 id="context-map">Context Map</h2>
+<p>The contexts and their relationships should be documented with a context map. This is usually done with a diagram.</p>
+<p>Everybody working on the system needs to know and understand the context map.</p>
+<p>The Context Map can also show problems with badly defined Bounded Contexts. For example if two (or more) contexts share a part of the system.</p>
+<p>When getting started with <span class="caps">DDD</span> it’s a good starting point to draw a context map of the system.</p>
+<h1 id="common-patterns">Common Patterns</h1>
+<h2 id="shared-kernel">Shared Kernel</h2>
+<p>If there is a part of the system that is present in two (or more) contexts is it called a Shared Kernel. This is a sign of uncoordinated teams working on closely related parts of the system.</p>
+<p>It’s also possible to actively to decide that two teams share a part of the system and maintain this part collectively. This reduces the effort of duplication and has the benefit of a partly common Ubiquitous Language.</p>
+<p>The scope of the Shared Kernel has to be clearly defined. And any changes to it needs coordination between the teams that share it.</p>
+<h2 id="customer-supplier">Customer-Supplier</h2>
+<p>If one subsystem depends strongly on another one they are in a Customer-Supplier relationship.</p>
+<p>The teams developing these subsystems need to meet regularly. The “customer” has to specify its requirements. The “supplier” team has to implement them.</p>
+<p>There should be automated acceptance tests that guarantee the proper implementation.</p>
+<h2 id="anti-corruption-layer">Anti-Corruption Layer</h2>
+<p>When connecting with legacy systems or third party software it’s important that the domain model doesn’t get polluted by the other system. The anti-corruption layer sits between the domain model and the external model. It is a natural part of the domain model (with its ubiquitous language) but translates between the two systems.</p>
+<p>Usually it is implemented as a service. Internally it uses the Facade and the Adapter patterns. It makes sense to implement even multiple services in the anti-corruption layer.</p>
+<h2 id="core-domain-and-subdomain">Core Domain and Subdomain</h2>
+<p>As big enterprise applications have huge models it makes sense to split them in separate parts (bounded contexts).</p>
+<p>These parts have a focus on different aspects of the domain:</p>
+<h3 id="core-domain">Core Domain</h3>
+<p>This contains the main functionality of the application. It is the unique selling point. The best developers should be assigned to work on that part of the domain.
+The core should stay as small as possible. It contains a lot of business logic.</p>
+<h3 id="subdomains">Subdomains</h3>
+<p>The other parts of the model is implemented in subdomains.</p>
+<p>They could be developed by an other company or could even be an generic third party tool that is integrated into the system.</p>
+<h4 id="generic-subdomains">Generic Subdomains</h4>
+<p>They should be generic and do not contain any specialties. Ideally they could be reused for other applications.</p>
+<h4 id="supporting-subdomains">Supporting Subdomains</h4>
+<p>They are part of the specific domain of the application. But they don’t contain core functionality.</p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./exponential_coordinates_of_rotations_(rodrigues'_formula).html" title="Previous: Exponential Coordinates of Rotations (Rodrigues’ formula)">Exponential Coordinates of Rotations (Rodrigues’ formula)</a></li>
+                <li class="next-article"><a href="./seven_concurrency_models_in_seven_weeks.html" title="Next: Seven Concurrency Models in Seven Weeks">Seven Concurrency Models in Seven Weeks</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2020-01-05T15:57:29+01:00">Jan 5, 2020</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-08T21:10:46+02:00">Apr 8, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#agile-ref">Agile
+                    <span>2</span>
+</a></li>
+                <li><a href="./tags#scrum-ref">Scrum
+                    <span>2</span>
+</a></li>
+                <li><a href="./tags#software_development_methodology-ref">Software Development Methodology
+                    <span>3</span>
+</a></li>
+                <li><a href="./tags#xp-ref">XP
+                    <span>2</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

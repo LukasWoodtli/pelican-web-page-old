@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, OS, Programming, " />
+
+<meta property="og:title" content="Modern OS’s "/>
+<meta property="og:url" content="./modern_os's.html" />
+<meta property="og:description" content="This page collects some notes about different Operating System approaches. Most of the information gathered here is from the course Advanced Operating Systems. Some information is from Operating System. And other Wikipedia pages. The book Modern Operating Systems by Andrew S. Tanenbaum is also a very good resource I’m …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2015-04-02T00:27:44+02:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="Modern OS’s ">
+<meta name="twitter:description" content="This page collects some notes about different Operating System approaches. Most of the information gathered here is from the course Advanced Operating Systems. Some information is from Operating System. And other Wikipedia pages. The book Modern Operating Systems by Andrew S. Tanenbaum is also a very good resource I’m …">
+
+        <title>Modern OS’s  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./modern_os's.html"> Modern <span class="caps">OS</span>&#8217;s  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#overview-of-kernels">Overview of Kernels</a></li>
+<li><a href="#other-oss">Other <span class="caps">OS</span>’s:</a></li>
+<li><a href="#sharing-resources">Sharing Resources</a></li>
+<li><a href="#exokernel">Exokernel</a><ul>
+<li><a href="#memory-tlb">Memory (<span class="caps">TLB</span>)</a></li>
+<li><a href="#cpu-scheduling"><span class="caps">CPU</span>-Scheduling</a></li>
+<li><a href="#revoction-of-resources">Revoction of Resources</a></li>
+</ul>
+</li>
+<li><a href="#l3">L3</a><ul>
+<li><a href="#l3-strikes-against-microkernel">L3 strikes against microkernel</a></li>
+<li><a href="#thesis-of-l3-for-os-structuring">Thesis of L3 for <span class="caps">OS</span> structuring</a></li>
+</ul>
+</li>
+<li><a href="#virtualization">Virtualization</a><ul>
+<li><a href="#native-hypervisor-bare-metal">Native Hypervisor (bare metal)</a></li>
+<li><a href="#hosted-hypervisors">Hosted Hypervisors</a></li>
+<li><a href="#full-virtualization">Full virtualization</a></li>
+<li><a href="#para-virtualization">Para Virtualization</a></li>
+<li><a href="#overview">Overview</a></li>
+</ul>
+</li>
+<li><a href="#memory-virtualization">Memory Virtualization</a><ul>
+<li><a href="#not-virtualized">Not virtualized:</a></li>
+<li><a href="#virtualized">Virtualized:</a></li>
+</ul>
+</li>
+<li><a href="#cpu-virtualization"><span class="caps">CPU</span> Virtualization</a><ul>
+<li><a href="#control-transfer">Control Transfer</a><ul>
+<li><a href="#full-virtualization_1">Full virtualization</a></li>
+<li><a href="#para-virtualization_1">Para virtualization</a></li>
+</ul>
+</li>
+<li><a href="#data-transfer">Data Transfer</a><ul>
+<li><a href="#full-virtualization_2">Full virtualization</a></li>
+<li><a href="#para-virtualization-eg-xen">Para virtualization (e.g. Xen)</a><ul>
+<li><a href="#xen-io-rings">Xen I/O-Rings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#memory-models">Memory Models</a><ul>
+<li><a href="#sequential-consistency-memory-model">Sequential Consistency (Memory Model)</a></li>
+<li><a href="#cache-coherence">Cache Coherence</a><ul>
+<li><a href="#non-cache-coherent-shared-address-space-multi-processor-ncc-shared-memory-multi-processor">Non cache coherent shared address space multi processor (<span class="caps">NCC</span> shared memory multi processor)</a></li>
+<li><a href="#cc-shared-memory-multi-processor"><span class="caps">CC</span> shared memory multi processor</a><ul>
+<li><a href="#write-invalidate">Write-Invalidate</a></li>
+<li><a href="#write-update">Write-Update</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#synchronization">Synchronization</a><ul>
+<li><a href="#synchronization-primitives">Synchronization Primitives</a></li>
+<li><a href="#atomic-instruction">Atomic Instruction</a><ul>
+<li><a href="#read-modify-write-rmw">Read-Modify-Write (<span class="caps">RMW</span>)</a></li>
+<li><a href="#scalability-issues-with-synchronitation">Scalability issues with Synchronitation</a></li>
+</ul>
+</li>
+<li><a href="#spinlock">Spinlock</a><ul>
+<li><a href="#naive-spinlock-spin-on-ts">Naive Spinlock (Spin on T+S)</a></li>
+<li><a href="#caching-spinlock-spin-on-read">Caching Spinlock (Spin on read)</a></li>
+<li><a href="#spinlock-with-delay">Spinlock with Delay</a><ul>
+<li><a href="#delay-after-lock-release">Delay after lock release</a></li>
+<li><a href="#delay-with-exponential-backoff">Delay with exponential backoff</a></li>
+</ul>
+</li>
+<li><a href="#ticket-lock">Ticket Lock</a></li>
+<li><a href="#summary">Summary</a></li>
+</ul>
+</li>
+<li><a href="#queuing-lock">Queuing Lock</a><ul>
+<li><a href="#array-based-queuing-lock-anderson-lock">Array-based queuing Lock (Anderson Lock)</a></li>
+<li><a href="#link-based-queuing-lock">Link Based queuing Lock</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#parallel-architectures">Parallel Architectures</a></li>
+<li><a href="#spring">Spring</a><ul>
+<li><a href="#overall-system-structure">Overall System Structure</a></li>
+<li><a href="#nucleus">Nucleus</a><ul>
+<li><a href="#doors">Doors</a></li>
+<li><a href="#object-invocations-via-doors">Object invocations via Doors</a></li>
+</ul>
+</li>
+<li><a href="#network-proxies">Network Proxies</a></li>
+<li><a href="#security-model">Security model</a></li>
+<li><a href="#virtual-memory">Virtual Memory</a><ul>
+<li><a href="#cache-and-pager-objects">Cache and Pager Objects</a></li>
+</ul>
+</li>
+<li><a href="#file-system">File System</a></li>
+<li><a href="#spring-naming">Spring Naming</a></li>
+<li><a href="#unix-emulation"><span class="caps">UNIX</span> Emulation</a></li>
+</ul>
+</li>
+<li><a href="#barrelfish">Barrelfish</a><ul>
+<li><a href="#system-structure">System Structure</a></li>
+<li><a href="#memory-management">Memory Management</a></li>
+<li><a href="#knowledge-and-policy-engine">Knowledge and Policy Engine</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <p>This page collects some notes about different Operating System approaches.</p>
+<p>Most of the information gathered here is from the course <a href="https://www.udacity.com/course/ud189">Advanced Operating Systems</a>.</p>
+<p>Some information is from <a href="http://en.wikipedia.org/wiki/Operating_system" title="Wikipedia">Operating System</a>. And other Wikipedia pages.</p>
+<p>The book <em>Modern Operating Systems</em> by Andrew S. Tanenbaum is also a very good resource I’m using for learning about Operating Systems.</p>
+
+<h1 id="overview-of-kernels">Overview of Kernels</h1>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Kernel</th>
+<th>Type</th>
+<th>Programming Language</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://en.wikipedia.org/wiki/SPIN_(operating_system)"><span class="caps">SPIN</span></a></td>
+<td>Microkernel (Mach-like)</td>
+<td>Modula-3</td>
+<td>Special approach.</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>Monolithic (modular)</td>
+<td>C, Assembly</td>
+<td>Loadable kernel modules allow loading extensions (drivers) at runtime.</td>
+</tr>
+<tr>
+<td><span class="caps">XNU</span></td>
+<td>Hybrid</td>
+<td>C, C++</td>
+<td>Kernel of <span class="caps">OS</span> X. Mach-3.0 and FreeBSD combined.</td>
+</tr>
+<tr>
+<td><span class="caps">BSD</span></td>
+<td>Monolithic</td>
+<td>C</td>
+<td>FreeBSD, OpenBSD, NetBSD…</td>
+</tr>
+<tr>
+<td>Mach</td>
+<td>Microkernel</td>
+<td>C?</td>
+<td>One of the earlyest mikrokernel. Not all mach versions are mikrokernels.</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>Hybrid</td>
+<td>C, C++, Assembly</td>
+<td>Win <span class="caps">NT</span>: Hybrid, Win 9x and earlyer: Mololithic.</td>
+</tr>
+<tr>
+<td>FreeRTOS</td>
+<td>Microkernel (<span class="caps">RTOS</span>)</td>
+<td>C, Assembly</td>
+<td>Real Time <span class="caps">OS</span>. Mainly for embedded systems.</td>
+</tr>
+<tr>
+<td><span class="caps">UNIX</span></td>
+<td>Monolithic</td>
+<td>C, Assembly</td>
+<td>Original: <span class="caps">AT</span>&amp;T Unix.</td>
+</tr>
+<tr>
+<td>L3</td>
+<td>Microkernel</td>
+<td><span class="caps">ELAN</span></td>
+<td>Predecessor of L4.</td>
+</tr>
+<tr>
+<td>Barrelfish</td>
+<td>“Multikernel”</td>
+<td>C</td>
+<td>Special aproach.</td>
+</tr>
+<tr>
+<td>Mac <span class="caps">OS</span> 9</td>
+<td>Microkernel (Nanokernel)</td>
+<td>?</td>
+<td>Legacy</td>
+</tr>
+<tr>
+<td><span class="caps">QNX</span></td>
+<td>Microkernel (<span class="caps">RTOS</span>)</td>
+<td>?</td>
+<td>Unix-Like (<span class="caps">POSIX</span>), Qt supported.</td>
+</tr>
+<tr>
+<td>VxWorks</td>
+<td>Monolithic (<span class="caps">RTOS</span>)</td>
+<td>?</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="https://en.m.wikipedia.org/wiki/Spring_(operating_system)">Spring</a></td>
+<td>Microkernel</td>
+<td>independent (<span class="caps">CORBA</span> <span class="caps">IDL</span>)</td>
+<td>Solaris emulation, <span class="caps">OOP</span> design, doors …</td>
+</tr>
+</tbody>
+</table>
+<h1 id="other-oss">Other <span class="caps">OS</span>’s:</h1>
+<ul>
+<li><a href="https://en.m.wikipedia.org/wiki/Nucleus_RTOS">Nucleus <span class="caps">RTOS</span></a></li>
+<li><a href="https://en.m.wikipedia.org/wiki/ChorusOS">ChorusOS</a></li>
+</ul>
+<h1 id="sharing-resources">Sharing Resources</h1>
+<p>One of the most important task of an <span class="caps">OS</span> is to share (hardware) resources. There are two posibilities how resources can be shared.</p>
+<ol>
+<li>time sharing: i.e <span class="caps">CPU</span>, Printer</li>
+<li>space sharing: i.e <span class="caps">RAM</span>, Hard Disc</li>
+</ol>
+<h1 id="exokernel">Exokernel</h1>
+<p>Allocating resources to library <span class="caps">OS</span>’s:</p>
+<ul>
+<li>space (memory)</li>
+<li>time (<span class="caps">CPU</span>)</li>
+</ul>
+<p>Library <span class="caps">OS</span>’s can ‘download’ code into the kernel. A security management mechanism checks if it is allowed by th library <span class="caps">OS</span>.</p>
+<h2 id="memory-tlb">Memory (<span class="caps">TLB</span>)</h2>
+<p><span class="caps">TLB</span>: Translation Lookaside Buffer.
+Software-<span class="caps">TLB</span> is snapshot for the <span class="caps">TLB</span> for switching the library <span class="caps">OS</span>’s.</p>
+<h2 id="cpu-scheduling"><span class="caps">CPU</span>-Scheduling</h2>
+<ul>
+<li>Linear vector of “time slots”</li>
+<li>Each library-<span class="caps">OS</span> marks the time slots for own use</li>
+<li>If <span class="caps">OS</span> takes more time than allowed in a time slot it gets less time in the next time slot (penalty)</li>
+<li>Strand as abstraction of threads</li>
+</ul>
+<h2 id="revoction-of-resources">Revoction of Resources</h2>
+<ul>
+<li>Exokernel tells the library <span class="caps">OS</span> which resources are revoked (repossesion vector)</li>
+</ul>
+<h1 id="l3">L3</h1>
+<h2 id="l3-strikes-against-microkernel">L3 strikes against microkernel</h2>
+<ul>
+<li>Kernel-User switches (boarder crossing cost)</li>
+<li>Address space switches (Protected Procedures Calls for Cross Protection domain calls)</li>
+<li>Thread switches + <span class="caps">IPC</span> (Kernel mediation for <span class="caps">PPC</span>)</li>
+<li>Memory effects (locality loss)</li>
+</ul>
+<h2 id="thesis-of-l3-for-os-structuring">Thesis of L3 for <span class="caps">OS</span> structuring</h2>
+<ul>
+<li>Minimal abstractions in microkernel</li>
+<li>Microkernels are processor specific in implementation =&gt; non-portable</li>
+<li>Right set of microkernel abstractions and processor-specific implementation =&gt; efficient processor independent abstractions at higher levels</li>
+</ul>
+<p>L3 is faster than Mach (Microkernel).</p>
+<h1 id="virtualization">Virtualization</h1>
+<p>Hypervisor: Operation system of operation systems (<span class="caps">VMM</span>: Virtal Machine Monitor).</p>
+<h2 id="native-hypervisor-bare-metal">Native Hypervisor (bare metal)</h2>
+<p>Hypervisor runs directly on hardware.
+Guest <span class="caps">OS</span>’s running inside the hypervisor.</p>
+<h2 id="hosted-hypervisors">Hosted Hypervisors</h2>
+<p>Run on top of a Host <span class="caps">OS</span> (as an application process).
+Guest <span class="caps">OS</span>’s running inside the hypervisor.</p>
+<ul>
+<li>VMWare Workstation</li>
+<li>VirtualBox</li>
+</ul>
+<h2 id="full-virtualization">Full virtualization</h2>
+<ul>
+<li>Guest <span class="caps">OS</span>’s are not touched (unchanged binaries)</li>
+<li>They are running as user process in host <span class="caps">OS</span></li>
+<li>Privileged instructios in guest <span class="caps">OS</span>’s trigger trap in hypervisor (trap and emulate)</li>
+<li>i.e. VMWare</li>
+</ul>
+<h2 id="para-virtualization">Para Virtualization</h2>
+<ul>
+<li>Guest <span class="caps">OS</span> is modified to run on an an hypervisor</li>
+<li>A very small percentage of the guest <span class="caps">OS</span> code needs to be changed</li>
+<li>i.e. Xen</li>
+</ul>
+<h2 id="overview">Overview</h2>
+<p>Virtualize hardware:</p>
+<ul>
+<li>memory hierarchy</li>
+<li><span class="caps">CPU</span></li>
+<li>Devices</li>
+</ul>
+<h1 id="memory-virtualization">Memory Virtualization</h1>
+<h2 id="not-virtualized">Not virtualized:</h2>
+<p>Page Table (<span class="caps">PT</span>) maps Virtual Page Numbers (<span class="caps">VPN</span>) of processes to Physical Page Number (<span class="caps">PPN</span>).</p>
+<h2 id="virtualized">Virtualized:</h2>
+<p>Guest <span class="caps">OS</span> translates Virtual Page Number (<span class="caps">VPN</span>) to Physical Page Number (<span class="caps">PPN</span>) with Page Table (<span class="caps">PT</span>). Hypervisor then translates Physical Page Number (<span class="caps">PPN</span>) to Machine Page Number (<span class="caps">MPN</span>) with Shadow Page Table (S-<span class="caps">PT</span>).</p>
+<h1 id="cpu-virtualization"><span class="caps">CPU</span> Virtualization</h1>
+<p>Events that happen in a task of the Guest <span class="caps">OS</span> need to be delivered to the Guest <span class="caps">OS</span> by the Hypervisor.</p>
+<p>An event can be:</p>
+<ul>
+<li>External Interrupt (<span class="caps">HW</span> Interrupt)</li>
+<li>Exception (<span class="caps">HW</span>- and <span class="caps">SW</span>-Exception)</li>
+<li>Page Fault</li>
+<li>Syscall</li>
+</ul>
+<p>The occured events are delivered to the Guest <span class="caps">OS</span> wrapped in a <span class="caps">SW</span>-Interrupt by the Hypervisor.</p>
+<p>Communication from the Guest <span class="caps">OS</span> to the <span class="caps">CPU</span> hapens generally through traps. So the hypervisor can
+handle it. In para-virtualized environment the Hypervisor can provide an <span class="caps">API</span> for the Guest <span class="caps">OS</span> instead
+of using traps.</p>
+<ul>
+<li>Full virtualization: “trap and emulate”</li>
+<li>Para virtualization: more opportunity for innovation</li>
+</ul>
+<h2 id="control-transfer">Control Transfer</h2>
+<h3 id="full-virtualization_1">Full virtualization</h3>
+<ul>
+<li>implicit (traps) guest → hypervisor</li>
+<li>software interrupts (events) hypervisor → guest</li>
+</ul>
+<h3 id="para-virtualization_1">Para virtualization</h3>
+<ul>
+<li>explicit (hypercalls) guest → hypervisor</li>
+<li>software interrupts (events) hypervisor → guest</li>
+</ul>
+<blockquote>
+<p>Guest has control via hypercalls on when event notifications
+  need to be delivered.</p>
+</blockquote>
+<h2 id="data-transfer">Data Transfer</h2>
+<h3 id="full-virtualization_2">Full virtualization</h3>
+<ul>
+<li>implicit</li>
+</ul>
+<h3 id="para-virtualization-eg-xen">Para virtualization (e.g. Xen)</h3>
+<ul>
+<li>explicit ⇒ opportunity to innovate</li>
+</ul>
+<h4 id="xen-io-rings">Xen I/O-Rings</h4>
+<p>Xen uses a ring buffer for data transfer with producer-consumer pattern.
+There are 4 pointer to the buffer.</p>
+<ol>
+<li>Request producer (shared, updated by guest)</li>
+<li>Request consumer (private to Xen)</li>
+<li>Response producer (shared, updated by guest)</li>
+<li>Response consumer (private to guest)</li>
+</ol>
+<h1 id="memory-models">Memory Models</h1>
+<ul>
+<li>Memory Consistency: What is the Model presented to the Programmer?</li>
+<li>Cache Coherence: How is the System implementing the Model in presence of private caches?</li>
+</ul>
+<h2 id="sequential-consistency-memory-model">Sequential Consistency (Memory Model)</h2>
+<p>Access to a shared memory location is performed in sequence by the processors. The accesses can be interwoven.</p>
+<h2 id="cache-coherence">Cache Coherence</h2>
+<h3 id="non-cache-coherent-shared-address-space-multi-processor-ncc-shared-memory-multi-processor">Non cache coherent shared address space multi processor (<span class="caps">NCC</span> shared memory multi processor)</h3>
+<p>System only gives access to shared address space. System Software maintains chaching.</p>
+<ul>
+<li>Shared address space available for all processors</li>
+<li>Private caches</li>
+</ul>
+<blockquote>
+<p>If you modify data it’s a problem of the system software to make sure the caches are coherent!</p>
+</blockquote>
+<h3 id="cc-shared-memory-multi-processor"><span class="caps">CC</span> shared memory multi processor</h3>
+<ul>
+<li>Hardware provides shared address space</li>
+<li>Maintains cache coherence in hardware</li>
+</ul>
+<h4 id="write-invalidate">Write-Invalidate</h4>
+<p>Hardware ensures that written memory location is invalidated in all caches.</p>
+<h4 id="write-update">Write-Update</h4>
+<p>Hardware ensure that modified memory location is updated in all caches.</p>
+<blockquote>
+<p><span class="dquo">“</span>Shared memory machines scale well when you don’t share memory.”, Chuck Thacker</p>
+</blockquote>
+<h1 id="synchronization">Synchronization</h1>
+<h2 id="synchronization-primitives">Synchronization Primitives</h2>
+<ul>
+<li>Mutex Locks (single exclusive access to resource)</li>
+<li>Shared Lock (Multiple reader to one resource)</li>
+<li>Barriers (Synchronize threads, wait for other threads till all completed their work)</li>
+</ul>
+<h2 id="atomic-instruction">Atomic Instruction</h2>
+<p>During the execution of an instruction the processor can not be interrupted.</p>
+<p>Aquiring a lock needs to be atomic.</p>
+<h3 id="read-modify-write-rmw">Read-Modify-Write (<span class="caps">RMW</span>)</h3>
+<p>Different aproaches:</p>
+<ul>
+<li>Test-and-Set (T+S): Reads a memory location. Then returns the actual value and sets it to 1 atomically.</li>
+<li>Fetch-and-Inc: Reads a memory location. Then returns the actual value and increments it atomically.</li>
+<li>Fetch-and-<span class="math">\(\Phi\)</span>: Generally with any given function (<span class="math">\(\Phi\)</span>) after fetching and returning the actual value.</li>
+</ul>
+<h3 id="scalability-issues-with-synchronitation">Scalability issues with Synchronitation</h3>
+<ul>
+<li>Latency: Latency is the time that a thread needs to acquire a lock.</li>
+<li>Waiting time: The time that a thread needs to wait to get the lock. This time is in the hands of the application developers and not of the <span class="caps">OS</span> developers.</li>
+<li>Contention: If a lock is released and several threads are waiting for it. How long does it take until a thread is chosen from the waiting threads.</li>
+</ul>
+<h2 id="spinlock">Spinlock</h2>
+<h3 id="naive-spinlock-spin-on-ts">Naive Spinlock (Spin on T+S)</h3>
+<p>A thread or processor waiting for a lock loops (spins) without doing any useful work.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">LOCK</span><span class="ss">(</span><span class="nv">L</span><span class="ss">)</span>:
+    <span class="k">WHILE</span><span class="ss">(</span><span class="nv">T</span><span class="o">+</span><span class="nv">S</span><span class="ss">(</span><span class="nv">L</span><span class="ss">)</span> <span class="o">==</span> <span class="nv">locked</span><span class="ss">)</span><span class="c1">;</span>
+</code></pre></div>
+<p>Problems with this naive spinlock implementation:</p>
+<ul>
+<li>Too much contention: Every processor tries to access lock.</li>
+<li>Does not exploit caches: Private caches in processor can’t contain lock variable (T+S needs to be atomic. That’s not possible with cached variables).</li>
+<li>Disrupts useful work: After releasing a lock a processor usually wants to do some work. But other processors need resources for trying to acquire the lock.</li>
+</ul>
+<h3 id="caching-spinlock-spin-on-read">Caching Spinlock (Spin on read)</h3>
+<p>Waiting processors spin on cached copy of <code>L</code>. So there is no communication to memory. The cached copy
+of <code>L</code> is updated by the cache coherence mechanism of the system.</p>
+<div class="highlight"><pre><span></span><code><span class="n">LOCK</span><span class="p">(</span><span class="n">L</span><span class="p">):</span><span class="w"></span>
+<span class="w">    </span><span class="n">WHILE</span><span class="p">(</span><span class="n">L</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">locked</span><span class="p">);</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">Spinning</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">cached</span><span class="w"> </span><span class="k">var</span><span class="o">.</span><span class="w"> </span><span class="n">Reading</span><span class="w"> </span><span class="n">L</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">atomic</span><span class="o">.</span><span class="w"></span>
+<span class="w">        </span><span class="n">IF</span><span class="p">(</span><span class="n">T</span><span class="o">+</span><span class="n">S</span><span class="p">(</span><span class="n">L</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">locked</span><span class="p">)</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">Read</span><span class="w"> </span><span class="n">L</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">memory</span><span class="w"> </span><span class="p">(</span><span class="ow">not</span><span class="w"> </span><span class="n">cache</span><span class="p">)</span><span class="o">.</span><span class="w"></span>
+<span class="w">            </span><span class="n">go</span><span class="w"> </span><span class="n">back</span><span class="p">;</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">If</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="n">fails</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="n">spinning</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">cached</span><span class="w"> </span><span class="n">L</span><span class="w"> </span><span class="n">again</span><span class="o">.</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Less traffic on bus.</li>
+<li>Disruptive.</li>
+</ul>
+<h3 id="spinlock-with-delay">Spinlock with Delay</h3>
+<p>If a lock is released every process waits for a given time before trying to aquire the lock.</p>
+<h4 id="delay-after-lock-release">Delay after lock release</h4>
+<div class="highlight"><pre><span></span><code><span class="k">WHILE</span><span class="p">((</span><span class="n">L</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">locked</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"></span>
+<span class="w">      </span><span class="p">(</span><span class="n">T</span><span class="o">+</span><span class="n">S</span><span class="p">(</span><span class="n">L</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">locked</span><span class="p">))</span><span class="w"></span>
+<span class="err">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">WHILE</span><span class="p">(</span><span class="n">L</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">locked</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">delay</span><span class="p">(</span><span class="n">d</span><span class="o">[</span><span class="n">Pi</span><span class="o">]</span><span class="p">);</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="k">when</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="k">get</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">lock</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="n">wait</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">while</span><span class="w"></span>
+<span class="err">}</span><span class="w"></span>
+</code></pre></div>
+<p>The delay time is dependent on the processor.</p>
+<h4 id="delay-with-exponential-backoff">Delay with exponential backoff</h4>
+<div class="highlight"><pre><span></span><code><span class="k">WHILE</span><span class="ss">(</span><span class="nv">T</span><span class="o">+</span><span class="nv">S</span><span class="ss">(</span><span class="nv">L</span><span class="ss">)</span> <span class="o">==</span> <span class="nv">locked</span><span class="ss">)</span> <span class="o">//</span> <span class="nv">not</span> <span class="nv">using</span> <span class="nv">chaching</span> <span class="nv">at</span> <span class="nv">all</span>
+{
+    <span class="nv">delay</span><span class="ss">(</span><span class="nv">d</span><span class="ss">)</span><span class="c1">; // d is small at first</span>
+    <span class="nv">d</span> <span class="o">=</span> <span class="nv">d</span> <span class="o">*</span> <span class="mi">2</span><span class="c1">;</span>
+}
+</code></pre></div>
+<p>Every time when the lock is checked and not free the processor waits a longer time before trying again.
+T+S can be used because we wait before trying to quire the lock again. This reduces the contention.
+This algorithm works also on architecture without chaches (or cache coherent system in <span class="caps">HW</span>).</p>
+<h3 id="ticket-lock">Ticket Lock</h3>
+<p>The process that tries to acquire a lock gets a ticket.
+When the lock is released the process is notified.</p>
+<p>This adds fairness to the locking algorithm.</p>
+<p>But it causes contention.</p>
+<h3 id="summary">Summary</h3>
+<ul>
+<li>Spin on T+S, Spin on read and Spinlock with Delay are not fair</li>
+<li>Ticket Lock is fair but noisy (contention)</li>
+</ul>
+<h2 id="queuing-lock">Queuing Lock</h2>
+<h3 id="array-based-queuing-lock-anderson-lock">Array-based queuing Lock (Anderson Lock)</h3>
+<p>For each lock there is an array with flags. The size of the
+array is equal to the number of processors.</p>
+<p>Flags:</p>
+<ul>
+<li>has-lock (<strong>hl</strong>)</li>
+<li>must-wait (<strong>mw</strong>)</li>
+</ul>
+<p><img alt="The flag array structure" class="img-fluid" src="/images/array_based_queuing_lock.png"/></p>
+<p>Only one slot can be marked as <strong>hl</strong>.</p>
+<p>The slots are not statically associated with a particular processor.</p>
+<div class="highlight"><pre><span></span><code><span class="nv">LOCK</span><span class="ss">(</span><span class="nv">L</span><span class="ss">)</span>:
+   <span class="nv">myPlace</span> <span class="o">=</span> <span class="nv">fetch_and_inc</span><span class="ss">(</span><span class="nv">queuelast</span><span class="ss">)</span><span class="c1">;</span>
+   <span class="k">WHILE</span><span class="ss">(</span><span class="nv">flags</span>[<span class="nv">myPlace</span> <span class="nv">mod</span> <span class="nv">N</span>] <span class="o">==</span> <span class="nv">mw</span><span class="ss">)</span><span class="c1">;</span>
+
+<span class="nv">UNLOCK</span><span class="ss">(</span><span class="nv">L</span><span class="ss">)</span>:
+    <span class="nv">flags</span>[<span class="nv">current</span> <span class="nv">mod</span> <span class="nv">N</span>] <span class="o">=</span> <span class="nv">mw</span><span class="c1">; // release lock for feature use</span>
+    <span class="nv">flags</span>[<span class="ss">(</span><span class="nv">current</span><span class="o">+</span><span class="mi">1</span><span class="ss">)</span> <span class="nv">mod</span> <span class="nv">N</span>] <span class="o">=</span> <span class="nv">hl</span><span class="c1">; // next processor in queue gets lock</span>
+</code></pre></div>
+<ul>
+<li>Only one atomic operation needed per critical section</li>
+<li>Fairness: first-come, first-served</li>
+<li>But needs a lot of space. For each lock there is one array with the size of number of processors</li>
+</ul>
+<h3 id="link-based-queuing-lock">Link Based queuing Lock</h3>
+<p>The Locks are stored in a linked list.</p>
+<p>Synchronization for adding and removing clients to a lock.</p>
+<p>Published by <a href="http://www.cs.rice.edu/~johnmc/papers/tocs91.pdf">John M. Mellor-Crummey and Michael L. Scott (<span class="caps">MCS</span>)</a></p>
+<h1 id="parallel-architectures">Parallel Architectures</h1>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Symmetric_multiprocessing">Symmetric multiprocessing (<span class="caps">SMP</span>)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Non-Uniform_Memory_Access">Non-uniform memory access (<span class="caps">NUMA</span>)</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Cache_coherence">Cache coherence</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Computer_cluster">Computer cluster</a></li>
+</ul>
+<p><span class="caps">OS</span>:</p>
+<h1 id="spring">Spring</h1>
+<p><a href="https://en.m.wikipedia.org/wiki/Spring_(operating_system)">Wikipedia:Spring (operating system)</a></p>
+<p><a href="https://www.cs.fsu.edu/~awang/courses/cop5611_s2004/spring.pdf">An Overview of the Spring System</a></p>
+<ul>
+<li>Indepentant of programming language (<span class="caps">CORBA</span> <span class="caps">IDL</span>)</li>
+<li><span class="caps">OOP</span></li>
+<li>Microkernel</li>
+<li>Spring Nucleus: secure objects with high speed object invocation between address spaces and networked machines</li>
+<li>Object managers:<ul>
+<li>e.g. file system: file objects</li>
+<li>running in non-kernel mode</li>
+<li>like server</li>
+</ul>
+</li>
+<li><span class="caps">IDL</span> (<span class="caps">CORBA</span>) Generate:<ol>
+<li>Interface (e.g. header file)</li>
+<li>Client side stub code: get access to object implemented in other address space or machine</li>
+<li>Server side stub code: used by object manager to translate remote object invocations into the run-time environment of object implementation</li>
+</ol>
+</li>
+<li>Serverless objects<ul>
+<li>entire state of object always in clients address space</li>
+<li>passing to other address space: copy entire state</li>
+</ul>
+</li>
+<li>Subcontracts<ul>
+<li>plugging different kinds of object runtimes</li>
+<li>control how<ul>
+<li>object invocation is implemented</li>
+<li>object references are transmitted between address spaces</li>
+<li>object references are released</li>
+<li>…</li>
+</ul>
+</li>
+<li>Subcontracts<ul>
+<li>Singleton</li>
+<li>Replication</li>
+<li>Cheap objects</li>
+<li>Caching</li>
+<li>Crash recovery</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="overall-system-structure">Overall System Structure</h2>
+<ul>
+<li>Microkernel<ul>
+<li>Processes, <span class="caps">IPC</span> and Memory management part of kernel (Liedtke)</li>
+</ul>
+</li>
+<li>Kernel mode<ul>
+<li>Nucleus: processes and <span class="caps">IPC</span><ul>
+<li>Entered by trap mechanism</li>
+</ul>
+</li>
+<li>Virtual Memory Manager<ul>
+<li>page faults</li>
+<li>external pagers (looks like any other object server)</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>All other system services implemented as user-level servers<ul>
+<li>naming</li>
+<li>paging</li>
+<li>network <span class="caps">IO</span></li>
+<li>file systems</li>
+<li>keyboard management</li>
+<li>…</li>
+</ul>
+</li>
+<li>inherently distributed: all services and objects available on one node are also a available on other nodes in the distributed system</li>
+</ul>
+<h2 id="nucleus">Nucleus</h2>
+<ul>
+<li>Three basic abstractions: domains, threads and doors</li>
+<li>No memory management</li>
+<li>Domains<ul>
+<li>analogous to processes in Unix or tasks in Mach</li>
+<li>address space for applications</li>
+<li>resources: threads, doors, …</li>
+</ul>
+</li>
+<li>Threads<ul>
+<li>execute within domains</li>
+</ul>
+</li>
+<li>Doors<ul>
+<li>Cross domain calls</li>
+<li><span class="caps">OOP</span> calls between domains</li>
+<li>entry points to domains</li>
+<li>represented by a <span class="caps">PC</span> and a unique value (nominated by domain)</li>
+<li>unique value used by object server to identify state of object</li>
+<li>unique value might be a C++ pointer</li>
+</ul>
+</li>
+</ul>
+<h3 id="doors">Doors</h3>
+<ul>
+<li>pieces of protected nucleus state</li>
+<li>each domain has a table with doors it has access to</li>
+<li>refers to doors using <em>door identifiers</em></li>
+<li>same door may be referenced by several different door identifiers in different domains</li>
+<li>possesion of door: right to send invocation request to door</li>
+<li>valid door can be obtained with consent of<ul>
+<li>target domain</li>
+<li>someone who already has door identifier to that door</li>
+</ul>
+</li>
+<li>doors can be passed as arguments or be returned as values from functions</li>
+</ul>
+<h3 id="object-invocations-via-doors">Object invocations via Doors</h3>
+<ul>
+<li>cross-address-space invocation</li>
+<li>Algorithm<ol>
+<li>nucleus allocates server thread in target address space</li>
+<li>nucleus transfers control to that thread, passing information about door and the arguments of the invoked method</li>
+<li>when the called thread returns:<ul>
+<li>deactivation of the thread</li>
+<li>activation of caller thread</li>
+<li>passing return data</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<h2 id="network-proxies">Network Proxies</h2>
+<p>rovide object invocation across network
+- connect nuclei of different machines transparently
+- proxies are normal user-mode domains (no special support from nucleus)
+- client and server need not to be aware that proxies exist: normal door invocation</p>
+<h2 id="security-model">Security model</h2>
+<ul>
+<li>secure access to objects</li>
+<li>two basic security mechanisms:<ul>
+<li>Access Control Lists</li>
+<li>software capabilities</li>
+</ul>
+</li>
+<li>invocations are controlled by nucleus doors and front objects</li>
+</ul>
+<h2 id="virtual-memory">Virtual Memory</h2>
+<ul>
+<li>demand-paged virtual memory system</li>
+<li>per machine virtual memory manager (<span class="caps">VMM</span>) handles local memory:<ul>
+<li>mapping</li>
+<li>sharing</li>
+<li>protection</li>
+<li>transfer</li>
+<li>caching</li>
+</ul>
+</li>
+<li>depends on <em>external pagers</em> for accessing store and maintaining inter-machine coherency</li>
+<li><em>Address Space</em> and <em>Memory</em> objects used by clients</li>
+<li>Adress Space:<ul>
+<li>virtual address space of domain</li>
+<li>implemented by <span class="caps">VMM</span></li>
+</ul>
+</li>
+<li>Memory<ul>
+<li>abstraction of memory that can be mapped to address space</li>
+<li>can be a file</li>
+<li>operations to set and query length and bind</li>
+<li>no read/write or page-in/out operations</li>
+</ul>
+</li>
+<li>Separating memory from interface for paging<ul>
+<li>useful for implementing filesystem</li>
+<li>Memory Object server can be on different machine than the Pager Object server</li>
+</ul>
+</li>
+</ul>
+<h3 id="cache-and-pager-objects">Cache and Pager Objects</h3>
+<ul>
+<li>two-way connection between the VMMs and external pagers</li>
+<li>cache must be coherent between more than one <span class="caps">VMM</span></li>
+<li><span class="caps">VMM</span> obtains data by invoking pager object implemented by external pager</li>
+<li>external pager performs coherency actions by invoking cache object implemented by a <span class="caps">VMM</span></li>
+<li>the coherency protocol is not specified by the architecture: external pagers can implement  any coherency protocol</li>
+</ul>
+<h2 id="file-system">File System</h2>
+<ul>
+<li>file objects implemented by fileserver</li>
+<li>file objects may be memory mapped</li>
+<li>access to files on local disks or over the network</li>
+<li>Spring security and naming architectures to provide access control and directory services</li>
+<li>Spring file system typically consists of several layered file servers</li>
+</ul>
+<h2 id="spring-naming">Spring Naming</h2>
+<ul>
+<li>Naming for:<ul>
+<li>users</li>
+<li>files</li>
+<li>printers</li>
+<li>machines</li>
+<li>services</li>
+<li>…</li>
+</ul>
+</li>
+<li>uniform name service</li>
+<li>any object can be bound to any name</li>
+<li>Object can be:<ul>
+<li>local to a process</li>
+<li>local to a machine</li>
+<li>resident on the network</li>
+<li>transient or persistent</li>
+<li>standard system object</li>
+<li>process environment object</li>
+<li>user specific object</li>
+</ul>
+</li>
+<li>new name spaces  can be compose of different name spaces</li>
+<li>name service allows objects to be associated with a name in a context</li>
+<li>objects need not be bound to a name</li>
+<li>naming graph (name space):<ul>
+<li>a directed graph</li>
+<li>nodes with outgoing edges are contexts</li>
+</ul>
+</li>
+<li>naming provide persistence</li>
+<li>access control and authentication</li>
+</ul>
+<h2 id="unix-emulation"><span class="caps">UNIX</span> Emulation</h2>
+<ul>
+<li>Spring can run Solaris binaries</li>
+<li>implemented by user-level code</li>
+<li>contains no <span class="caps">UNIX</span> code</li>
+<li>two components:<ul>
+<li>a shared library (libue.so), dynamically linked with each Solaris binary</li>
+<li>a set of <span class="caps">UNIX</span>-specific services</li>
+</ul>
+</li>
+</ul>
+<h1 id="barrelfish">Barrelfish</h1>
+<ul>
+<li>Multikernel</li>
+<li><span class="caps">OS</span> as distributed system of functional units (network of independent cores)</li>
+<li>communication via explicit messages (message passing)</li>
+<li>Design principles<ol>
+<li>Make all inter-core communication explicit (message passing)</li>
+<li>Make <span class="caps">OS</span> structure <span class="caps">HW</span>-neutral</li>
+<li>View state as replicated instead of shared</li>
+</ol>
+</li>
+<li>Single computer as networked system</li>
+<li><span class="caps">RPC</span><ul>
+<li>latency is lower than shared memory access</li>
+<li>asynchronous or pipelined <span class="caps">RPC</span>: client processors can avoid stalling on cache misses</li>
+</ul>
+</li>
+<li>Asynchronous messaging: event-driven programming</li>
+<li>pitfalls with shared data structures in scalable progams:<ul>
+<li>correctness</li>
+<li>performance</li>
+<li>lock granularity</li>
+<li>field layout in structures (alignment …)</li>
+</ul>
+</li>
+<li>applications can share memory across cores, but <span class="caps">OS</span> design does not reky on shared memory</li>
+<li>networking optimizations for message passing:<ul>
+<li>pipelining: a number of requests in flight at once</li>
+<li>batching: sending or processing a number of messages together</li>
+</ul>
+</li>
+<li>Multikernel separates <span class="caps">OS</span> structure from hardware</li>
+<li>Replication of state is a useful framework for:<ul>
+<li>changes to the running cores</li>
+<li>hotplugging processors</li>
+<li>shutting down subsystems to save power</li>
+</ul>
+</li>
+<li>Replication:<ul>
+<li>Benefit of performance and availability</li>
+<li>at cost of ensuring replica consistency</li>
+</ul>
+</li>
+<li>porting application to Barrelfish are straightforward<ul>
+<li>standard C and mate library</li>
+<li>Virtual Memory Management</li>
+<li>subset of <span class="caps">POSIX</span> threads and file I/O APIs</li>
+</ul>
+</li>
+</ul>
+<h2 id="system-structure">System Structure</h2>
+<ul>
+<li>multiple independent <span class="caps">OS</span> instances</li>
+<li>communication via explicit messages</li>
+<li>each <span class="caps">OS</span> instance per core<ul>
+<li>privileged mode <span class="caps">CPU</span> driver</li>
+<li>user mode monitor process</li>
+</ul>
+</li>
+<li><span class="caps">CPU</span> driver local to core</li>
+<li>monitor<ul>
+<li>performes inter-core coordination</li>
+<li>coordinate system-wide state</li>
+<li>handling message-oriented inter-core communication</li>
+<li>mostly processor-agnostic</li>
+</ul>
+</li>
+<li>monitor and <span class="caps">CPU</span> driver encapsulate: scheduling, communication and resource allocation</li>
+<li>device drivers and system services (network stack, memory allocators …) run in user mode</li>
+<li>device interrupts are routed in hardware to the appropriate core</li>
+<li><span class="caps">CPU</span> driver<ul>
+<li>enfonces protection</li>
+<li>performs authorization</li>
+<li>timeslices processes</li>
+<li>mediates access to core and associated hardware (<span class="caps">MMU</span>, <span class="caps">APIC</span> …)</li>
+<li>completely event-driven and non-preemptable (single threaded)</li>
+<li>processes events: traps from user processes, interrupts from devices to other cores</li>
+</ul>
+</li>
+<li>Process structure<ul>
+<li>collection of dispatcher objects (cores)</li>
+<li>dispatchers scheduled by local <span class="caps">CPU</span> driver</li>
+</ul>
+</li>
+<li>Inter-core communication<ul>
+<li>user-level <span class="caps">RPC</span> (<span class="caps">URPC</span>):<ul>
+<li>marschaling code generated with stub compiler</li>
+<li>name service to locate services</li>
+<li>channels established between services (setup performed by monitors)</li>
+<li>no shared memory other than <span class="caps">URPC</span> channel and packet payload</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>cross-core thread management is performed in user-space<ul>
+<li>thread schedulers exchange messages to create and unblock threads and migrate threads between cores</li>
+<li><span class="caps">POSIX</span> like threads</li>
+</ul>
+</li>
+</ul>
+<h2 id="memory-management">Memory Management</h2>
+<ul>
+<li>global set of resources</li>
+<li>user-level app and services services use shared memory across multiple cores</li>
+<li>capability system (<a href="https://sel4.systems/"> seL4</a>)</li>
+<li>virtual memory management (allocation/manipulation of page tables…) entirely in user-space</li>
+<li>capability code is complex</li>
+</ul>
+<h2 id="knowledge-and-policy-engine">Knowledge and Policy Engine</h2>
+<ul>
+<li>Maintaining  knowledge of hardware in <a href="http://wiki.barrelfish.org/SystemKnowledgeBase">‘system knowledge base’</a></li>
+<li>subset of first-order logic: <a href="http://eclipseclp.org/">The ECLiPSe Constraint Programming System</a></li>
+<li>declarative approach</li>
+<li>hardware discovery</li>
+</ul>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="next-article"><a href="./intro_to_sql.html" title="Next: Intro to SQL">Intro to SQL</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2015-04-02T00:27:44+02:00">Apr 2, 2015</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+                <li><a href="./tags#os-ref">OS
+                    <span>13</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, Parsing, Design Patterns, Programming, " />
+
+<meta property="og:title" content="Language Implementation Patterns "/>
+<meta property="og:url" content="./language_implementation_patterns.html" />
+<meta property="og:description" content="This page collects notes and citations from the book: Language Implementation Patterns by Terence Parr Some of my examples can be found here Getting Started with Parsing Basic Parsing Patterns “The act of recognizing a phrase by computer is called parsing.” “You can think of grammars as functional specifications or …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2017-12-26T18:34:32+01:00" />
+<meta property="og:article:modified_time" content="2022-04-12T07:48:05+02:00" />
+<meta name="twitter:title" content="Language Implementation Patterns ">
+<meta name="twitter:description" content="This page collects notes and citations from the book: Language Implementation Patterns by Terence Parr Some of my examples can be found here Getting Started with Parsing Basic Parsing Patterns “The act of recognizing a phrase by computer is called parsing.” “You can think of grammars as functional specifications or …">
+
+        <title>Language Implementation Patterns  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./language_implementation_patterns.html"> Language Implementation&nbsp;Patterns  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#getting-started-with-parsing">Getting Started with Parsing</a><ul>
+<li><a href="#basic-parsing-patterns">Basic Parsing Patterns</a><ul>
+<li><a href="#identifying-phrase-structure">Identifying Phrase Structure</a></li>
+<li><a href="#building-recursive-descent-parsers">Building Recursive-Descent Parsers</a></li>
+<li><a href="#parser-construction-using-a-grammar-dsl">Parser Construction Using a Grammar <span class="caps">DSL</span></a></li>
+<li><a href="#tokenizing-sentences">Tokenizing Sentences</a></li>
+<li><a href="#pattern-1-mapping-grammars-to-recursive-descent-recognizers">Pattern 1: Mapping Grammars to Recursive-Descent Recognizers</a><ul>
+<li><a href="#alternatives">Alternatives</a></li>
+<li><a href="#optional-subrule-t">Optional subrule (T)?</a></li>
+<li><a href="#one-or-more-subrules">One or more (…)+ subrules</a></li>
+<li><a href="#zero-or-more-subrules">Zero or more (…)* subrules</a></li>
+</ul>
+</li>
+<li><a href="#pattern-2-ll1-recursive-descent-lexer">Pattern 2: <span class="caps">LL</span>(1) Recursive-Descent Lexer</a></li>
+<li><a href="#pattern-3-ll1-recursive-descent-parser">Pattern 3: <span class="caps">LL</span>(1) Recursive-Descent Parser</a><ul>
+<li><a href="#deterministic-parsing-decisions">Deterministic Parsing Decisions</a></li>
+</ul>
+</li>
+<li><a href="#pattern-4-llk-recursive-descent-parser">Pattern 4: <span class="caps">LL</span>(k) Recursive-Descent Parser</a></li>
+</ul>
+</li>
+<li><a href="#enhanced-parsing-patterns">Enhanced Parsing Patterns</a><ul>
+<li><a href="#parsing-with-arbitrary-lookahead">Parsing with Arbitrary Lookahead</a></li>
+<li><a href="#parsing-like-a-pack-rat">Parsing like a Pack Rat</a></li>
+<li><a href="#directing-the-parse-with-semantic-information">Directing the Parse with Semantic Information</a></li>
+<li><a href="#pattern-5-backtracking-parser">Pattern 5 Backtracking Parser</a><ul>
+<li><a href="#dealing-with-actions-while-backtracking">Dealing with Actions While Backtracking</a></li>
+</ul>
+</li>
+<li><a href="#pattern-6-memoizing-parser">Pattern 6 Memoizing Parser</a></li>
+<li><a href="#pattern-7-predicated-parser">Pattern 7 Predicated Parser</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#analyzing-languages">Analyzing Languages</a><ul>
+<li><a href="#chapter-4-building-intermediate-form-trees">Chapter 4 Building Intermediate Form Trees</a><ul>
+<li><a href="#why-we-build-trees">Why We Build Trees</a></li>
+<li><a href="#building-abstract-syntax-trees">Building Abstract Syntax Trees</a></li>
+<li><a href="#representing-pseudo-operations-in-asts">Representing Pseudo-operations in ASTs</a></li>
+<li><a href="#implementing-asts-in-java">Implementing ASTs in Java</a></li>
+<li><a href="#enforcing-tree-structure-with-the-type-system">Enforcing Tree Structure with the Type System</a></li>
+<li><a href="#constructing-asts-with-antlr-grammars">Constructing ASTs with <span class="caps">ANTLR</span> Grammars</a></li>
+<li><a href="#pattern-8-parse-tree">Pattern 8: Parse Tree</a><ul>
+<li><a href="#purpose">Purpose</a></li>
+<li><a href="#discussion">Discussion</a></li>
+</ul>
+</li>
+<li><a href="#pattern-9-homogeneous-ast">Pattern 9: Homogeneous <span class="caps">AST</span></a><ul>
+<li><a href="#purpose_1">Purpose</a></li>
+<li><a href="#discussion_1">Discussion</a></li>
+</ul>
+</li>
+<li><a href="#pattern-10-normalized-heterogeneous-ast">Pattern 10: Normalized Heterogeneous <span class="caps">AST</span></a><ul>
+<li><a href="#purpose_2">Purpose</a></li>
+<li><a href="#discussion_2">Discussion</a></li>
+</ul>
+</li>
+<li><a href="#pattern-11-irregular-heterogeneous-ast">Pattern 11: Irregular Heterogeneous <span class="caps">AST</span></a><ul>
+<li><a href="#purpose_3">Purpose</a></li>
+<li><a href="#discussion_3">Discussion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#walking-and-rewriting-trees">Walking and Rewriting Trees</a><ul>
+<li><a href="#walking-trees-and-visitation-order">Walking Trees and Visitation Order</a></li>
+<li><a href="#pattern-12-embedded-heterogeneous-tree-walker">Pattern 12: Embedded Heterogeneous Tree Walker</a><ul>
+<li><a href="#purpose_4">Purpose</a></li>
+<li><a href="#discussion_4">Discussion</a></li>
+</ul>
+</li>
+<li><a href="#pattern-13-external-tree-visitor">Pattern 13: External Tree Visitor</a><ul>
+<li><a href="#purpose_5">Purpose</a></li>
+<li><a href="#discussion_5">Discussion</a></li>
+<li><a href="#implementation">Implementation</a><ul>
+<li><a href="#visitor-switching-on-node-type">Visitor Switching on Node Type</a></li>
+<li><a href="#switching-on-the-token-type-to-build-independent-visitors">Switching on the Token Type to Build Independent Visitors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#pattern-14-tree-grammar">Pattern 14: Tree Grammar</a><ul>
+<li><a href="#purpose_6">Purpose</a></li>
+<li><a href="#discussion_6">Discussion</a></li>
+</ul>
+</li>
+<li><a href="#pattern-15-tree-pattern-matcher">Pattern 15: Tree Pattern Matcher</a><ul>
+<li><a href="#purpose_7">Purpose</a></li>
+<li><a href="#discussion_7">Discussion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#chapter-6-tracking-and-identifying-program-symbols">Chapter 6 Tracking and Identifying Program Symbols</a><ul>
+<li><a href="#collecting-information-about-program-entities">Collecting Information About Program Entities</a></li>
+<li><a href="#grouping-symbols-into-scopes">Grouping Symbols into Scopes</a></li>
+<li><a href="#resolving-symbols">Resolving Symbols</a></li>
+</ul>
+</li>
+<li><a href="#chapter-7-managing-symbol-tables-for-data-aggregates">Chapter 7 Managing Symbol Tables for Data Aggregates</a><ul>
+<li><a href="#building-scope-trees-for-structs">Building Scope Trees for Structs</a></li>
+<li><a href="#building-scope-trees-for-classes">Building Scope Trees for Classes</a></li>
+</ul>
+</li>
+<li><a href="#chapter-8-enforcing-static-typing-rules">Chapter 8 Enforcing Static Typing Rules</a></li>
+</ul>
+</li>
+<li><a href="#building-interpreters">Building Interpreters</a><ul>
+<li><a href="#chapter-9-building-high-level-interpreters">Chapter 9 Building High-Level Interpreters</a><ul>
+<li><a href="#designing-high-level-interpreter-memory-systems">Designing High-Level Interpreter Memory Systems</a></li>
+<li><a href="#processing-instructions">Processing Instructions</a></li>
+</ul>
+</li>
+<li><a href="#chapter-10-building-bytecode-interpreters">Chapter 10 Building Bytecode Interpreters</a><ul>
+<li><a href="#bytecode-machine-architecture">Bytecode Machine Architecture</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#translating-and-generating-languages">Translating and Generating Languages</a><ul>
+<li><a href="#translating-computer-languages">Translating Computer Languages</a><ul>
+<li><a href="#rule-based-translation">Rule-Based Translation</a></li>
+<li><a href="#model-driven-translation">Model-Driven Translation</a></li>
+<li><a href="#decoupling-input-model-traversal-from-output-order">Decoupling Input Model Traversal from Output Order</a></li>
+<li><a href="#organizing-translated-phrases-into-a-nested-model">Organizing Translated Phrases into a Nested Model</a></li>
+<li><a href="#pattern-29-syntax-directed-translator">Pattern 29: Syntax-Directed Translator</a><ul>
+<li><a href="#purpose_8">Purpose</a></li>
+<li><a href="#discussion_8">Discussion</a></li>
+</ul>
+</li>
+<li><a href="#pattern-30-rule-based-translator">Pattern 30: Rule-Based Translator</a><ul>
+<li><a href="#purpose_9">Purpose</a></li>
+<li><a href="#discussion_9">Discussion</a></li>
+</ul>
+</li>
+<li><a href="#pattern-31-target-specific-generator-classes">Pattern 31: Target-Specific Generator Classes</a><ul>
+<li><a href="#purpose_10">Purpose</a></li>
+<li><a href="#discussion_10">Discussion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <p>This page collects notes and citations from the book:</p>
+<p><a href="https://pragprog.com/book/tpdsl/language-implementation-patterns">Language Implementation Patterns by Terence Parr</a></p>
+<p>Some of my examples can be found <a href="https://github.com/LukasWoodtli/LanguageImplementationPatterns">here</a></p>
+
+<h1 id="getting-started-with-parsing">Getting Started with Parsing</h1>
+<h2 id="basic-parsing-patterns">Basic Parsing Patterns</h2>
+<p><em><span class="dquo">“</span>The act of recognizing a phrase by computer is called </em><em>parsing</em><em>.”</em></p>
+<p><em><span class="dquo">“</span>You can think of grammars as functional specifications or design documents for parsers.”</em></p>
+<p><em><span class="dquo">“</span>Grammars are more than designs, though. They are actually executable ‘programs’ written in a domain-specific language (<span class="caps">DSL</span>) specifically designed for expressing language structures.”</em></p>
+<h3 id="identifying-phrase-structure">Identifying Phrase Structure</h3>
+<p><em><span class="dquo">“</span>Vocabulary symbols (tokens) play different roles like variable and operator. We can even identify the role of token subsequences like expression.”</em></p>
+<p><em><span class="dquo">“</span>Parse trees are important because they tell us everything we need to know about the syntax (structure) of a phrase.”</em></p>
+<p><em><span class="dquo">“</span>To parse [is to generate] a two-dimensional parse tree from a flat token sequence.”</em></p>
+<h3 id="building-recursive-descent-parsers">Building Recursive-Descent Parsers</h3>
+<p><em><span class="dquo">“</span>A parser checks whether a sentence conforms to the syntax of a language.”</em></p>
+<p><em><span class="dquo">“</span>A language is just a set of valid sentences.”</em></p>
+<p><em><span class="dquo">“</span>A top-down parser […] starts at the top of the parse tree and works its way down to the token leaf nodes.”</em></p>
+<p><em><span class="dquo">“</span>Recursive-Descent Parser</em></p>
+<ul>
+<li><em><strong>Descent</strong> refers to its top-down nature, and</em></li>
+<li><em><strong>Recursive</strong> refers to the fact that its functions potentially call themselves.”</em></li>
+</ul>
+<p><em><span class="dquo">“</span>Nesting in a parse tree begets [(Kind zeugen)] recursion in a recursive-descent parser.”</em></p>
+<p><em><span class="dquo">“</span><span class="caps">LL</span>(1)</em></p>
+<ul>
+<li><em>The first </em><em>L</em><em> means ‘read the input from left to right.’</em></li>
+<li><em>The second </em><em>L</em><em> means ‘descend into parse tree children from left to right.’”</em></li>
+</ul>
+<h3 id="parser-construction-using-a-grammar-dsl">Parser Construction Using a Grammar <span class="caps">DSL</span></h3>
+<p><em><span class="dquo">“</span>[We can use] a <span class="caps">DSL</span> specifically designed for describing languages. ‘Programs’ in this <span class="caps">DSL</span> are called </em><em>grammars</em><em>. Tools that translate grammars to parsers are called </em><em>parser generators</em><em>.”</em></p>
+<p><em><span class="dquo">“</span>Grammars are […] functional specifications for languages.”</em></p>
+<p><em><span class="dquo">“</span>Substructures in the parse tree and functions in the parser correspond to </em><em>rules</em><em> in a grammar.”</em></p>
+<p><em><span class="dquo">“</span>[Lexer:] combining input characters into vocabulary symbols (tokens).”</em></p>
+<h3 id="tokenizing-sentences">Tokenizing Sentences</h3>
+<p><em><span class="dquo">“</span>Recognizers that feed off character streams are called </em><em>tokenizers</em><em> or </em><em>lexers</em><em>”</em></p>
+<p><em><span class="dquo">“</span>At the character level, we refer to syntax as the </em><em>lexical structure</em><em>.”</em></p>
+<p><em><span class="dquo">“</span>Grammars describe language structures, and so we can also use them for lexical specifications.”</em></p>
+<p><em><span class="dquo">“</span>Lexical rules start with an uppercase letter”</em></p>
+<p><em><span class="dquo">“</span>Lexer and parser design patterns […] are nearly identical. […] The only difference lies in the type of their input symbols, characters or tokens.”</em></p>
+<h3 id="pattern-1-mapping-grammars-to-recursive-descent-recognizers">Pattern 1: Mapping Grammars to Recursive-Descent Recognizers</h3>
+<p><em><span class="dquo">“</span>Even when building lexers and parsers by hand, the best starting point is a grammar.”</em></p>
+<p><em><span class="dquo">“</span></em><em>Left recursion</em><em> results in an infinite method invocation loop.”</em></p>
+<p><em><span class="dquo">“</span>The following rule yields a parser that does not terminate:</em>”</p>
+<div class="highlight"><pre><span></span><code><span class="n">r</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="n">X</span><span class="w"> </span><span class="o">;</span><span class="w"></span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>we’d end up with a function that immediately called itself”</em></p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span> <span class="nf">r</span><span class="p">()</span> <span class="p">{</span> <span class="n">r</span><span class="p">();</span> <span class="n">match</span><span class="p">(</span><span class="n">X</span><span class="p">);</span> <span class="p">}</span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>Besides left-recursive rules, there are other grammar constructs that yield </em><em>nondeterministic</em><em> recursive-descent recognizers. A nondeterministic recognizer cannot decide which path to take.”</em></p>
+<p><em><span class="dquo">“</span>A grammar, G, is a set of rules from which we generate a class definition (in any object-oriented programming language) containing a method for each rule”</em></p>
+<p><em><span class="dquo">“</span>For each rule, r, defined in a grammar, we build a method of the same name”</em></p>
+<p><em><span class="dquo">“</span>Token references for token type <code>T</code> become calls to <code>match(T)</code>. match is a support method in Parser that consumes a token if <code>T</code> is the current lookahead token. If there is a mismatch, match throws an exception.”</em></p>
+<h4 id="alternatives">Alternatives</h4>
+<p><em><span class="dquo">“</span>Alternatives become either a switch or an if-then-else sequence”</em></p>
+<p><img alt="Alternatives" class="img-fluid" src="/images/language_implementation_patterns/alternatives.svg"/></p>
+<div class="highlight"><pre><span></span><code><span class="k">switch</span> <span class="p">(</span><span class="o">&lt;</span><span class="n">lookahead</span><span class="o">-</span><span class="n">token</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">case</span> <span class="o">&lt;</span><span class="n">token1</span><span class="o">-</span><span class="n">predicting</span><span class="o">-</span><span class="n">alt1</span><span class="o">&gt;</span><span class="p">:</span>
+  <span class="k">case</span> <span class="o">&lt;</span><span class="n">token2</span><span class="o">-</span><span class="n">predicting</span><span class="o">-</span><span class="n">alt1</span><span class="o">&gt;</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">match</span><span class="o">-</span><span class="n">alt1</span><span class="o">&gt;</span>
+    <span class="k">break</span><span class="p">;</span>
+  <span class="k">case</span> <span class="o">&lt;</span><span class="n">token1</span><span class="o">-</span><span class="n">predicting</span><span class="o">-</span><span class="n">alt2</span><span class="o">&gt;</span><span class="p">:</span>
+  <span class="k">case</span> <span class="o">&lt;</span><span class="n">token2</span><span class="o">-</span><span class="n">predicting</span><span class="o">-</span><span class="n">alt2</span><span class="o">&gt;</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">match</span><span class="o">-</span><span class="n">alt2</span><span class="o">&gt;</span>
+    <span class="k">break</span><span class="p">;</span>
+  <span class="k">case</span> <span class="o">&lt;</span><span class="n">token1</span><span class="o">-</span><span class="n">predicting</span><span class="o">-</span><span class="n">altN</span><span class="o">&gt;</span><span class="p">:</span>
+  <span class="k">case</span> <span class="o">&lt;</span><span class="n">token2</span><span class="o">-</span><span class="n">predicting</span><span class="o">-</span><span class="n">altN</span><span class="o">&gt;</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="n">match</span><span class="o">-</span><span class="n">altN</span><span class="o">&gt;</span>
+    <span class="k">break</span><span class="p">;</span>
+  <span class="k">default</span><span class="p">:</span>
+    <span class="o">&lt;</span><span class="k">throw</span><span class="o">-</span><span class="n">exception</span><span class="o">&gt;</span>
+  <span class="p">}</span>
+</code></pre></div>
+<h4 id="optional-subrule-t">Optional subrule <code>(T)?</code></h4>
+<p><img alt="Option" class="img-fluid" src="/images/language_implementation_patterns/option.svg"/></p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="p">(</span><span class="o">&lt;</span><span class="n">lookahead</span><span class="o">-</span><span class="n">is</span><span class="o">-</span><span class="n">T</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span> <span class="n">match</span><span class="p">(</span><span class="n">T</span><span class="p">);}</span> <span class="c1">// no error else clause</span>
+</code></pre></div>
+<h4 id="one-or-more-subrules">One or more <code>(...)+</code> subrules</h4>
+<p><img alt="One or more" class="img-fluid" src="/images/language_implementation_patterns/one_or_more.svg"/></p>
+<div class="highlight"><pre><span></span><code><span class="k">do</span> <span class="p">{</span> <span class="o">&lt;</span><span class="n">code</span><span class="o">-</span><span class="n">matching</span><span class="o">-</span><span class="n">alternatives</span><span class="o">&gt;</span> <span class="p">}</span>
+<span class="k">while</span><span class="p">(</span><span class="o">&lt;</span><span class="n">lookahead</span><span class="o">-</span><span class="n">predicts</span><span class="o">-</span><span class="n">an</span><span class="o">-</span><span class="n">alt</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">subrule</span><span class="o">&gt;</span><span class="p">);</span>
+</code></pre></div>
+<h4 id="zero-or-more-subrules">Zero or more <code>(...)*</code> subrules</h4>
+<p><img alt="Zero or more" class="img-fluid" src="/images/language_implementation_patterns/zero_or_more.svg"/></p>
+<div class="highlight"><pre><span></span><code><span class="k">while</span><span class="p">(</span><span class="o">&lt;</span><span class="n">lookahead</span><span class="o">-</span><span class="n">predicts</span><span class="o">-</span><span class="n">an</span><span class="o">-</span><span class="n">alt</span><span class="o">-</span><span class="n">of</span><span class="o">-</span><span class="n">subrule</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+  <span class="o">&lt;</span><span class="n">code</span><span class="o">-</span><span class="n">matching</span><span class="o">-</span><span class="n">alternatives</span><span class="o">&gt;</span> <span class="p">}</span>
+</code></pre></div>
+<h3 id="pattern-2-ll1-recursive-descent-lexer">Pattern 2: <span class="caps">LL</span>(1) Recursive-Descent Lexer</h3>
+<p><em><span class="dquo">“</span>Lexers derive a stream of tokens from a character stream by recognizing lexical patterns. Lexers are also called </em><em>scanners</em><em>, </em><em>lexical analyzers</em><em>, and </em><em>tokenizers</em><em>.”</em></p>
+<p><em><span class="dquo">“</span>This pattern can recognize nested lexical structures such as nested comments”</em></p>
+<p><em><span class="dquo">“</span>The goal of the lexer is to emit a sequence of tokens. Each token has two primary attributes: a </em><em>token type</em><em> (symbol category) and the text associated with it.”</em></p>
+<h3 id="pattern-3-ll1-recursive-descent-parser">Pattern 3: <span class="caps">LL</span>(1) Recursive-Descent Parser</h3>
+<p><em><span class="dquo">“</span>It’s the weakest form of recursive-descent parser but the easiest to understand and implement.”</em></p>
+<p><em><span class="dquo">“</span>To make parsing decisions, the parser tests the current lookahead token against the alternatives’ lookahead sets. A lookahead set is the set of tokens that can begin a particular alternative.”</em></p>
+<p><em><span class="dquo">“</span>Formally, we compute lookahead sets using two computations: <span class="caps">FIRST</span> and <span class="caps">FOLLOW</span>. In practice, though, it’s easier to simply ask ourselves, ‘What tokens can possibly start phrases beginning at this alternative?’”</em></p>
+<h4 id="deterministic-parsing-decisions">Deterministic Parsing Decisions</h4>
+<p><em><span class="dquo">“</span><span class="caps">LL</span> parsing decisions work only when the lookahead sets predicting the alternatives are disjoint”</em></p>
+<p><em><span class="dquo">“</span>If the lookahead sets overlap, though, the parser is </em><em>nondeterministic</em><em>-it cannot determine which alternative to choose.”</em></p>
+<p><em><span class="dquo">“</span>Building an <span class="caps">LL</span>(1) parser is the easiest way to learn about parsers. In practice, though, we really need more than a single token of lookahead.”</em></p>
+<h3 id="pattern-4-llk-recursive-descent-parser">Pattern 4: <span class="caps">LL</span>(k) Recursive-Descent Parser</h3>
+<p><em><span class="dquo">“</span>The strength of a recursive-descent parser depends entirely on the strength of its lookahead decisions.”</em></p>
+<p><em><span class="dquo">“</span>Having more lookahead is like being able to see farther down multiple paths emanating from a fork in a maze. The farther we can see ahead, the easier it is to decide which path to take. More powerful parsing decisions make it easier to build parsers.”</em></p>
+<p><em><span class="dquo">“</span>For example, we want to recognize input such as <code>[a, b=c, [d,e]]</code><span class="dquo">“</span></em></p>
+<div class="highlight"><pre><span></span><code>list : '[' elements ']' ;
+elements : element ( ',' element)* ;
+element : NAME '=' NAME
+        | NAME
+        | list
+        ;
+</code></pre></div>
+<p><em><span class="dquo">“</span><code>element</code> [is] non-<span class="caps">LL</span>(1) since the first two alternatives start with the same <code>NAME</code> token.”</em></p>
+<p><em><span class="dquo">“</span>The lookahead depth </em><em>k</em><em> in <span class="caps">LL</span>(k) is really a maximum not the exact, fixed amount of lookahead each parsing decision uses.”</em></p>
+<h2 id="enhanced-parsing-patterns">Enhanced Parsing Patterns</h2>
+<h3 id="parsing-with-arbitrary-lookahead">Parsing with Arbitrary Lookahead</h3>
+<p><em><span class="dquo">“</span>[Some] language constructs […] only differ on the right side. For example, C++ function definitions and declarations are identical until the parser sees <code>;</code> or <code>{</code> :”</em></p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">bar</span><span class="p">()</span><span class="w"> </span><span class="p">{...}</span><span class="w"> </span><span class="c1">// a function definition</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">bar</span><span class="p">();</span><span class="w"> </span><span class="c1">// a function declaration</span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>function headers can be arbitrarily long, the distinguishing token does not appear at a fixed lookahead position from the left side of the statement.”</em></p>
+<p><em><span class="dquo">“</span>The parser can speculatively parse as far ahead as it needs.”</em></p>
+<p><em><span class="dquo">“</span>Speculatively matching the alternatives of a rule effectively orders them. The first alternative that matches wins. This is great because we can use ordering to specify precedence.”</em></p>
+<p><em><span class="dquo">“</span>With ordered alternatives, there is no ambiguity because the parser consistently chooses the first of two ambiguous alternatives. By having the parser pay attention to the order of alternatives”</em></p>
+<p><em><span class="dquo">“</span>Though speculative parsing has a lot of advantages, there are two drawbacks. First, it can make debugging more difficult. When the parser speculatively parses ahead, it’s easy to get lost with all of the scanning ahead and rewinding. Second, backtracking can be extremely slow. Fortunately, we can fix the efficiency issue.”</em></p>
+<h3 id="parsing-like-a-pack-rat">Parsing like a Pack Rat</h3>
+<p><em><span class="dquo">“</span>Almost by definition, we use backtracking parsers only when we need to distinguish between similar language constructs. If the constructs are similar, the associated grammar likely contains repeated references to the same rule.”</em></p>
+<h3 id="directing-the-parse-with-semantic-information">Directing the Parse with Semantic Information</h3>
+<p><em><span class="dquo">“</span>The parsers we’re working with in this book recognize </em><em>context-free languages</em><em>. A context-free language is a language whose constructs don’t depend on the presence of other constructs.
+Unfortunately, some programming languages have context-sensitive phrases. To handle context-sensitive phrases with a context-free parser, we have to predicate alternatives. In effect, a predicate is just a run-time boolean test that says when it’s <span class="caps">OK</span> to match an alternative. The predicates gate the associated alternatives in and out.”</em></p>
+<p><em><span class="dquo">“</span>In C++, the expression <code>T(6)</code> is either a function call or a constructor-style typecast depending on whether <code>T</code> is a function or type name. A C++ parser literally does not know how to interpret <code>T(6)</code> without seeing the definition of <code>T</code>. Such a construct is </em><em>context sensitive</em><em> and, in this case, ambiguous from a purely syntactic point of view.”</em></p>
+<p><em><span class="dquo">“</span>Ambiguous grammars lead to </em><em>nondeterministic parsers</em><em>”</em></p>
+<h3 id="pattern-5-backtracking-parser">Pattern 5 Backtracking Parser</h3>
+<p><em><span class="dquo">“</span>This pattern adds speculative parsing support (arbitrary lookahead) to any recursive-descent recognizer.”</em></p>
+<p><em><span class="dquo">“</span>[…] we can’t map all grammars to recursive-descent parsers. Only </em><em>non-left-recursive grammars</em><em> work (no rule can directly or indirectly invoke itself without consuming a token).”</em></p>
+<p><em><span class="dquo">“</span>[…] we can’t always get properly functioning (deterministic) parsers even from non-left-recursive grammars. The problem is that fixed lookahead <span class="caps">LL</span> parsers need the lookahead sets predicting alternatives to be disjoint.”</em></p>
+<p><em><span class="dquo">“</span>This pattern overcomes this lookahead issue by allowing arbitrary lookahead […]. To look arbitrarily ahead, we need infrastructure to support backtracking. Backtracking also gives us a way to specify the precedence of ambiguous rule alternatives (alternatives that can match the same input). Backtracking parsers, by definition, try the alternatives in order.”</em></p>
+<p><em><span class="dquo">“</span>Syntactic predicates are grammar fragments that specify the lookahead language predicting an alternative.”</em></p>
+<p><em><span class="dquo">“</span><span class="caps">ANTLR</span>’s notion of grammars plus syntactic predicates [are called] Parsing Expression Grammars (PEGs)”</em></p>
+<p><em><span class="dquo">“</span>In the functional language world, syntactic predicates are called </em><em>parser combinators</em><em>”</em></p>
+<p><em><span class="dquo">“</span>Syntactic predicates and speculative parsing are extremely useful when parsing phrases that look the same from the left edge. Distinguishing between C++ function definitions and declarations is a prime example”</em></p>
+<h4 id="dealing-with-actions-while-backtracking">Dealing with Actions While Backtracking</h4>
+<p><em><span class="dquo">“</span>Either we disallow actions or disallow actions with side effects, or we parse winning alternatives twice.”</em></p>
+<p><em><span class="dquo">“</span>During speculation, all actions are off. Once the parser knows an alternative will match, however, it can match the alternative again “with feeling” to do the actions.”</em></p>
+<h3 id="pattern-6-memoizing-parser">Pattern 6 Memoizing Parser</h3>
+<p><em><span class="dquo">“</span>This pattern records partial parsing results during backtracking to guarantee linear parsing performance, at the cost of a small amount of memory.”</em></p>
+<p><em><span class="dquo">“</span>Memoizing is a form of dynamic programming”</em></p>
+<p><em><span class="dquo">“</span>Another name for </em><em>memoizing recursive-descent parser</em><em> is </em><em>packrat parser</em><em>”</em></p>
+<p><em><span class="dquo">“</span>Memoization only helps us, though, if we invoke the same rule at the same input position more than once.”</em></p>
+<p><em><span class="dquo">“</span>For example, upon input <code>(3+4);</code>, a backtracking parser derived from the following rule invokes <code>expr</code> twice:”</em></p>
+<div class="highlight"><pre><span></span><code><span class="n">s</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">expr</span><span class="w"> </span><span class="s1">'!'</span><span class="w"> </span><span class="c1">// assume backtracking parser tries this alternative</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="n">expr</span><span class="w"> </span><span class="s1">';'</span><span class="w"> </span><span class="c1">// and then this one</span>
+<span class="w">  </span><span class="o">;</span><span class="w"></span>
+<span class="n">expr</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="o">;</span><span class="w"> </span><span class="c1">// match input such as "(3+4)"</span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>Rule <code>s</code> invokes <code>expr</code> to speculatively match the first alternative. <code>expr</code> succeeds, but <code>s</code> finds that the next 
+input symbol is <code>;</code> and not <code>!</code>. Rule <code>s</code> rewinds the input and tries the second alternative. The parser immediately calls
+<code>expr</code> again and at the same input position. […] To avoid reparsing, all we have to do is remember that <code>expr</code> succeeded 
+the last time we tried it at this position.”</em></p>
+<p><em><span class="dquo">“</span>Packrat parsers are guaranteed to have linear performance [and also] linear space complexity.”</em></p>
+<h3 id="pattern-7-predicated-parser">Pattern 7 Predicated Parser</h3>
+<p><em><span class="dquo">“</span>This pattern augments any top-down parser with arbitrary boolean expressions that help make parsing decisions.”</em></p>
+<p><em><span class="dquo">“</span>These boolean expressions are called semantic predicates and specify the semantic applicability of an alternative.
+Predicates that evaluate to false effectively “turn off” a parser decision path. From a grammar point of view, false
+predicates make alternatives invisible.”</em></p>
+<p><em><span class="dquo">“</span>We need semantic predicates when the parser cannot use syntax alone to make parsing decisions, that is, when the parser
+cannot distinguish between alternatives without using run-time information. The most common case is when we need to use symbol
+table information to guide the parse.”</em></p>
+<p><em><span class="dquo">“</span>Predicates are also useful when a parser must recognize multiple versions of an input language. For example, the <span class="caps">GCC</span> C
+compiler adds a number of extensions beyond C. Java 5.0 introduced the enum keyword to support enumerated types.”</em></p>
+<h1 id="analyzing-languages">Analyzing Languages</h1>
+<h2 id="chapter-4-building-intermediate-form-trees">Chapter 4 Building Intermediate Form Trees</h2>
+<p><em><span class="dquo">“</span>Only the simplest language applications get away with reading 
+input and directly generating output. Such applications are called
+</em><em>syntax-directed</em><em> applications”</em></p>
+<p><em><span class="dquo">“</span>The key characteristic of syntax-directed applications is that 
+they translate input phrase by phrase using a single pass over
+the input.”</em></p>
+<p><em><span class="dquo">“</span>Most language applications, however, need to build an
+</em><em>intermediate representation</em><em> (<span class="caps">IR</span>) or intermediate form.”</em></p>
+<p><em><span class="dquo">“</span>The goal of an application’s reader component is to fill an <span class="caps">IR</span> 
+data structure with elements of interest from the input stream.”</em></p>
+<p><em><span class="dquo">“</span>to get a computer to understand a nontrivial sentence, we have to 
+break it down into a series of operations and operands.”</em></p>
+<p><em><span class="dquo">“</span>Once we identify the operators and operands among the input 
+tokens, we need to build an <span class="caps">IR</span> data structure. For most language 
+applications, that means building a tree data structure. In 
+particular, we’ll build an </em><em>abstract syntax tree</em><em> (<span class="caps">AST</span>).”</em></p>
+<p><em><span class="dquo">“</span>Abstract syntax tree (<span class="caps">AST</span>) […] hold the key tokens from the input
+stream and record grammatical relationships discovered during the parse.”</em></p>
+<p><em><span class="dquo">“</span>ASTs are the </em><em>lingua franca</em><em> spoken by the various stages in a 
+language application. Each stage performs a computation, rewrites 
+the tree, or creates another data structure before passing the tree 
+along to the next stage.”</em></p>
+<p><em><span class="dquo">“</span>The four most common <span class="caps">IR</span> tree patterns:”</em></p>
+<ul>
+<li><em><span class="dquo">“</span></em><em>Parse trees</em><em> record how a parser recognizes an input sentence. The interior nodes are rule names, and the leaves are tokens. Although parse trees are less suitable than ASTs for most language applications, parsers can create them automatically.”</em></li>
+<li><em><span class="dquo">“</span></em><em>Homogeneous <span class="caps">AST</span></em><em> […]: If all the nodes have the same type, we say that they are homogeneous. With a single node type, there can be no specialty fields to reference child subtrees. Nodes track children with lists of child pointers.”</em></li>
+<li><em><span class="dquo">“</span></em><em>Normalized Heterogeneous <span class="caps">AST</span></em><em> […]: Trees with a multitude of node types are called heterogeneous trees. Normalized het erogeneous trees use a normalized list of children like homogeneous trees.”</em></li>
+<li><em><span class="dquo">“</span></em><em>Irregular Heterogeneous <span class="caps">AST</span></em><em> […]: When we refer to an <span class="caps">AST</span> as heterogeneous, we also assume that the nodes have irregular children. Instead of a normalized child list, the nodes have named fields, one per child.”</em></li>
+</ul>
+<h3 id="why-we-build-trees">Why We Build Trees</h3>
+<p><em><span class="dquo">“</span>Many languages have subphrases and nested structures.”</em></p>
+<p><em><span class="dquo">“</span>trees are the perfect data structure to represent ordered and
+nested structures. There are two general kinds of trees we’re going
+to look at: </em><em>parse trees</em><em> and </em><em>abstract syntax trees</em><em>.”</em></p>
+<p><em><span class="dquo">“</span>Parse trees record the sequence of rules a parser applies as well 
+as the tokens it matches. Interior parse tree nodes represent rule 
+applications, and leaf nodes represent token matches.”</em></p>
+<p><em><span class="dquo">“</span>a parser execution trace isn’t really the best <span class="caps">IR</span>. Certainly we
+need to pinpoint the various substructures, but we don’t need to 
+name them explicitly.”</em></p>
+<h3 id="building-abstract-syntax-trees">Building Abstract Syntax Trees</h3>
+<p><em><span class="dquo">“</span>An <span class="caps">IR</span> tree should be the following:</em></p>
+<ul>
+<li><em><strong>Dense</strong>: No unnecessary nodes</em></li>
+<li><em><strong>Convenient</strong>: Easy to walk</em></li>
+<li><em><strong>Meaningful</strong>: Emphasize operators, operands, and the relationship between them rather than artifacts from the grammar”</em></li>
+</ul>
+<p><em><span class="dquo">“</span>it should be easy and fast to identify patterns in the tree. 
+Language applications that use intermediate trees usually make 
+multiple passes over the trees in order to analyze or build other 
+data structures. The structure of intermediate trees should be 
+brain-dead simple.”</em></p>
+<p><em><span class="dquo">“</span>the tree structure should be insensitive to changes in the grammar”</em></p>
+<p><em><span class="dquo">“</span>Computers only care about operators and operands.”</em></p>
+<p><em><span class="dquo">“</span>By condensing the input to its essential elements, we decouple it 
+from the original syntax. So, for example, assignment syntax boils 
+down to an assignment operator and two operands. Decoupling does two 
+things. First, it gets us closer to the operator-operand model of 
+the <span class="caps">CPU</span>. Second, we can have different languages share a common 
+intermediate form.”</em></p>
+<p><em><span class="dquo">“</span>The key idea behind <span class="caps">AST</span> structure is that tokens representing 
+operators or operations become subtree roots. All other tokens 
+become operands (children of operator nodes).”</em></p>
+<h3 id="representing-pseudo-operations-in-asts">Representing Pseudo-operations in ASTs</h3>
+<p><em><span class="dquo">“</span>Not all programming language constructs map directly to
+executable code.”</em></p>
+<p><em><span class="dquo">“</span>In some cases, there is no reasonable input token to use as a
+subtree root. We must invent an </em><em>imaginary token</em><em>, a token for 
+which there is no corresponding input token. For example, variable
+declarations in languages derived from C usually need an imaginary token.”</em></p>
+<h3 id="implementing-asts-in-java">Implementing ASTs in Java</h3>
+<p><em><span class="dquo">“</span>technically, we need only one data type: a generic tree node with
+a list of children. What we really care about is the tree structure
+(relationships between nodes), not necessarily the node
+implementation type(s) themselves.”</em></p>
+<p><em><span class="dquo">“</span>Trees built from a single data type are called
+</em><em>homogeneous trees</em><em>.”</em></p>
+<h3 id="enforcing-tree-structure-with-the-type-system">Enforcing Tree Structure with the Type System</h3>
+<p><em><span class="dquo">“</span>To avoid creating improperly structured ASTs, we can co-opt the implementation
+language’s static type system to enforce structure.”</em></p>
+<p><em><span class="dquo">“</span>The best way to create ASTs and to verify their structure is with a formal mechanism.”</em></p>
+<h3 id="constructing-asts-with-antlr-grammars">Constructing ASTs with <span class="caps">ANTLR</span> Grammars</h3>
+<p><em>” The key is that we are declaring what the <span class="caps">AST</span> should look like, not how to build it.
+It is analogous to using a grammar to specify syntax rather than building a parser.”</em></p>
+<p><em><span class="dquo">“</span>We looked at two different ways to structure intermediate representations (parse trees and ASTs)
+and three different ways to implement ASTs.”</em></p>
+<ul>
+<li><em><span class="dquo">“</span>Pattern 8, Parse Tree […]:</em><ul>
+<li><em>Pros: Parser generators can automatically build these for us.</em></li>
+<li><em>Cons: Parse trees are full of noise (unnecessary nodes). They are sensitive to changes in the grammar unrelated to syntax. If a parser generator generates heterogeneous node types, there can be literally hundreds of class definitions.</em>”</li>
+</ul>
+</li>
+<li><em><span class="dquo">“</span>Pattern 9, Homogeneous <span class="caps">AST</span> […]:</em><ul>
+<li><em>Pros: Homogeneous trees are very simple.</em></li>
+<li><em>Cons: It’s cumbersome to annotate <span class="caps">AST</span> nodes because the single node type has the union of all needed fields. There is no way to add methods specific to a particular kind of node.”</em></li>
+</ul>
+</li>
+<li><em><span class="dquo">“</span>Pattern 10, Normalized Heterogeneous <span class="caps">AST</span> […]:</em><ul>
+<li><em>Pros: It’s easy to add operator or operand-specific data and methods.</em></li>
+<li><em>Cons: Large grammars like Java’s need about 200 class definitions to be fully heterogeneous. That’s a lot of files to read and write.”</em></li>
+</ul>
+</li>
+<li><em><span class="dquo">“</span>Pattern 11, Irregular Heterogeneous <span class="caps">AST</span> […].</em><ul>
+<li><em>Pros: It’s easy to add operator- or operand-specific data and methods. Sometimes code operating on nodes is more readable because the children (operands) have names rather than positions like <code>children[0]</code>. Building tree-walking methods for a small set of heterogeneous nodes is quick and easy.</em></li>
+<li><em>Cons: As with Pattern 10, Normalized Heterogeneous <span class="caps">AST</span> […], there are lots of <span class="caps">AST</span> classes to read and write. Having irregular children makes building external visitors difficult. Most of the time we have to build tree walkers by hand using Pattern 12, Embedded Heterogeneous Tree Walker […]”</em></li>
+</ul>
+</li>
+</ul>
+<p><em><span class="dquo">“</span>If you’re in doubt about which is best in your situation, choosing Pattern 10, Normalized Heterogeneous <span class="caps">AST</span> […]
+is a safe bet.”</em></p>
+<h3 id="pattern-8-parse-tree">Pattern 8: Parse Tree</h3>
+<h4 id="purpose">Purpose</h4>
+<p><em><span class="dquo">“</span>A parse tree describes how a parser recognized an input sentence.
+A parse tree is sometimes called a syntax tree (as opposed to an abstract
+syntax tree). Despite not being that useful for building interpreters and
+translators [they] are heavily used
+by development environments and text rewriting systems.”</em></p>
+<h4 id="discussion">Discussion</h4>
+<p><em><span class="dquo">“</span>Parse trees record the sequence of rules a parser applies as well as the tokens
+it matches. Interior parse tree nodes represent rule applications, and leaf
+nodes represent token matches.”</em></p>
+<p><em><span class="dquo">“</span>Parse trees are really easy to build by hand and are so regular that tools like
+<span class="caps">ANTLR</span> can automate the process for us.”</em></p>
+<p><em><span class="dquo">“</span>Parse
+trees are full of noise because of all the interior rule nodes. They are also very
+sensitive to changes in the grammar.”</em></p>
+<p><em><span class="dquo">“</span>An <span class="caps">AST</span> captures just the essential information from the input: all of the input
+tokens and the appropriate structure. The interior nodes are operators or
+operations rather than rule names.”</em></p>
+<p><em><span class="dquo">“</span>Parse trees mirror the function call graphs of a recursive-descent parser”</em></p>
+<h3 id="pattern-9-homogeneous-ast">Pattern 9: Homogeneous <span class="caps">AST</span></h3>
+<h4 id="purpose_1">Purpose</h4>
+<p><em><span class="dquo">“</span>A homogeneous tree implements an abstract syntax tree (<span class="caps">AST</span>) using a single
+node data type and a normalized child list representation.”</em></p>
+<h4 id="discussion_1">Discussion</h4>
+<p><em><span class="dquo">“</span>The key idea behind an <span class="caps">AST</span> is the operator-operand tree structure, not the
+node data type.”</em></p>
+<p><em><span class="dquo">“</span>We don’t need to use the type system of our implementation language to distinguish
+between nodes.”</em></p>
+<p><em><span class="dquo">“</span>In fact, homogeneous ASTs are the only
+convenient choice for non-object-oriented languages like C.”</em></p>
+<p><em><span class="dquo">“</span>Homogeneous ASTs necessarily use a normalized child representation:
+<code>List&lt;AST&gt;</code>. This makes it particularly easy to build external visitors.”</em></p>
+<h3 id="pattern-10-normalized-heterogeneous-ast">Pattern 10: Normalized Heterogeneous <span class="caps">AST</span></h3>
+<h4 id="purpose_2">Purpose</h4>
+<p><em><span class="dquo">“</span>This pattern implements an abstract syntax tree (<span class="caps">AST</span>) using more than a single
+node data type but with a normalized child list representation.”</em></p>
+<h4 id="discussion_2">Discussion</h4>
+<p><em><span class="dquo">“</span>This pattern makes the most sense when we need to store node-specific data”</em></p>
+<p><em><span class="dquo">“</span>The normalized child list makes it much easier to build external visitors.”</em></p>
+<h3 id="pattern-11-irregular-heterogeneous-ast">Pattern 11: Irregular Heterogeneous <span class="caps">AST</span></h3>
+<h4 id="purpose_3">Purpose</h4>
+<p><em><span class="dquo">“</span>This pattern implements an abstract syntax tree (<span class="caps">AST</span>) using more than a single
+node data type and with an irregular child list representation.”</em></p>
+<h4 id="discussion_3">Discussion</h4>
+<p><em><span class="dquo">“</span>Instead of a uniform list of children, each node data type has specific
+(named) child fields. In this sense, the child pointers are irregular.
+In some cases, named fields lead to more readable code.”</em></p>
+<p><em><span class="dquo">“</span>It’s very natural to name the fields of a class, in this case naming the children of
+a node. The big downside to using nodes with irregular children is that it’s
+much less convenient to build tree walkers”</em></p>
+<h2 id="walking-and-rewriting-trees">Walking and Rewriting Trees</h2>
+<p><em><span class="dquo">“</span>Tree walking is one of the key processes going on in a large language application.”</em></p>
+<p><em><span class="dquo">“</span>In real applications, though, tree walking gets surprisingly complicat- ed. There are a number of different variations, sometimes even within the same application.”</em></p>
+<p><em><span class="dquo">“</span>The variation we choose depends on whether we have the source code for our tree nodes, whether the trees have normalized children, whether the trees are homogeneous or heterogeneous, whether we need to rewrite trees while walking, and even in which order we need to walk the nodes.”</em></p>
+<h3 id="walking-trees-and-visitation-order">Walking Trees and Visitation Order</h3>
+<ul>
+<li><em><span class="dquo">“</span>Preorder traversal or top-down traversal: <span class="math">\(+ 1 2\)</span>. Visit a (parent) node before visiting its children.</em></li>
+<li><em>Inorder traversal: <span class="math">\(1 + 2\)</span>. Visit a node in between visiting children.</em></li>
+<li><em>Postorder traversal or bottom-up traversal: <span class="math">\(1 2 +\)</span>. Visit a node after visiting its children.”</em></li>
+</ul>
+<h3 id="pattern-12-embedded-heterogeneous-tree-walker">Pattern 12: Embedded Heterogeneous Tree Walker</h3>
+<h4 id="purpose_4">Purpose</h4>
+<p><em><span class="dquo">“</span>This pattern walks heterogeneous ASTs using a set of recursive methods defined within the node class definitions.”</em></p>
+<h4 id="discussion_4">Discussion</h4>
+<p><em><span class="dquo">“</span>This is the easiest tree-walking pattern to understand, but, ultimately, this approach doesn’t scale well. Because it distributes tree-walking code across all node definitions, it works best when there are only a few node definitions.”</em></p>
+<h3 id="pattern-13-external-tree-visitor">Pattern 13: External Tree Visitor</h3>
+<h4 id="purpose_5">Purpose</h4>
+<p><em><span class="dquo">“</span>This pattern encapsulates all tree-walking code associated with a particular task into a single visitor class.
+Visitors combine tree walking and action execution code outside the <span class="caps">AST</span> node definitions. Consequently, we can change the functionality of the tree walker without having to change the <span class="caps">AST</span> class definitions and can even switch visitors on the fly. An external visitor can walk either heterogeneous or homogeneous <span class="caps">AST</span> nodes.”</em></p>
+<h4 id="discussion_5">Discussion</h4>
+<p><em><span class="dquo">“</span>The visitor pattern is the workhorse of choice for tree walking in most language applications. Ultimately you might get tired of manually building visitors, though”</em></p>
+<h4 id="implementation">Implementation</h4>
+<p><em><span class="dquo">“</span>There are two ways to implement this pattern. The first is more traditional and relies on the node types themselves. The second relies on the node’s token type instead.”</em></p>
+<h5 id="visitor-switching-on-node-type">Visitor Switching on Node Type</h5>
+<p><em><span class="dquo">“</span>The traditional implementation of the visitor pattern originally specified in
+‘Design Patterns: Elements of Reusable Object-Oriented Software’
+relies on a ‘double-dispatch’ method within each <span class="caps">AST</span> node. The double-dispatch method redirects <code>visit()</code>
+ calls on a node to an appropriate method in a visitor servicing that node type. The visitor is like a set of callback methods.”</em></p>
+<h5 id="switching-on-the-token-type-to-build-independent-visitors">Switching on the Token Type to Build Independent Visitors</h5>
+<p><em><span class="dquo">“</span>For language applications, we build trees from tokens. Since we can distinguish between tokens using the token type, we can also 
+distinguish between <span class="caps">AST</span> nodes using the token type. By switching on the token type rather than the <span class="caps">AST</span> node type, we can avoid
+the <code>visit()</code> method in each <span class="caps">AST</span> node. In its place, we use just one dispatch method inside the visitor.”</em></p>
+<h3 id="pattern-14-tree-grammar">Pattern 14: Tree Grammar</h3>
+<h4 id="purpose_6">Purpose</h4>
+<p><em><span class="dquo">“</span>Tree grammars are a terse and formal way of building an external visitor.”</em></p>
+<h4 id="discussion_6">Discussion</h4>
+<p><em><span class="dquo">“</span>Tree grammars look just like conventional parser grammars except that we can match subtree patterns as well.
+As with parser grammars, we can embed actions to extract information or reorganize the input (a tree, in this case).”</em></p>
+<p><em><span class="dquo">“</span><span class="caps">ANTLR</span> generates tree walkers from tree grammars that literally act like parsers.”</em></p>
+<p><em><span class="dquo">“</span>Tree grammars do not care about the implementation language classes used to represent <span class="caps">AST</span> nodes (they work with both homogeneous and heterogeneous <span class="caps">AST</span> nodes).”</em></p>
+<h3 id="pattern-15-tree-pattern-matcher">Pattern 15: Tree Pattern Matcher</h3>
+<h4 id="purpose_7">Purpose</h4>
+<p><em><span class="dquo">“</span>This pattern walks trees, triggering actions or tree rewrites as it encounters tree patterns of interest.
+The process of matching and rewriting trees is formally called term rewriting.”</em></p>
+<h4 id="discussion_7">Discussion</h4>
+<p><em><span class="dquo">“</span>Using a tree pattern matcher differs from using a tree grammar in two important ways:</em></p>
+<ul>
+<li><em>We have to specify patterns only for the subtrees we care about.</em></li>
+<li><em>We don’t need to direct the tree walk.”</em></li>
+</ul>
+<p><em><span class="dquo">“</span>A tree pattern matcher is analogous to text rewriting tools such as <code>awk</code>, <code>sed</code>, and <code>perl</code>.”</em></p>
+<h2 id="chapter-6-tracking-and-identifying-program-symbols">Chapter 6 Tracking and Identifying Program Symbols</h2>
+<h3 id="collecting-information-about-program-entities">Collecting Information About Program Entities</h3>
+<p><em><span class="dquo">“</span>what we need to know for each symbol”</em></p>
+<ul>
+<li><em>Name</em></li>
+<li><em>Category</em>: class, method, variable, label…</li>
+<li><em>Type</em></li>
+</ul>
+<h3 id="grouping-symbols-into-scopes">Grouping Symbols into Scopes</h3>
+<ul>
+<li><em>Static vs. dynamic scoping</em></li>
+<li><em>Nesting</em></li>
+<li><em>Contents</em>: declarations, statements or both</li>
+<li><em>Visibility</em></li>
+</ul>
+<h3 id="resolving-symbols">Resolving Symbols</h3>
+<p><em><span class="dquo">“</span>to resolve a symbol reference, we look for it in its semantic context, starting with the current scope. If <code>resolve()</code> doesn’t find the symbol in the current scope, it asks the enclosing scope if it can find the symbol. <code>resolve()</code> recursively walks toward the root of the scope tree until it finds the symbol or runs out of scopes.”</em></p>
+<h2 id="chapter-7-managing-symbol-tables-for-data-aggregates">Chapter 7 Managing Symbol Tables for Data Aggregates</h2>
+<h3 id="building-scope-trees-for-structs">Building Scope Trees for Structs</h3>
+<p><em><span class="dquo">“</span>We also have to resolve symbols within struct scopes from the outside. In other words, a language application might have to figure out which field <code>«expr».x</code> refers to.”</em></p>
+<p><em><span class="dquo">“</span>The general (recursive) rule for resolving <code>«expr».x</code> is to determine the type of <code>«expr»</code> and then look up <code>x</code> in that scope.”</em></p>
+<p><em><span class="dquo">“</span>we need two different resolve methods: one for looking up isolated symbols like <code>d</code> and another for resolving member access expressions like <code>d.i</code>.”</em></p>
+<h3 id="building-scope-trees-for-classes">Building Scope Trees for Classes</h3>
+<p><em><span class="dquo">“</span>Per the usual object-oriented language conventions, […] we want to look up the inheritance chain before looking in the global scope.”</em></p>
+<p><em><span class="dquo">“</span>To handle […] forward references […]. We can make two passes over the input, one to define symbols and another to resolve them”</em></p>
+<h2 id="chapter-8-enforcing-static-typing-rules">Chapter 8 Enforcing Static Typing Rules</h2>
+<p><em><span class="dquo">“</span>Sometimes, though, we write code that make no sense even if the syntax is correct. Such programs violate a language’s semantic rules.”</em></p>
+<p><em><span class="dquo">“</span>Languages typically have lots and lots of semantic rules. Some rules are run-time constraints (dynamic semantics), and some are compile-time constraints (static semantics).”</em></p>
+<p><em><span class="dquo">“</span>Some languages enforce the same rule statically and then again dynamically to guard against hostile programs. For example, Java does type checking at compile-time as well as at run-time.”</em></p>
+<h1 id="building-interpreters">Building Interpreters</h1>
+<h2 id="chapter-9-building-high-level-interpreters">Chapter 9 Building High-Level Interpreters</h2>
+<p><em><span class="dquo">“</span>High-level interpreters directly execute source code instructions or the <span class="caps">AST</span> equivalent. (Low-level interpreters execute instructions called bytecodes that are close to <span class="caps">CPU</span> machine instructions.)”</em></p>
+<p><em><span class="dquo">“</span>An interpreter simulates an idealized computer in software. Such “computers” have a processor, code memory, data memory, and (usually) a stack. The processor pulls instructions from the code memory, decodes them, and exe- cutes them. An instruction can read or write to the data memory or onto the stack. Function calls save return addresses so they can return to the instruction following the function call.”</em></p>
+<p><em><span class="dquo">“</span>There are three things to consider when building an interpreter: how to store data, how and when to track symbols, and how to execute instructions.”</em></p>
+<h3 id="designing-high-level-interpreter-memory-systems">Designing High-Level Interpreter Memory Systems</h3>
+<p><em><span class="dquo">“</span>High-level interpreters store values according to variable names, not memory addresses (like low-level interpreters and CPUs do). That means we’ve got to represent memory with a dictionary mapping names to values. There are three kinds of memory spaces to worry about for most programming languages: global memory, function spaces (for parameters and locals), and data aggregate instances (structs or objects).”</em></p>
+<h3 id="processing-instructions">Processing Instructions</h3>
+<p><em><span class="dquo">“</span>fetch-decode-execute cycle: First, we load an instruction from code memory. Then, we decode the instruction to find the operation and operands. Finally, we execute the operation. Rinse and repeat.”</em></p>
+<h2 id="chapter-10-building-bytecode-interpreters">Chapter 10 Building Bytecode Interpreters</h2>
+<h3 id="bytecode-machine-architecture">Bytecode Machine Architecture</h3>
+<p><em><span class="dquo">“</span>A bytecode interpreter simulates a computer with the following components:”</em></p>
+<ul>
+<li><em>Code memory</em>: the assembled bytecode (instructions and operands)</li>
+<li><em>ip register</em>: pointing at the next instruction to be executed</li>
+<li><em>Global memory</em>: space for variables</li>
+<li><em><span class="caps">CPU</span></em>: executes instructions</li>
+<li><em>Constant pool</em>: holds the constants (known at assembly time)</li>
+<li><em>Function call stack</em>: for parameters, local variables and return values</li>
+<li><em>fp register</em>: points to the top of the function call stack</li>
+</ul>
+<p>In addition a Stack-Based interpreter has:</p>
+<ul>
+<li><em>Operand stack</em>: for temporary values (instead of registers)</li>
+<li><em>sp register</em>: points to the top of the operand stack</li>
+</ul>
+<p>A Register-Based interpreter has (instead of a operand stack):</p>
+<ul>
+<li><em>infinite register set per function call</em>: parameters, local variables and return values</li>
+</ul>
+<h1 id="translating-and-generating-languages">Translating and Generating Languages</h1>
+<h2 id="translating-computer-languages">Translating Computer Languages</h2>
+<p><em><span class="dquo">“</span>Translation involves fully understanding each input phrase, picking
+an appropriate output construct, and filling it with elements from
+the input model.”</em></p>
+<p><em><span class="dquo">“</span>We usually have to create an input model like an <span class="caps">AST</span> because we
+can’t always do semantic analysis properly as we parse.”</em></p>
+<p><em><span class="dquo">“</span>According to the needs of the task at hand, we compute everything we
+need to know about the input and then make a decision about mapping an
+input phrase to an output phrase.”</em></p>
+<h3 id="rule-based-translation">Rule-Based Translation</h3>
+<p><em><span class="dquo">“</span>Rule-based systems are particularly good at legacy code conversions
+because we want the translated code to be natural.”</em></p>
+<p><em><span class="dquo">“</span>These rule engines let us say what to do, not how to do it.
+They are powerful, implementation-language independent, expressive,
+formal, and beautiful.”</em></p>
+<p><em><span class="dquo">“</span>These systems tend to be complex beasts. With a large number of
+translation rules, translations can be slow.”</em></p>
+<p><em><span class="dquo">“</span>The rule engines themselves are black boxes, which can
+make it hard to understand what’s gone wrong in a translation.
+Some of these systems were also designed to be the center of the
+universe, making them tricky to integrate into applications.”</em></p>
+<h3 id="model-driven-translation">Model-Driven Translation</h3>
+<p><em><span class="dquo">“</span>In a model-driven translator, everything centers around an input
+model created by the parser.”</em></p>
+<p><em><span class="dquo">“</span>From the <span class="caps">AST</span> input model, we’re going to learn how to derive an
+appropriate output model instead of immediately generating output.”</em></p>
+<p><em><span class="dquo">“</span>As we walk the input model, we’ll match subtrees and create
+output objects to represent translated phrases”</em></p>
+<p><em><span class="dquo">“</span>Using a hierarchy of output objects to represent the output makes
+sense because it’s equivalent to a syntax tree.”</em></p>
+<h3 id="decoupling-input-model-traversal-from-output-order">Decoupling Input Model Traversal from Output Order</h3>
+<p><em><span class="dquo">“</span>There are two ways to solve input-output ordering mismatches. First,
+we can walk the tree [multiple times].”</em></p>
+<p><em><span class="dquo">“</span>This works but is inefficient because we have to walk the
+(potentially very large) tree [multiple times]. This is an
+output-driven approach because it ‘pulls’ information
+from the input model according to the output order.”</em></p>
+<p><em><span class="dquo">“</span>The second choice is to walk the input model a single time,
+collecting the declarations and definitions in lists instead of
+directly emitting text”</em></p>
+<p><em><span class="dquo">“</span>This input-driven approach lets us decouple the input and output
+order, albeit at the cost of buffering up the various output pieces.
+It’s totally worth it, though.”</em></p>
+<p><em><span class="dquo">“</span>We know that the translation process is about creating an input
+model, enriching it with semantic information, and then creating an
+appropriate output model. Target-specific generator classes
+are familiar and well-structured, but building them is a lot of work,
+and they’re often a hassle to use. Visitors that generate text directly
+are much more convenient. Unfortunately, print statements lock the
+order of the output elements to the input model traversal order.
+Besides, computing output strings in a general-purpose programming
+language ain’t exactly pretty.”</em></p>
+<h3 id="organizing-translated-phrases-into-a-nested-model">Organizing Translated Phrases into a Nested Model</h3>
+<p><em><span class="dquo">“</span>In general, translators need to track a few locations
+in the output model. These locations are typically things such as
+the current file object, the current class object, or the current method object.”</em></p>
+<h3 id="pattern-29-syntax-directed-translator">Pattern 29: Syntax-Directed Translator</h3>
+<h4 id="purpose_8">Purpose</h4>
+<p><em><span class="dquo">“</span>This pattern generates text using a grammar, or equivalent hand-built parser,
+embedded with actions.”</em></p>
+<h4 id="discussion_8">Discussion</h4>
+<p><em><span class="dquo">“</span>Syntax-directed translators are little more than grammars salted with actions
+(code snippets). They don’t build internal models and then walk them to
+generate output.
+Putting actions directly in a grammar sometimes makes the grammar difficult
+to read. It also locks the grammar into a single bit of translator functionality.”</em></p>
+<h3 id="pattern-30-rule-based-translator">Pattern 30: Rule-Based Translator</h3>
+<h4 id="purpose_9">Purpose</h4>
+<p><em><span class="dquo">“</span>A rule-based translator expresses a translation with a set of ‘x becomes y’
+rules, written in the <span class="caps">DSL</span> of a pattern-matching engine.”</em></p>
+<h4 id="discussion_9">Discussion</h4>
+<p><em><span class="dquo">“</span>To use a rule-based system, we have to feed it two things: a grammar that
+describes input sentences and a set of translation rules.”</em></p>
+<p><em><span class="dquo">“</span>Although it looks like we’re doing text-to-text transformations,
+the underlying engine is actually doing tree rewrites.
+For complicated translators, we need to build a lot of ancillary data structures
+beyond trees such as symbol tables and control-flow graphs.”</em></p>
+<h3 id="pattern-31-target-specific-generator-classes">Pattern 31: Target-Specific Generator Classes</h3>
+<h4 id="purpose_10">Purpose</h4>
+<p><em><span class="dquo">“</span>This pattern describes a class library whose sole purpose is to represent and
+generate output constructs in a particular language.”</em></p>
+<h4 id="discussion_10">Discussion</h4>
+<p><em><span class="dquo">“</span>Rather than use print statements to generate programs or data, generator
+classes let us insulate application code from the exact syntax of an output
+language. […] we’re defining a special class for each output element.”</em></p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./make_as_multi-paradigm_language.html" title="Previous: Make as multi-paradigm language">Make as multi-paradigm language</a></li>
+                <li class="next-article"><a href="./gcc,_binutils_and_other_developer_tools.html" title="Next: GCC, binutils and other developer tools">GCC, binutils and other developer tools</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2017-12-26T18:34:32+01:00">Dez 26, 2017</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-12T07:48:05+02:00">Apr 12, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+                <li><a href="./tags#design_patterns-ref">Design Patterns
+                    <span>2</span>
+</a></li>
+                <li><a href="./tags#parsing-ref">Parsing
+                    <span>2</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, OS, Linux, Unix, Programming, " />
+
+<meta property="og:title" content="Linking and Loading "/>
+<meta property="og:url" content="./linking_and_loading.html" />
+<meta property="og:description" content="The different forms of Linking There are two major forms of linking: static and dynamic. But there are some subtle details in each form of linking. This explanations are mainly for Linux. On other OS’s the same concepts apply but with some minor differences. See also: Executable Loader Static …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2017-11-24T14:06:00+01:00" />
+<meta property="og:article:modified_time" content="2022-04-08T21:27:48+02:00" />
+<meta name="twitter:title" content="Linking and Loading ">
+<meta name="twitter:description" content="The different forms of Linking There are two major forms of linking: static and dynamic. But there are some subtle details in each form of linking. This explanations are mainly for Linux. On other OS’s the same concepts apply but with some minor differences. See also: Executable Loader Static …">
+
+        <title>Linking and Loading  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./linking_and_loading.html"> Linking and&nbsp;Loading  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            
+            <p>The different forms of Linking</p>
+<p>There are two major forms of linking: static and dynamic. But there are some subtle details in each form of linking.</p>
+<p>This explanations are mainly for Linux. On other <span class="caps">OS</span>’s the same concepts apply but with some minor differences.</p>
+<p>See also: <a href="./executable_loader.html">Executable Loader</a></p>
+<h1 id="static-linking">Static Linking</h1>
+<ul>
+<li>Combine object files and archives to binaries (executables and shared libraries)</li>
+<li>Usually a step in the build process (after compiling)</li>
+<li>Not very flexible</li>
+<li>Not very suitable for libraries<ul>
+<li>Libraries should be linked dynamically to executables</li>
+<li>Libraries are usually created by statically linking object files together</li>
+</ul>
+</li>
+<li>Order of symbol resolution can be tricky (e. g. same symbol in multiple object files)</li>
+</ul>
+<h1 id="dynamic-linking">Dynamic Linking</h1>
+<p>Shared libraries (so, dll, dylib) are loaded at runtime.</p>
+<h2 id="loading">Loading</h2>
+<ul>
+<li>Often just called: dynamic linking</li>
+<li>Shared libraries are passed to linker in build process (like with static linking)</li>
+<li>Dynamic loader loads library to process address space when executable is started (or can be lazy loaded)</li>
+<li>Mostly used for libraries that are available at build time</li>
+</ul>
+<h2 id="manual-loading-dlopen">Manual loading (dlopen)</h2>
+<ul>
+<li>Same mechanism as dynamic linking</li>
+<li>But linking happens manually (programmatically)</li>
+<li>‘dlopen’ on Linux/<span class="caps">UNIX</span></li>
+<li>Can load library at run time</li>
+<li>Used for plug-in mechanism</li>
+</ul>
+<h2 id="preloading">Preloading</h2>
+<ul>
+<li>The dynamic linker looks for libraries in ‘LD_PATH’</li>
+<li>Possible to hook into loading process with ‘LD_PRELOAD’</li>
+<li>Libraries provided in ‘LD_PRELOAD’ are loaded instead of libraries in ‘LD_PATH’</li>
+<li>Can be used for overwriting or extending system functions (e. g. allocators: ‘malloc’, ‘free’, ‘realloc’ …)</li>
+<li>Special checks (security) are performed before library is preloaded</li>
+</ul>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./linux_system_calls.html" title="Previous: Linux System Calls">Linux System Calls</a></li>
+                <li class="next-article"><a href="./make_as_multi-paradigm_language.html" title="Next: Make as multi-paradigm language">Make as multi-paradigm language</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2017-11-24T14:06:00+01:00">Nov 24, 2017</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-08T21:27:48+02:00">Apr 8, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+                <li><a href="./tags#linux-ref">Linux
+                    <span>13</span>
+</a></li>
+                <li><a href="./tags#os-ref">OS
+                    <span>13</span>
+</a></li>
+                <li><a href="./tags#unix-ref">Unix
+                    <span>9</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

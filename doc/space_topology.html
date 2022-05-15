@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Robotics, Mechanics, " />
+
+<meta property="og:title" content="Space Topology "/>
+<meta property="og:url" content="./space_topology.html" />
+<meta property="og:description" content="Space Topology Euclidian space: \(\mathbb{E}^n\) or \(\mathbb{R}^n\) Sphere: \(S^n\) Torus: \(T^n\) (\(T^2 = S^1 \times S^1\)) \(\mathbb{R}^n\) is the \(n\)-dimensional Euclidian space, \(S^n\) the \(n\)-dimensional surface of a sphere and \(T^n\) is the \(n\)-dimensional surface …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2018-09-19T22:46:46+02:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="Space Topology ">
+<meta name="twitter:description" content="Space Topology Euclidian space: \(\mathbb{E}^n\) or \(\mathbb{R}^n\) Sphere: \(S^n\) Torus: \(T^n\) (\(T^2 = S^1 \times S^1\)) \(\mathbb{R}^n\) is the \(n\)-dimensional Euclidian space, \(S^n\) the \(n\)-dimensional surface of a sphere and \(T^n\) is the \(n\)-dimensional surface …">
+
+        <title>Space Topology  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./space_topology.html"> Space&nbsp;Topology  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            
+            <h1 id="space-topology">Space Topology</h1>
+<ul>
+<li>Euclidian space: <span class="math">\(\mathbb{E}^n\)</span> or <span class="math">\(\mathbb{R}^n\)</span></li>
+<li>Sphere: <span class="math">\(S^n\)</span></li>
+<li>Torus: <span class="math">\(T^n\)</span> (<span class="math">\(T^2 = S^1 \times S^1\)</span>)</li>
+</ul>
+<p><span class="math">\(\mathbb{R}^n\)</span> is the <span class="math">\(n\)</span>-dimensional Euclidian space, <span class="math">\(S^n\)</span> the <span class="math">\(n\)</span>-dimensional surface of a sphere and <span class="math">\(T^n\)</span> is the <span class="math">\(n\)</span>-dimensional
+surface of a torus in a $(n + 1) dimensional space.</p>
+<blockquote>
+<p><span class="math">\(S^1 \times S^1 \times S^1 \times \cdots \times S^1 = T^n\)</span> for <span class="math">\(n\)</span> copies of <span class="math">\(S^1\)</span></p>
+</blockquote>
+<p>Some spaces (<a href="./configuration_space_and_degrees_of_freedoms.html">c-spaces</a>) can be represented as Cartesian product of two or more lower dimensional spaces.</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>C-space</th>
+<th>Cartesian product</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rigid body in plane</td>
+<td><span class="math">\(\mathbb{R}^2\times S^1\)</span></td>
+<td>x-y-coordinates and an angle</td>
+</tr>
+<tr>
+<td><span class="caps">PR</span> robot arm</td>
+<td><span class="math">\(\mathbb{R}^1\times S^1\)</span></td>
+<td>prismatic joint: <span class="math">\(\mathbb{R}^1\)</span>, revolute joint: <span class="math">\(S^1\)</span></td>
+</tr>
+<tr>
+<td>2R robot arm</td>
+<td><span class="math">\(S^1 \times S^1 = T^2\)</span></td>
+<td>2 times revolute joint</td>
+</tr>
+<tr>
+<td>planar rigid body with 2R robot arm</td>
+<td><span class="math">\(\mathbb{R}^2 \times S^1 \times T^2 = \mathbb{R}^2 \times T^3\)</span></td>
+<td></td>
+</tr>
+<tr>
+<td>rigid body in 3-D</td>
+<td><span class="math">\(\mathbb{R}^3\times S^2\times S^1\)</span></td>
+<td>1 point in 3-D, a point on a 2-D sphere and a point an a circle</td>
+</tr>
+</tbody>
+</table>
+<h1 id="space-representation">Space Representation</h1>
+<blockquote>
+<p>A numerical representation is not fundamental as the topology of a space. It involves always a choice.</p>
+</blockquote>
+<h2 id="explicit-parametrisation">Explicit parametrisation</h2>
+<ul>
+<li>Min. Number of coordinates needed</li>
+<li>For example<ul>
+<li>Cartesian coordinates <span class="math">\((x, y, z)\)</span></li>
+<li>latitude/longitude</li>
+</ul>
+</li>
+</ul>
+<h2 id="implicit-representation">Implicit representation</h2>
+<ul>
+<li>Surface embedded in a higher dimensional space with constraints</li>
+<li>For example<ul>
+<li>One constraint on three coordinates results in two degrees of freedom (2-D c-space)</li>
+<li><span class="math">\((x, y, z)\)</span> such that <span class="math">\(x^2 + y^2 + z^2 = 1\)</span></li>
+</ul>
+</li>
+</ul>
+<p>Implicit representations don’t have <em>singularities</em> but have more numbers than the number of degrees of freedom.</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Quaternion#Unit_quaternion">Unit quaternion</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Rotation_matrix">Rotation matrix</a></li>
+</ul>
+<h1 id="literature">Literature</h1>
+<p>Notes taken from:</p>
+<p>Modern Robotics: Mechanics, Planning, and Control by Kevin M. Lynch and Frank C. Park, Cambridge University Press, 2017</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./setup_a_new_machine.html" title="Previous: Setup a new Machine">Setup a new Machine</a></li>
+                <li class="next-article"><a href="./mechanical_constraints.html" title="Next: Mechanical Constraints">Mechanical Constraints</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2018-09-19T22:46:46+02:00">Sep 19, 2018</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#mechanics-ref">Mechanics</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#robotics-ref">Robotics
+                    <span>15</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

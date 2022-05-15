@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, OS, Linux, Unix, Programming, " />
+
+<meta property="og:title" content="Unix System Files "/>
+<meta property="og:url" content="./unix_system_files.html" />
+<meta property="og:description" content="/etc/passwd Contains user informations. The information fields are separated by a colon. user-name:password:UID:GID:info:home-dir:shell user-name: The name that the user needs to log in. password: Usually the entry x, meaning that the password is saved in /etc/shadow. UID: The user-id (usually greater than …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2017-03-06T21:58:15+01:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="Unix System Files ">
+<meta name="twitter:description" content="/etc/passwd Contains user informations. The information fields are separated by a colon. user-name:password:UID:GID:info:home-dir:shell user-name: The name that the user needs to log in. password: Usually the entry x, meaning that the password is saved in /etc/shadow. UID: The user-id (usually greater than …">
+
+        <title>Unix System Files  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./unix_system_files.html"> Unix System&nbsp;Files  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            
+            <h1 id="etcpasswd"><code>/etc/passwd</code></h1>
+<p>Contains user informations. The information fields are separated by a colon.</p>
+<p><code>user-name:password:UID:GID:info:home-dir:shell</code></p>
+<ul>
+<li><code>user-name</code>: The name that the user needs to log in.</li>
+<li><code>password</code>: Usually the entry <code>x</code>, meaning that the password is saved in <code>/etc/shadow</code>.</li>
+<li><code>UID</code>: The user-id (usually greater than 1000).</li>
+<li><code>GID</code>: The group-id.</li>
+<li><code>info</code>: Additional information such as the real name. Subfields separated by coma.</li>
+<li><code>home-dir</code>: The home dir of the user.</li>
+<li><code>shell</code>: The login-shell of the user (needs to be listed in <code>/etc/shells</code>).</li>
+</ul>
+<h1 id="etcshadow"><code>/etc/shadow</code></h1>
+<p>Saves the user password and related information. The file can be read only by root.</p>
+<p><code>name:password:DOC:minDay:maxDay:warn:deaktIn:deaktSince:unused</code></p>
+<ul>
+<li><code>name</code>: User name (same as in <code>/etc/passwd</code>).</li>
+<li><code>password</code>: Encrypted password.</li>
+<li><code>DOC</code>: Day of last change (number of days since 1.1.1970).</li>
+<li><code>minDay</code>: Earliest possible day to change password.</li>
+<li><code>maxDay</code>: Latest possible day to change password.</li>
+<li><code>warn</code>: Number of days before <code>maxDay</code> that a warning occures.</li>
+<li><code>deaktIn</code>: Day when password expires.</li>
+<li><code>deaktSince</code>: Number of days since password expired.</li>
+<li><code>unused</code>: For feature use.</li>
+</ul>
+<h1 id="etcgroup"><code>/etc/group</code></h1>
+<p>Stores informations about groups.</p>
+<p><code>groupName:password:groupId:member1,memger2,...</code></p>
+<ul>
+<li><code>groupName</code>: Name of the group.</li>
+<li><code>password</code>: Usually <code>x</code>, meaning that the password is saved in <code>/etc/passwd</code>.</li>
+<li><code>groupId</code>: Group <span class="caps">ID</span> (<span class="caps">GID</span>).</li>
+<li><code>member1,memger2,...</code>: User names of the members of the group (comma separated).</li>
+</ul>
+<h1 id="mounts">Mounts</h1>
+<ul>
+<li><code>/etc/fstab</code>: Lists drives to mount at startup</li>
+<li><code>/etc/exports</code>: Folders provided to clients over <span class="caps">NFS</span></li>
+</ul>
+<h1 id="network-files">Network Files</h1>
+<ul>
+<li><code>/etc/services</code>: Services provided on the network, mapping of ports to processes (see <code>getservbyname()</code> and <code>getservbyport()</code>).</li>
+<li><code>etc/networks</code>: Informations about connected networks (see <code>getnetbyname()</code> and <code>getnetbyaddr()</code>)</li>
+<li><code>/etc/protocols</code>: Information about network portocols (see <code>getprotobyname()</code> and <code>getprotobynumber()</code>)</li>
+<li><code>/etc/hosts</code>: Mapping from hostnames to <span class="caps">IP</span>’s, mainly replaced by <span class="caps">DNS</span> (see <code>gethostbyname()</code> and <code>gethostbyaddr()</code>)</li>
+</ul>
+<h1 id="logging">Logging</h1>
+<ul>
+<li><code>/etc/syslog.conf</code>: Configuration of applications that use syslog</li>
+<li><code>/etc/asl.conf</code>: Additional config on macOS</li>
+</ul>
+<h1 id="cron-jobs"><code>cron</code> Jobs</h1>
+<ul>
+<li>The config file is usually: <code>/var/spool/cron</code></li>
+<li>use <code>crontab -e</code> to edit the right file</li>
+</ul>
+<h1 id="shell">Shell</h1>
+<p>Configurations:</p>
+<ul>
+<li>bash: use <code>~/.bashrc</code> and source it in <code>~/.bash_profie</code></li>
+<li>zsh: use <code>~/.zshrc</code></li>
+</ul>
+<h2 id="references">References</h2>
+<p><a href="https://shreevatsa.wordpress.com/2008/03/30/zshbash-startup-files-loading-order-bashrc-zshrc-etc/">Zsh/Bash startup files loading order</a></p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./unix_device_files.html" title="Previous: Unix Device Files">Unix Device Files</a></li>
+                <li class="next-article"><a href="./smart_pointers.html" title="Next: Smart Pointers">Smart Pointers</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2017-03-06T21:58:15+01:00">Mär 6, 2017</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+                <li><a href="./tags#linux-ref">Linux
+                    <span>13</span>
+</a></li>
+                <li><a href="./tags#os-ref">OS
+                    <span>13</span>
+</a></li>
+                <li><a href="./tags#unix-ref">Unix
+                    <span>9</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

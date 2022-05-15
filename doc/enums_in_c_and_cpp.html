@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="C, C++, Programming, " />
+
+<meta property="og:title" content="Enums in C and C++ "/>
+<meta property="og:url" content="./enums_in_c_and_cpp.html" />
+<meta property="og:description" content="Enums in C and C++ are a very simple construct. It’s just a collection of identifiers that have (usually) distinctive values. By default the values increase by one in the stated order. But the values can defined by the programmer. Even if enums are a simple language construct there …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2015-04-16T18:00:45+02:00" />
+<meta property="og:article:modified_time" content="2022-04-09T09:45:25+02:00" />
+<meta name="twitter:title" content="Enums in C and C++ ">
+<meta name="twitter:description" content="Enums in C and C++ are a very simple construct. It’s just a collection of identifiers that have (usually) distinctive values. By default the values increase by one in the stated order. But the values can defined by the programmer. Even if enums are a simple language construct there …">
+
+        <title>Enums in C and C++  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./enums_in_c_and_cpp.html"> Enums in C and&nbsp;C++  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            
+            <p>Enums in C and C++ are a very simple construct. It’s just a collection of identifiers that have (usually) distinctive values. 
+By default the values increase by one in the stated order. But the values can defined by the programmer.
+Even if enums are a simple language construct there are special precautions that need to be taken when using them:</p>
+<ul>
+<li>Is a enum continuous (i.e. can I iterate over it?)</li>
+<li>Have the enum values meaning outside of my software or module</li>
+<li>what is the size (in Bytes) of an enum variable</li>
+</ul>
+<h1 id="iterating-over-enums">Iterating over enums</h1>
+<p>Be careful if you iterate over an enum. If the enum is not continuously defined your code is probably doing some things you don’t want it to do.
+For exampe:</p>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="n">VAL_1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">VAL_2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">VAL_3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">VAL_NB</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">my_enum_t</span><span class="p">;</span><span class="w"></span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">enum_var</span><span class="p">;</span><span class="w"></span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">enum_var</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">VAL_1</span><span class="p">;</span><span class="w"> </span><span class="n">enum_var</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">VAL_NB</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">enum_var</span><span class="p">)</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">"%i</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="n">enum_var</span><span class="p">);</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p><code>printf</code> is called 11 times with the values 10 to 20. That’s usually not what we want.</p>
+<p>So what’s the solution? Don’t iterate over enums that have fixed values assigned. If you have to do it there is a trick called <strong>X Macros</strong> 
+that I’ll cover in another post.</p>
+<p>There is one exception. You can assign a value to the first enum type:</p>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">VAL_1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">VAL_2</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">VAL_3</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="n">VAL_NB</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">my_enum_t</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<p>If you call the same loop as above you’ll get calls to <code>printf</code> with the values:</p>
+<blockquote>
+<p>10 (VAL_1), 11 (VAL_2) and 12 (VAL_3).</p>
+</blockquote>
+<h1 id="enums-with-fixed-values">Enums with fixed values</h1>
+<p>If you don’t need to iterate over your enum it’s usually a good practice to assign a defined value to your enum fields. This is even mandatory if your enum has a meaning across your software (or module) or even different versions of the same software. Add defined values to your enums if:</p>
+<ul>
+<li>the value can be saved to a file</li>
+<li>the value is sent (or received) over a physical interface</li>
+<li>the value is needed in an other software (or library…) or a different version of the same software (i. e. feature release)</li>
+</ul>
+<p>But if you do so, don’t iterate over your enum!</p>
+<p>If you serialize/deserialize your values (i.e. save into a file, send over an interface) be careful about the enum size and the endianness of 
+the used platform.</p>
+<h1 id="size-and-endianness">Size and endianness</h1>
+<p>The size (and endianness) of a enum variable depends on the compiler and on the target platform. So if you write platform independent code (and you should always do that) take care of this.
+There are some language extension in different compilers to address this topic. For example in Visual Studio:</p>
+<div class="highlight"><pre><span></span><code><span class="k">typedef</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">uint8_t</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span><span class="n">VAL_1</span><span class="p">,</span><span class="w"> </span><span class="n">VAL2</span><span class="p">,</span><span class="w"> </span><span class="cm">/* … */</span><span class="p">,</span><span class="w"> </span><span class="n">VAL_NB</span><span class="p">}</span><span class="w"> </span><span class="n">my_enum_t</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<p>For platform independent code you can do: <code>#define ENUM_AS_UINT8 : uint8_t</code></p>
+<h1 id="romable-values">Romable values</h1>
+<p>Another use of enums is mainly used in embedded systems development. In embedded systems you are often concerned that a constant is stored in the program flash. Otherwise it has to be loaded from <span class="caps">RAM</span> at runtime (and even stored there at start time). The usual way is to use defines. 
+But they are not really type safe. So for int-types it’s possible to use enums. If your compiler(s) support it you can even use anonymous enums.</p>
+<h1 id="advanced-enum-constructs-c11-qt">Advanced enum constructs (C++11, Qt)</h1>
+<p>C++11 introduces the enum class. And Qt some extensions for enums (Q_ENUMS) that I’ll not cover here. If you can use one of this advanced enum constructs then do it!</p>
+<h1 id="conclusion">Conclusion</h1>
+<ul>
+<li>If you have to iterate over your enum: don’t add explicit values to your enum, but add and {identifier}_NB value to the end (or something similar) to check when the iteration is finished</li>
+<li>If your enum value is meaningful (serialization…): assign a defined value and take care about endianness and size of the enum variables</li>
+<li>Use (anonymous) enums to make values Romable</li>
+<li>Use an advanced enum type (C++11, Qt) if you can</li>
+<li>If you need fixed enum values and you want to iterate over the values you need two enums. Use X Macros for it (there is going to be a feature post on that)</li>
+</ul>
+<h1 id="references">References</h1>
+<p><a href="http://en.wikipedia.org/wiki/Endianness">Endianness (Wikipedia)</a> <br/>
+<a href="http://stackoverflow.com/questions/7147008/the-usage-of-anonymous-enums">The usage of anonymous enums (Stack Overflow)</a> </p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./intro_to_sql.html" title="Previous: Intro to SQL">Intro to SQL</a></li>
+                <li class="next-article"><a href="./harmful_c_functions_and_their_replacements.html" title="Next: Harmful C Functions and their replacements">Harmful C Functions and their replacements</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2015-04-16T18:00:45+02:00">Apr 16, 2015</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-09T09:45:25+02:00">Apr 9, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#c-ref">C
+                    <span>9</span>
+</a></li>
+                <li><a href="./tags#cpp-ref">C++
+                    <span>19</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

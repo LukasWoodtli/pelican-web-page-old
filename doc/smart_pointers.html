@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="C++, Programming, " />
+
+<meta property="og:title" content="Smart Pointers "/>
+<meta property="og:url" content="./smart_pointers.html" />
+<meta property="og:description" content="From: Smart Pointers to boost your code unique_ptr unique ownership copying prevented use std::move to transfer ownership const prevents transfer can’t be used as elements in containers use as replacement for auto_ptr shared_ptr reference counting referenced object is destroyed when (and only when) all copies of the shared_ptr …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2017-03-20T22:12:44+01:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="Smart Pointers ">
+<meta name="twitter:description" content="From: Smart Pointers to boost your code unique_ptr unique ownership copying prevented use std::move to transfer ownership const prevents transfer can’t be used as elements in containers use as replacement for auto_ptr shared_ptr reference counting referenced object is destroyed when (and only when) all copies of the shared_ptr …">
+
+        <title>Smart Pointers  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./smart_pointers.html"> Smart&nbsp;Pointers  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#unique_ptr">unique_ptr</a></li>
+<li><a href="#shared_ptr">shared_ptr</a></li>
+<li><a href="#weak_ptr">weak_ptr</a></li>
+<li><a href="#scoped_ptr-boost">scoped_ptr (Boost)</a></li>
+<li><a href="#other-smart-pointers-boost">Other smart pointers (Boost)</a></li>
+<li><a href="#rules-for-smart-pointers">Rules for smart pointers</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <p>From:
+<a href="http://www.codeproject.com/Articles/8394/Smart-Pointers-to-boost-your-code">Smart Pointers to boost your code</a></p>
+
+<h1 id="unique_ptr"><code>unique_ptr</code></h1>
+<ul>
+<li>unique ownership</li>
+<li>copying prevented</li>
+<li>use <code>std::move</code> to transfer ownership</li>
+<li>const prevents transfer</li>
+<li>can’t be used as elements in containers</li>
+<li>use as replacement for <code>auto_ptr</code></li>
+</ul>
+<h1 id="shared_ptr"><code>shared_ptr</code></h1>
+<ul>
+<li>reference counting</li>
+<li>referenced object is destroyed when (and only when) all copies of the <code>shared_ptr</code> have been destroyed</li>
+<li>can be used as elements in containers</li>
+</ul>
+<h1 id="weak_ptr"><code>weak_ptr</code></h1>
+<ul>
+<li>created as copy of <code>shared_ptr</code></li>
+<li>copying/destroying have no effect on ref counting of <code>shared_ptr</code></li>
+<li>after all copies of <code>shared_ptr</code> have been destroyed all <code>weak_ptr</code> copies become empty</li>
+</ul>
+<h1 id="scoped_ptr-boost"><code>scoped_ptr</code> (Boost)</h1>
+<ul>
+<li>use <code>const unique_ptr</code> instead (or <code>unique_ptr</code> if you have to)</li>
+</ul>
+<h1 id="other-smart-pointers-boost">Other smart pointers (Boost)</h1>
+<ul>
+<li><code>intrusive_ptr</code></li>
+<li><code>shared_array</code></li>
+<li><code>scoped_array</code></li>
+</ul>
+<h1 id="rules-for-smart-pointers">Rules for smart pointers</h1>
+<ul>
+<li>Assign and keep:<ul>
+<li>Assign a newly constructed instance to a smart pointer immediately</li>
+<li>Keep the management of the referenced instance in the smart pointer(s).</li>
+</ul>
+</li>
+<li>The smart pointer(s) own the object.<ul>
+<li>Don’t delete the owned instance manually.</li>
+<li>You can’t (shouldn’t) take the instance away from the smart pointer.</li>
+</ul>
+</li>
+<li><code>..._ptr&lt;T&gt;</code> is not a <code>T*</code><ul>
+<li>There are no implicit conversions</li>
+<li>You can not assign a <code>T*</code> to a <code>..._ptr&lt;T&gt;</code></li>
+<li>You can not write <code>ptr = NULL</code> use <code>ptr.reset()</code></li>
+<li>To retrieve the raw pointer use <code>ptr.get()</code></li>
+<li>You must not delete it!</li>
+<li>You must not use this pointer after the smart pointer(s) it comes from is/are destroyed, resetted or reassigned</li>
+</ul>
+</li>
+<li>Avoid circular references<ul>
+<li>Use <code>weak_ptr</code> to break such cycles</li>
+</ul>
+</li>
+<li>No temporary <code>shared_ptr</code><ul>
+<li>Always construct <em>named</em> smart pointer variables.</li>
+<li>No anonymous (i.e. as param in function call) smart pointer constuction</li>
+</ul>
+</li>
+<li>Smart pointers are thread safe. But not necessary the pointee objects</li>
+</ul>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./unix_system_files.html" title="Previous: Unix System Files">Unix System Files</a></li>
+                <li class="next-article"><a href="./software_development_priorities.html" title="Next: Software Development Priorities">Software Development Priorities</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2017-03-20T22:12:44+01:00">Mär 20, 2017</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#cpp-ref">C++
+                    <span>19</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

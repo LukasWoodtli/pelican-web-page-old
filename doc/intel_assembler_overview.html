@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, Assembler, Programming, " />
+
+<meta property="og:title" content="Intel Assembler Overview "/>
+<meta property="og:url" content="./intel_assembler_overview.html" />
+<meta property="og:description" content="Program Format Typical sections of an assembler program are: Data section: declaration and definition of initialized data BSS section: declaration of uninitialized data Text section: where the code is placed Comments Code comments are written using the semicolon (;). It can be placed anywhere. Everything to the end of the line …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2017-10-17T18:19:46+02:00" />
+<meta property="og:article:modified_time" content="2022-04-10T19:27:29+02:00" />
+<meta name="twitter:title" content="Intel Assembler Overview ">
+<meta name="twitter:description" content="Program Format Typical sections of an assembler program are: Data section: declaration and definition of initialized data BSS section: declaration of uninitialized data Text section: where the code is placed Comments Code comments are written using the semicolon (;). It can be placed anywhere. Everything to the end of the line …">
+
+        <title>Intel Assembler Overview  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./intel_assembler_overview.html"> Intel Assembler&nbsp;Overview  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#program-format">Program Format</a></li>
+<li><a href="#comments">Comments</a></li>
+<li><a href="#numeric-literals">Numeric Literals</a></li>
+<li><a href="#constants">Constants</a></li>
+<li><a href="#initialized-variables-data">Initialized Variables (data)</a></li>
+<li><a href="#uninitialized-variables-bss">Uninitialized Variables (<span class="caps">BSS</span>)</a></li>
+<li><a href="#code-text">Code (text)</a></li>
+<li><a href="#assembler-directives">Assembler Directives</a></li>
+<li><a href="#labels">Labels</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            
+<h1 id="program-format">Program Format</h1>
+<p>Typical sections of an assembler program are:</p>
+<ul>
+<li><code>Data</code> section: declaration and definition of initialized data</li>
+<li><code>BSS</code> section: declaration of uninitialized data</li>
+<li><code>Text</code> section: where the code is placed</li>
+</ul>
+<h1 id="comments">Comments</h1>
+<p>Code comments are written using the semicolon (<code>;</code>).
+It can be placed anywhere. Everything to the end of the line is ignored.</p>
+<h1 id="numeric-literals">Numeric Literals</h1>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Radix</th>
+<th>Format</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Decimal</td>
+<td><em>default</em></td>
+<td><code>127</code></td>
+</tr>
+<tr>
+<td>Hex</td>
+<td><code>0x</code> prefix</td>
+<td><code>0x7F</code></td>
+</tr>
+<tr>
+<td>Octal</td>
+<td><code>q</code> postfix</td>
+<td><code>177q</code></td>
+</tr>
+</tbody>
+</table>
+<h1 id="constants">Constants</h1>
+<div class="highlight"><pre><span></span><code><span class="err">&lt;</span><span class="nf">name</span><span class="o">&gt;</span><span class="w">  </span><span class="nv">equ</span><span class="w">   </span><span class="o">&lt;</span><span class="nv">value</span><span class="o">&gt;</span><span class="w"></span>
+</code></pre></div>
+<p>Constants are substituted with their value during the assembly process.
+They are not assigned a memory location</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="no">SIZE</span><span class="w">  </span><span class="kd">equ</span><span class="w">   </span><span class="mi">127</span><span class="w"></span>
+</code></pre></div>
+<h1 id="initialized-variables-data">Initialized Variables (data)</h1>
+<ul>
+<li>Declared in <code>section .data</code></li>
+<li>Name, data type and initial value</li>
+<li>Supported data types:<ul>
+<li><code>db</code>: 8-bit(byte)</li>
+<li><code>dw</code>: 16-bit (word)</li>
+<li><code>dd</code>: 32-bit (double word)</li>
+<li><code>dq</code>: 64-bit (quad word)</li>
+<li><code>ddq</code>: 128-bit integer</li>
+<li><code>dt</code>: 128-bit float</li>
+</ul>
+</li>
+<li>Arrays are Initialized with comma separated values</li>
+</ul>
+<p>Format:</p>
+<div class="highlight"><pre><span></span><code><span class="err">&lt;</span><span class="nf">varName</span><span class="o">&gt;</span><span class="w">  </span><span class="o">&lt;</span><span class="nv">dataType</span><span class="o">&gt;</span><span class="w">   </span><span class="o">&lt;</span><span class="nv">initialValue</span><span class="o">&gt;</span><span class="w"></span>
+</code></pre></div>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">bVal</span><span class="w"> </span><span class="nv">db</span><span class="w"> </span><span class="mi">2</span><span class="w">            </span><span class="c1">; byte</span><span class="w"></span>
+<span class="nf">cVal</span><span class="w"> </span><span class="nv">db</span><span class="w"> </span><span class="s">"H"</span><span class="w">          </span><span class="c1">; char</span><span class="w"></span>
+<span class="nf">str</span><span class="w"> </span><span class="nv">db</span><span class="w"> </span><span class="s">"Hello World"</span><span class="w"> </span><span class="c1">; string</span><span class="w"></span>
+<span class="nf">wVal</span><span class="w"> </span><span class="nv">dw</span><span class="w"> </span><span class="mi">5000</span><span class="w">         </span><span class="c1">; 16-bit word</span><span class="w"></span>
+<span class="nf">dVal</span><span class="w"> </span><span class="nv">dd</span><span class="w"> </span><span class="mi">50000</span><span class="w">        </span><span class="c1">; 32-bit (double word)</span><span class="w"></span>
+<span class="nf">arr</span><span class="w"> </span><span class="nv">dd</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span><span class="w"> </span><span class="mi">300</span><span class="w"> </span><span class="c1">; 3 element array</span><span class="w"></span>
+<span class="nf">flt1</span><span class="w"> </span><span class="nv">dd</span><span class="w"> </span><span class="mf">3.14159</span><span class="w">      </span><span class="c1">; 32-bit float</span><span class="w"></span>
+<span class="nf">qVar</span><span class="w"> </span><span class="nv">dq</span><span class="w"> </span><span class="mi">1000000000</span><span class="w">   </span><span class="c1">; 64-bit (quad word)</span><span class="w"></span>
+</code></pre></div>
+<h1 id="uninitialized-variables-bss">Uninitialized Variables (<span class="caps">BSS</span>)</h1>
+<ul>
+<li>Declared in <code>section .bss</code></li>
+<li>Name, data type and count</li>
+<li>Supported data types:<ul>
+<li>resb 8-bit (byte)</li>
+<li>resw 16-bit (word)</li>
+<li>resd 32-bit (double-word)</li>
+<li>resq 64-bit (quad-word)</li>
+<li>resdq 128-bit (double quad-word)</li>
+</ul>
+</li>
+</ul>
+<p>Format:</p>
+<div class="highlight"><pre><span></span><code><span class="err">&lt;</span><span class="nf">varName</span><span class="o">&gt;</span><span class="w">  </span><span class="o">&lt;</span><span class="nv">resType</span><span class="o">&gt;</span><span class="w">   </span><span class="o">&lt;</span><span class="nv">count</span><span class="o">&gt;</span><span class="w"></span>
+</code></pre></div>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">bArr</span><span class="w"> </span><span class="nv">resb</span><span class="w"> </span><span class="mi">5</span><span class="w">   </span><span class="c1">; 5 element byte array</span><span class="w"></span>
+<span class="nf">wArr</span><span class="w"> </span><span class="nv">resw</span><span class="w"> </span><span class="mi">20</span><span class="w">  </span><span class="c1">; 20 element word array</span><span class="w"></span>
+<span class="nf">dArr</span><span class="w"> </span><span class="nv">resd</span><span class="w"> </span><span class="mi">30</span><span class="w">  </span><span class="c1">; 30 element double array</span><span class="w"></span>
+<span class="nf">qArr</span><span class="w"> </span><span class="nv">resq</span><span class="w"> </span><span class="mi">25</span><span class="w">  </span><span class="c1">; 25 element quad array</span><span class="w"></span>
+</code></pre></div>
+<h1 id="code-text">Code (text)</h1>
+<ul>
+<li>Placed in `section .text</li>
+<li>initial program entry point needs to be defined</li>
+</ul>
+<p>For the standard linker (Linux) the entry point is defined:</p>
+<div class="highlight"><pre><span></span><code><span class="k">global</span><span class="w"> </span><span class="nv">_start</span><span class="w"></span>
+<span class="nl">_start:</span><span class="w"></span>
+</code></pre></div>
+<h1 id="assembler-directives">Assembler Directives</h1>
+<p>Assembler directives are instrutions for the assembler that are not directly translated
+to <span class="caps">CPU</span> instrutions.</p>
+<h1 id="labels">Labels</h1>
+<ul>
+<li>Labels are used as targets for jumps</li>
+<li>Can contain letters, numbers and <code>_</code></li>
+<li>Terminated with colon (<code>:</code>)</li>
+<li>Case sensitive (at least in <em>yasm</em>)</li>
+<li>May be definied only once</li>
+</ul>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><code><span class="nl">loopBegin:</span><span class="w"></span>
+<span class="nl">end:</span><span class="w"></span>
+</code></pre></div>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./git_reset.html" title="Previous: Git Reset">Git Reset</a></li>
+                <li class="next-article"><a href="./x86_calling_conventions.html" title="Next: x86 Calling Conventions">x86 Calling Conventions</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2017-10-17T18:19:46+02:00">Okt 17, 2017</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-10T19:27:29+02:00">Apr 10, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#assembler-ref">Assembler
+                    <span>8</span>
+</a></li>
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

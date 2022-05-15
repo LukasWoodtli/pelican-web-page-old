@@ -12,14 +12,6 @@ REPO_DIRECTORY = os.path.split(REPO_DIRECTORY)[0]
 ROOTDIR_FOR_REPOS = os.path.join(REPO_DIRECTORY, "..")
 print("ROOTDIR_FOR_REPOS: ", ROOTDIR_FOR_REPOS)
 
-GITHUB_USERPAGE_REPO = "https://github.com/LukasWoodtli/LukasWoodtli.github.io"
-try:
-    GIT_HUB_TOKEN =  os.environ['DEPLOY_KEY']
-    GITHUB_USERPAGE_REPO =\
-        "https://{}github.com/LukasWoodtli/LukasWoodtli.github.io"\
-            .format(GIT_HUB_TOKEN + "@")
-except:
-    pass
 
 PELICAN_THEME = "pelican-elegant" # needs to be set in pelicanconf.py
 
@@ -29,7 +21,7 @@ REPOSITORIES = [("https://github.com/LukasWoodtli/" + PELICAN_THEME,
                  "pelican-bootstrapify"), # Pelican bootstrapify plug-in
                 ("https://github.com/getpelican/pelican-plugins",
                  "pelican-plugins"),
-                (GITHUB_USERPAGE_REPO, "github-userpage")] # github repo for publishing
+                 ]
 
 
 def remove_local_repository(local_path):
@@ -67,7 +59,7 @@ def build_web_page():
 
     # copy output to user page repo
     root_src_dir = os.path.join(REPO_DIRECTORY, "output")
-    root_dest_dir = os.path.join(ROOTDIR_FOR_REPOS, "github-userpage")
+    root_dest_dir = os.path.join(REPO_DIRECTORY, "doc")
 
     # clean up repository
     try:
@@ -90,8 +82,7 @@ def build_web_page():
             shutil.move(src_file, dst_dir)
 
 def publish_web_page():
-    userpage_local_repo = os.path.join(ROOTDIR_FOR_REPOS, "github-userpage")
-    repo = sh.git.bake(_cwd=userpage_local_repo)
+    repo = sh.git.bake(_cwd=REPO_DIRECTORY)
     repo.add("*")
     repo.commit(["-m", "Update Github page automated."])
     repo.push(["--force", "origin", "HEAD:gh-pages"])

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="C, C++, Dynamic Analysis, Programming, " />
+
+<meta property="og:title" content="Sanitizers "/>
+<meta property="og:url" content="./sanitizers.html" />
+<meta property="og:description" content="Sanitizers Address Sanitizer (and Leak Sanitizer) Compile and link with the flag -fsanitize=address It might be necessary to link with -lasan with older gcc/ld versions. When linking shared libraries (dso’s) the sanitizer run-time library (libasan.so) is not linked. This hapens only when executables are linked. It …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2018-03-05T21:05:09+01:00" />
+<meta property="og:article:modified_time" content="2022-04-10T21:48:35+02:00" />
+<meta name="twitter:title" content="Sanitizers ">
+<meta name="twitter:description" content="Sanitizers Address Sanitizer (and Leak Sanitizer) Compile and link with the flag -fsanitize=address It might be necessary to link with -lasan with older gcc/ld versions. When linking shared libraries (dso’s) the sanitizer run-time library (libasan.so) is not linked. This hapens only when executables are linked. It …">
+
+        <title>Sanitizers  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./sanitizers.html"> Sanitizers  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#sanitizers">Sanitizers</a><ul>
+<li><a href="#address-sanitizer-and-leak-sanitizer">Address Sanitizer (and Leak Sanitizer)</a><ul>
+<li><a href="#run-time-flags">Run-time flags</a></li>
+<li><a href="#leak-sanitizer-and-additional-checks">Leak Sanitizer and Additional Checks</a></li>
+<li><a href="#symbolizing-output">Symbolizing output</a></li>
+<li><a href="#preloading">Preloading</a></li>
+<li><a href="#custom-signal-handlers">Custom Signal Handlers</a></li>
+<li><a href="#suppressions">Suppressions</a></li>
+<li><a href="#virtual-memory-max-map-count">Virtual Memory Max Map Count</a></li>
+<li><a href="#docker">Docker</a></li>
+<li><a href="#help-and-debugging">Help and Debugging</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            
+<h1 id="sanitizers">Sanitizers</h1>
+<h2 id="address-sanitizer-and-leak-sanitizer">Address Sanitizer (and Leak Sanitizer)</h2>
+<p>Compile and link with the flag <code>-fsanitize=address</code>
+It might be necessary to link with <code>-lasan</code> with older gcc/ld versions.</p>
+<p>When linking shared libraries (dso’s) the sanitizer run-time library (<code>libasan.so</code>) is not linked. This hapens only when executables are linked.
+It can lead to problems with some linker flags. For example <code>-Wl,--no-undefined</code> or <code>-Wl,-z,defs</code> don’t work with with sanitizer because the compiler
+adds sanatizer related code into object files but the linker does not link the run-time library (leading to linker errors due to undefined symbols).</p>
+<p>To solve this problem either don’t use the mentioned linker flags or compile only files needed in executables (and not in shared libraries) with the sanatizer flag.</p>
+<h3 id="run-time-flags">Run-time flags</h3>
+<p>Flags for the sanitizers can be provided with the <code>ASAN_OPTIONS</code> and <code>LSAN_OPTIONS</code> environment variables. They take a colon (<code>:</code>) separated list and should be exported in the environment, before running a sanatized executable.</p>
+<h3 id="leak-sanitizer-and-additional-checks">Leak Sanitizer and Additional Checks</h3>
+<p>The Leak Sanitizer can be enabled in ASan by setting <code>ASAN_OPTIONS=detect_leaks=1</code>. This is not needed on Linux as it is enabled by default.</p>
+<p>Find dynamic initialization order problems (only on Linux):
+<code>ASAN_OPTIONS=check_initialization_order=1</code></p>
+<p>To find memory use after return add <code>ASAN_OPTIONS=detect_stack_use_after_return=1</code>.</p>
+<p>To check for memory use after scope the compiler flag (not runtime oprion) <code>-fsanitize-address-use-after-scope</code> can be used.</p>
+<h3 id="symbolizing-output">Symbolizing output</h3>
+<p>To see nice call stacks with readable symbols when the sanitizer finds a problem a symbolizer might be needed.</p>
+<p>Add this to the sanitizer runtime flags:</p>
+<p><code>ASAN_OPTIONS=symbolize=1</code></p>
+<p>and the path to the symbolizer</p>
+<p><code>ASAN_SYMBOLIZER_PATH=/usr/local/bin/llvm-symbolizer</code></p>
+<p>also the compiler flag to not omit the frame pointer can help: <code>-fno-omit-frame-pointer</code></p>
+<h3 id="preloading">Preloading</h3>
+<p>In some cases the sanitizer library needs to be preloaded to an executable. Especially if other libraries are preloaded. Then the sanitizer library needs to be first in the list of preloaded libraries:</p>
+<p><code>LD_PRELOAD=libasan.so.3:libmylib.dso:$LD_PRELOAD ./myexecutable</code></p>
+<p>Note that the version of the sanitizer library (e.g. <code>libasan.so.3</code>) needs to be provided if there is no symbolic link <code>libasan.so</code> that points to the right version.</p>
+<p>To find out the right library name (and the path) one can run
+<code>ldd path/to/an/executable | grep libasan</code>
+on an executable that was built with the <code>-fsanitize=address</code> flag</p>
+<p>For debugging problems with <code>LD_PRELOAD</code> setting the environment variable <code>LD_DEBUG=libs</code> might help. It shows which <span class="caps">DSO</span> is loaded from which directory and the order of loading the <span class="caps">DSO</span>’s.</p>
+<h3 id="custom-signal-handlers">Custom Signal Handlers</h3>
+<p>If an executable uses custom signal handlers then the signal handlers of ASan need to be disabled:</p>
+<p><code>ASAN_OPTIONS="allow_user_segv_handler=1:handle_segv=0:handle_abort=0:handle_sigfpe=0"</code></p>
+<h3 id="suppressions">Suppressions</h3>
+<p>To suppress detection of concrete leaks foud by LSan a suppression file can be provided</p>
+<p><code>LSAN_OPTIONS="suppressions=$(realpath lsan_suppressions.txt)"</code></p>
+<p>Example of <code>lsan_suppressions.txt</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">leak</span><span class="o">:</span><span class="n">FooBar</span><span class="w"></span>
+<span class="n">leak</span><span class="o">:</span><span class="n">libmylibrary</span><span class="o">.</span><span class="na">so</span><span class="w"></span>
+<span class="n">leak</span><span class="o">:</span><span class="n">myexecutable</span><span class="w"></span>
+</code></pre></div>
+<p>There is also a similar suppression mechanism for ASan.</p>
+<h3 id="virtual-memory-max-map-count">Virtual Memory Max Map Count</h3>
+<p>When out of memory errors occur when using the address sanatizer it can be of help to increase
+the number of virtual memory maps that a process can have.</p>
+<div class="highlight"><pre><span></span><code>sysctl -w vm.max_map_count<span class="o">=</span><span class="m">1000000</span>
+</code></pre></div>
+<p>The number of maps needs to be adjusted per use case (just experiment).</p>
+<p>The setting is also available at <code>/proc/sys/vm/max_map_count</code></p>
+<p>See also: <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html">Elasticsearch: Virtual memory</a></p>
+<h3 id="docker">Docker</h3>
+<p>To run an sanitized executable in a docker container the argument <code>--cap-add SYS_PTRACE</code> needs to be added to the <code>docker run</code> command.</p>
+<h3 id="help-and-debugging">Help and Debugging</h3>
+<p>It’s possible to print debug information when using the sanitizer. Also the verbosity
+of any output can be increased.</p>
+<p><code>ASAN_OPTIONS="verbosity=2:debug=1:help=1"</code></p>
+<p>For getting help </p>
+<p><code>ASAN_OPTIONS="help=1"</code></p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./zeit_management.html" title="Previous: Zeit Management">Zeit Management</a></li>
+                <li class="next-article"><a href="./qemu_quickstart.html" title="Next: QEMU Quickstart">QEMU Quickstart</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2018-03-05T21:05:09+01:00">Mär 5, 2018</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-10T21:48:35+02:00">Apr 10, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#c-ref">C
+                    <span>9</span>
+</a></li>
+                <li><a href="./tags#cpp-ref">C++
+                    <span>19</span>
+</a></li>
+                <li><a href="./tags#dynamic_analysis-ref">Dynamic Analysis
+                    <span>1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

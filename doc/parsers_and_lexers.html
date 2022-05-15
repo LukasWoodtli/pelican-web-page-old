@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Parsing, Computer Science, Programming, " />
+
+<meta property="og:title" content="Parsers and Lexers "/>
+<meta property="og:url" content="./parsers_and_lexers.html" />
+<meta property="og:description" content="Most material on this page is from Udacity: Programming Languages Source --[Lexer (break up in words)]--&gt; Tokens --[Parser (understand the structure)]--&gt; AST --[Find meaning]-&gt; ... Lexical Analysis (Lexing): String -&gt; Token List Syntatical Analysis (Parsing): Token List -&gt; Valid in Grammar? Grammars Terminals Non-terminals Rewrite rule / derivations Recursion (recursive rewrite rules) in a …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2017-01-08T21:55:49+01:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="Parsers and Lexers ">
+<meta name="twitter:description" content="Most material on this page is from Udacity: Programming Languages Source --[Lexer (break up in words)]--&gt; Tokens --[Parser (understand the structure)]--&gt; AST --[Find meaning]-&gt; ... Lexical Analysis (Lexing): String -&gt; Token List Syntatical Analysis (Parsing): Token List -&gt; Valid in Grammar? Grammars Terminals Non-terminals Rewrite rule / derivations Recursion (recursive rewrite rules) in a …">
+
+        <title>Parsers and Lexers  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./parsers_and_lexers.html"> Parsers and&nbsp;Lexers  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            
+            <blockquote>
+<p>Most material on this page is from <a href="https://de.udacity.com/course/programming-languages--cs262/">Udacity: Programming Languages</a></p>
+</blockquote>
+<p><code>Source --[Lexer (break up in words)]--&gt; Tokens --[Parser (understand the structure)]--&gt; AST --[Find meaning]-&gt; ...</code></p>
+<ul>
+<li>Lexical Analysis (Lexing): String -&gt; Token List</li>
+<li>Syntatical Analysis (Parsing): Token List -&gt; Valid in Grammar?</li>
+</ul>
+<h1 id="grammars">Grammars</h1>
+<ul>
+<li>Terminals</li>
+<li>Non-terminals</li>
+<li>Rewrite rule / derivations</li>
+</ul>
+<p>Recursion (recursive rewrite rules) in a context-free grammar can allow an <em>infinite</em> number of valid sentences in the language.</p>
+<h1 id="grammars-and-regular-expressions">Grammars and Regular Expressions</h1>
+<ul>
+<li>Grammars are more powerful than Regular Expressions</li>
+<li><em>Regular Expressions</em> describe <em>Regular Languages</em></li>
+<li><em>Grammars</em> describe <em>Context Free Languages</em></li>
+</ul>
+<p><em><span class="dquo">“</span>A language </em><em>L</em><em> is a </em><em>context-free language</em><em> if there exists a context-free grammar </em><em>G</em><em> such that the set of strings accepted by </em><em>G</em><em> is exactly </em><em>L</em><em>. Context-free languages are strictly more powerful than regular languages. (i.e., context-free grammars are strictly more powerful than regular expressions.)”</em></p>
+<h1 id="programming-languages-analogy">Programming Languages Analogy</h1>
+<ul>
+<li>Expressions := Noun Prases</li>
+<li>Operators := Verbs</li>
+<li>Statements := Setences</li>
+</ul>
+<h1 id="formal-grammar-concepts">Formal Grammar Concepts</h1>
+<p>If a language ‘L’ is <em>regular</em>, then that language ‘L’ is also <em>context free</em>.</p>
+<p>Language: a set of strings</p>
+<ul>
+<li>Regular language: represented by <span class="caps">FSM</span> or Regexp</li>
+<li>Context-free language: represented by context-free Grammar</li>
+</ul>
+<h1 id="using-rewrite-rules">Using Rewrite Rules</h1>
+<ul>
+<li>Closure</li>
+<li>Shift</li>
+<li>Reduce</li>
+</ul>
+<p>Function calls:
+1. Create a new environment. It’s <em>parent</em> is the current environment.
+2. Create storage places in the new environment for each <em>formal parameter</em>.
+3. Fill these placeswith the values of the <em>actual arguments</em>
+3. Evaluate the <em>function body</em> in the new environment.</p>
+<h1 id="comparison-of-ll-and-lr-parsers">Comparison of <span class="caps">LL</span>- and <span class="caps">LR</span>-Parsers</h1>
+<p>This overview is assembled mostly from
+<a href="http://blog.reverberate.org/2013/07/ll-and-lr-parsing-demystified.html"><span class="caps">LL</span> and <span class="caps">LR</span> Parsing Demystified</a></p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th><span class="caps">LL</span> Parser</th>
+<th><span class="caps">LR</span> Parser</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>traversal</td>
+<td>pre-order  (visit the parent node before the children)</td>
+<td>post-order (visit the parent node after the children)</td>
+</tr>
+<tr>
+<td>derivations</td>
+<td>leftmost derivation</td>
+<td>reversed rightmost derivation</td>
+</tr>
+<tr>
+<td>direction</td>
+<td>top-down</td>
+<td>bottom-up</td>
+</tr>
+<tr>
+<td>alternative description</td>
+<td>predictive parser</td>
+<td>shift-reduce parser</td>
+</tr>
+</tbody>
+</table>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./modern_cpp_design.html" title="Previous: Modern C++ Design">Modern C++ Design</a></li>
+                <li class="next-article"><a href="./complexity.html" title="Next: Complexity">Complexity</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2017-01-08T21:55:49+01:00">Jan 8, 2017</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+                <li><a href="./tags#parsing-ref">Parsing
+                    <span>2</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

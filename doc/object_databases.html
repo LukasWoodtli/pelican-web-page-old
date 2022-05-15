@@ -1,0 +1,4805 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="ETH, OOP, Programming, " />
+
+<meta property="og:title" content="Object Databases "/>
+<meta property="og:url" content="./object_databases.html" />
+<meta property="og:description" content="Motivation Information Systems Design Conceptual Design -&gt; Technical Design -&gt; Implementation Orthogonal Persistence Data has to outlive the execution of the program Independence of longelivety of data How much code needs to be written for persistence (effort for programmer) None at all would be nice but not realistic (GUI objects usually don …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2016-04-20T14:30:43+02:00" />
+<meta property="og:article:modified_time" content="2022-04-10T21:39:06+02:00" />
+<meta name="twitter:title" content="Object Databases ">
+<meta name="twitter:description" content="Motivation Information Systems Design Conceptual Design -&gt; Technical Design -&gt; Implementation Orthogonal Persistence Data has to outlive the execution of the program Independence of longelivety of data How much code needs to be written for persistence (effort for programmer) None at all would be nice but not realistic (GUI objects usually don …">
+
+        <title>Object Databases  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./object_databases.html"> Object&nbsp;Databases  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#motivation">Motivation</a><ul>
+<li><a href="#orthogonal-persistence">Orthogonal Persistence</a></li>
+<li><a href="#impedance-missmatch">Impedance Missmatch</a></li>
+<li><a href="#relational-databases">Relational Databases</a></li>
+<li><a href="#object-relational-mapping-orm">Object-relational mapping (<span class="caps">ORM</span>)</a></li>
+<li><a href="#develop-own-database">Develop own Database</a></li>
+<li><a href="#sql"><span class="caps">SQL</span></a><ul>
+<li><a href="#data-definition-language-ddl">Data Definition Language (<span class="caps">DDL</span>)</a></li>
+<li><a href="#data-manipulation-language-dml">Data Manipulation Language (<span class="caps">DML</span>)</a></li>
+<li><a href="#query-language-ql">Query Language (<span class="caps">QL</span>)</a></li>
+</ul>
+</li>
+<li><a href="#ddl-dml-and-ql-in-sql-and-java"><span class="caps">DDL</span>, <span class="caps">DML</span> and <span class="caps">QL</span> in <span class="caps">SQL</span> and Java</a></li>
+<li><a href="#learning-goals">Learning Goals</a></li>
+</ul>
+</li>
+<li><a href="#general-topics-for-dbs">General Topics for <span class="caps">DB</span>’s</a><ul>
+<li><a href="#crud-and-acid"><span class="caps">CRUD</span> and <span class="caps">ACID</span></a></li>
+</ul>
+</li>
+<li><a href="#odmg-standard"><span class="caps">ODMG</span> Standard</a><ul>
+<li><a href="#object-data-management-group-odmg">Object Data Management Group (<span class="caps">ODMG</span>)</a><ul>
+<li><a href="#object-model">Object Model</a><ul>
+<li><a href="#types">Types</a></li>
+<li><a href="#type-specifications">Type Specifications</a></li>
+<li><a href="#type-implementation">Type Implementation</a></li>
+<li><a href="#subtyping-and-inheritance">Subtyping and Inheritance</a></li>
+</ul>
+</li>
+<li><a href="#object-query-language-oql">Object Query Language (<span class="caps">OQL</span>)</a><ul>
+<li><a href="#difference-to-sql">Difference to <span class="caps">SQL</span></a></li>
+<li><a href="#return-types">Return Types</a></li>
+<li><a href="#extents">Extents</a></li>
+</ul>
+</li>
+<li><a href="#collections">Collections</a><ul>
+<li><a href="#sub-collections">Sub-collections</a></li>
+</ul>
+</li>
+<li><a href="#relationships">Relationships</a></li>
+<li><a href="#persistence">Persistence</a></li>
+<li><a href="#other-concepts-supported">Other Concepts Supported</a></li>
+<li><a href="#object-definition-language-odl">Object Definition Language (<span class="caps">ODL</span>)</a></li>
+<li><a href="#collection-expressions">Collection Expressions</a></li>
+<li><a href="#language-bindings">Language Bindings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#hibernate">Hibernate</a><ul>
+<li><a href="#object-relational-mappings">Object-Relational Mappings</a></li>
+<li><a href="#main-concepts">Main Concepts</a></li>
+<li><a href="#configuration">Configuration</a><ul>
+<li><a href="#properties">Properties</a></li>
+<li><a href="#persistent-objects">Persistent Objects</a></li>
+</ul>
+</li>
+<li><a href="#mapping-associations">Mapping Associations</a></li>
+<li><a href="#mapping-inheritance">Mapping Inheritance</a></li>
+<li><a href="#annotations">Annotations</a></li>
+</ul>
+</li>
+<li><a href="#google-android">Google Android</a><ul>
+<li><a href="#application-component-model">Application component model</a></li>
+<li><a href="#data-management">Data Management</a></li>
+</ul>
+</li>
+<li><a href="#object-oriented-databases-object-database-manifesto">Object-Oriented Databases: Object Database Manifesto</a><ul>
+<li><a href="#objects-mandatory">Objects (mandatory)</a></li>
+<li><a href="#types-and-classes">Types and Classes</a></li>
+<li><a href="#generalization-hierarchies">Generalization Hierarchies</a></li>
+<li><a href="#durability-and-efficiency">Durability and Efficiency</a></li>
+<li><a href="#concurrency-control-and-recovery">Concurrency Control and Recovery</a></li>
+<li><a href="#declarative-query-language">Declarative Query Language</a></li>
+</ul>
+</li>
+<li><a href="#db4o">db4o</a><ul>
+<li><a href="#object-container">Object Container</a></li>
+<li><a href="#storing-objects">Storing Objects</a></li>
+<li><a href="#retrieving-objects">Retrieving Objects</a><ul>
+<li><a href="#soda-queries"><span class="caps">SODA</span> Queries</a></li>
+</ul>
+</li>
+<li><a href="#updating-objects">Updating Objects</a></li>
+<li><a href="#deleting-objects">Deleting Objects</a></li>
+<li><a href="#simple-vs-complex-objects">Simple vs. Complex Objects</a></li>
+<li><a href="#simple-structured-objects">Simple Structured Objects</a><ul>
+<li><a href="#updating-simple-structured-objects">Updating Simple Structured Objects</a></li>
+<li><a href="#deleting-simple-structured-objects">Deleting Simple Structured Objects</a></li>
+</ul>
+</li>
+<li><a href="#object-hierarchies">Object Hierarchies</a></li>
+<li><a href="#transparent-persistence">Transparent Persistence</a></li>
+<li><a href="#activation">Activation</a><ul>
+<li><a href="#transparent-activation">Transparent Activation</a></li>
+</ul>
+</li>
+<li><a href="#db4o-transactions">db4o Transactions</a></li>
+<li><a href="#configuration_1">Configuration</a></li>
+<li><a href="#external-tools">External tools</a></li>
+<li><a href="#indexes">Indexes</a></li>
+<li><a href="#tuning-for-speed">Tuning for Speed</a></li>
+<li><a href="#distribution-and-replication">Distribution and Replication</a></li>
+<li><a href="#callbacks">Callbacks</a></li>
+<li><a href="#object-instantiation">Object Instantiation</a></li>
+</ul>
+</li>
+<li><a href="#versant">Versant</a><ul>
+<li><a href="#indexing">Indexing</a></li>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#database-volumes">Database Volumes</a></li>
+<li><a href="#versant-manager">Versant Manager</a></li>
+<li><a href="#cache">Cache</a></li>
+<li><a href="#versant-server">Versant Server</a></li>
+<li><a href="#processes-sessions-and-transactions">Processes, Sessions and Transactions</a></li>
+<li><a href="#java-versant-interface">Java Versant Interface</a></li>
+<li><a href="#jvi-layers"><span class="caps">JVI</span> Layers</a><ul>
+<li><a href="#fundamental-layer">Fundamental Layer</a></li>
+<li><a href="#transparent-layer">Transparent Layer</a><ul>
+<li><a href="#first-and-second-class-objects">First and Second Class Objects</a></li>
+<li><a href="#persistence-categories">Persistence Categories</a></li>
+<li><a href="#persistence-and-navigation">Persistence and Navigation</a></li>
+</ul>
+</li>
+<li><a href="#omdg-layer"><span class="caps">OMDG</span> Layer</a></li>
+</ul>
+</li>
+<li><a href="#application-development">Application Development</a></li>
+<li><a href="#byte-code-enhancement">Byte-code Enhancement</a></li>
+<li><a href="#object-lifecycle">Object Lifecycle</a></li>
+<li><a href="#versant-collections">Versant Collections</a></li>
+<li><a href="#versant-query-language-vql">Versant Query Language (<span class="caps">VQL</span>)</a></li>
+<li><a href="#event-notification-and-persistent-object-hooks">Event Notification and Persistent Object Hooks</a></li>
+</ul>
+</li>
+<li><a href="#objectstore">ObjectStore</a><ul>
+<li><a href="#general-topics-of-persistence">General Topics of Persistence</a></li>
+<li><a href="#architecture_1">Architecture</a></li>
+<li><a href="#virtual-memory-mapping-architecture">Virtual Memory Mapping Architecture</a></li>
+<li><a href="#server-side-components">Server Side Components</a></li>
+<li><a href="#client-side-components">Client Side Components</a></li>
+<li><a href="#fetching-and-mapping-pages">Fetching and Mapping Pages</a><ul>
+<li><a href="#fetching-and-mapping-sequence">Fetching and Mapping Sequence</a></li>
+</ul>
+</li>
+<li><a href="#cache-forward-architecture">Cache-Forward Architecture</a></li>
+<li><a href="#shared-virtual-memory">Shared Virtual Memory</a></li>
+<li><a href="#page-permits-and-locks">Page Permits and Locks</a></li>
+<li><a href="#distribution-and-heterogeneity">Distribution and Heterogeneity</a></li>
+<li><a href="#persistence_1">Persistence</a></li>
+<li><a href="#transactions">Transactions</a><ul>
+<li><a href="#transaction-types">Transaction Types</a></li>
+</ul>
+</li>
+<li><a href="#database-layout">Database Layout</a></li>
+<li><a href="#developing-applications-api">Developing Applications (<span class="caps">API</span>)</a><ul>
+<li><a href="#managing-databases">Managing Databases</a></li>
+<li><a href="#transactions_1">Transactions</a></li>
+<li><a href="#creating-persistent-objects">Creating Persistent Objects</a></li>
+<li><a href="#updating-and-deleting-persistent-objects">Updating and Deleting Persistent Objects</a></li>
+<li><a href="#collections-and-relationships">Collections and Relationships</a></li>
+</ul>
+</li>
+<li><a href="#database-roots">Database Roots</a></li>
+</ul>
+</li>
+<li><a href="#objectivitydb">Objectivity/<span class="caps">DB</span></a><ul>
+<li><a href="#key-features">Key Features</a></li>
+<li><a href="#architecture_2">Architecture</a></li>
+<li><a href="#federation">Federation</a></li>
+<li><a href="#databases">Databases</a></li>
+<li><a href="#containers">Containers</a></li>
+<li><a href="#pages">Pages</a><ul>
+<li><a href="#logical-and-physical-pages">Logical and Physical Pages</a></li>
+</ul>
+</li>
+<li><a href="#persistent-object-model">Persistent Object Model</a></li>
+<li><a href="#relationships_1">Relationships</a><ul>
+<li><a href="#non-inline-relationships-default">Non-Inline Relationships (default)</a></li>
+<li><a href="#inline-relationships">Inline Relationships</a></li>
+</ul>
+</li>
+<li><a href="#deletion-and-lock-propagation">Deletion and Lock Propagation</a></li>
+<li><a href="#copy-and-versioning-behaviour">Copy and Versioning Behaviour</a></li>
+<li><a href="#domain-classes">Domain Classes</a></li>
+<li><a href="#connection-sessions-and-threads">Connection, Sessions and Threads</a></li>
+<li><a href="#persistent-collections">Persistent Collections</a></li>
+<li><a href="#iterators">Iterators</a></li>
+<li><a href="#scope-names">Scope Names</a></li>
+<li><a href="#retrieving-objects_1">Retrieving Objects</a></li>
+<li><a href="#linq-overview"><span class="caps">LINQ</span> Overview</a></li>
+</ul>
+</li>
+<li><a href="#graph-databases">Graph Databases</a><ul>
+<li><a href="#social-network-analysis">Social Network Analysis</a></li>
+<li><a href="#graphs">Graphs</a><ul>
+<li><a href="#graph-metrics">Graph Metrics</a><ul>
+<li><a href="#path-lengths">Path Lengths</a></li>
+<li><a href="#node-properties">Node Properties</a></li>
+<li><a href="#network-structure-properties">Network Structure Properties</a></li>
+</ul>
+</li>
+<li><a href="#general-model">General Model</a></li>
+</ul>
+</li>
+<li><a href="#graph-database-implementations">Graph Database Implementations</a><ul>
+<li><a href="#infinitegraph-objectivity">InfiniteGraph (Objectivity)</a></li>
+<li><a href="#neo4j">Neo4j</a></li>
+<li><a href="#comparison-between-infinitegraph-and-neo4j">Comparison between InfiniteGraph and Neo4j</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#version-models">Version Models</a><ul>
+<li><a href="#versioned-object">Versioned Object</a></li>
+<li><a href="#version-organsiations">Version Organsiations</a></li>
+<li><a href="#references">References</a></li>
+<li><a href="#storage-strategies">Storage Strategies</a></li>
+<li><a href="#operation-and-interaction-models">Operation and Interaction Models</a></li>
+<li><a href="#queries-and-configurations">Queries and Configurations</a></li>
+<li><a href="#temporal-databases">Temporal Databases</a></li>
+<li><a href="#time-in-databases">Time in Databases</a></li>
+<li><a href="#classification-of-temporal-databases">Classification of Temporal Databases</a><ul>
+<li><a href="#querying-moving-objects-with-uncertainity">Querying Moving Objects with Uncertainity</a></li>
+</ul>
+</li>
+<li><a href="#representing-temporal-data">Representing Temporal Data</a></li>
+<li><a href="#conceptual-and-data-models">Conceptual and Data Models</a></li>
+<li><a href="#homogeneous-and-heterogenous-models">Homogeneous and Heterogenous Models</a></li>
+<li><a href="#storage-models">Storage Models</a></li>
+<li><a href="#engineering-databases">Engineering Databases</a></li>
+<li><a href="#design-space-version-model">Design Space Version Model</a></li>
+<li><a href="#software-configuration-systems">Software Configuration Systems</a></li>
+<li><a href="#product-space-representation">Product Space Representation</a></li>
+<li><a href="#version-space">Version Space</a><ul>
+<li><a href="#version-space-representation">Version Space Representation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#indexing_1">Indexing</a><ul>
+<li><a href="#type-hierarchy-indexing">Type Hierarchy Indexing</a><ul>
+<li><a href="#key-vs-type-grouping">Key- vs Type-Grouping</a></li>
+<li><a href="#extent-and-full-extent">Extent and Full Extent</a></li>
+<li><a href="#single-class-index-sc-index">Single Class Index (<span class="caps">SC</span>-Index)</a></li>
+<li><a href="#class-hierarchy-index-ch-index">Class Hierarchy Index (<span class="caps">CH</span>-Index)</a></li>
+<li><a href="#h-tree">H-Tree</a></li>
+<li><a href="#class-division-index-cd-index">Class Division Index (<span class="caps">CD</span>-Index)</a></li>
+<li><a href="#multi-key-type-index-mt-index">Multi-Key Type Index (<span class="caps">MT</span>-Index)</a></li>
+</ul>
+</li>
+<li><a href="#aggregation-path-indexing">Aggregation Path Indexing</a><ul>
+<li><a href="#nested-index-nx">Nested Index (<span class="caps">NX</span>)</a></li>
+<li><a href="#path-index-px">Path Index (<span class="caps">PX</span>)</a></li>
+<li><a href="#join-index-jx">Join-Index (<span class="caps">JX</span>)</a></li>
+<li><a href="#multi-index-mx">Multi-Index (<span class="caps">MX</span>)</a></li>
+<li><a href="#access-support-relations-asr">Access Support Relations (<span class="caps">ASR</span>)</a></li>
+<li><a href="#overview-aggregation-path-indexing">Overview: Aggregation Path Indexing</a></li>
+</ul>
+</li>
+<li><a href="#collection-operations">Collection Operations</a><ul>
+<li><a href="#signature-files">Signature Files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#the-om-data-model">The <span class="caps">OM</span> Data Model</a><ul>
+<li><a href="#typing-and-classification">Typing and Classification</a></li>
+<li><a href="#om-data-model-layers"><span class="caps">OM</span> Data Model Layers</a></li>
+<li><a href="#collection-constraint">Collection Constraint</a></li>
+<li><a href="#associations-relationships">Associations (Relationships)</a></li>
+<li><a href="#object-model-language-oml">Object Model Language (<span class="caps">OML</span>)</a><ul>
+<li><a href="#collection-algebra">Collection Algebra</a></li>
+<li><a href="#binary-collections">Binary Collections</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            
+<!-- Lecture 1 Slides/Notes Start -->
+<h1 id="motivation">Motivation</h1>
+<ul>
+<li>Information Systems Design<ul>
+<li>Conceptual Design -&gt; Technical Design -&gt; Implementation</li>
+</ul>
+</li>
+</ul>
+<h2 id="orthogonal-persistence">Orthogonal Persistence</h2>
+<p>Data has to outlive the execution of the program</p>
+<ul>
+<li><strong>Independence</strong> of longelivety of data<ul>
+<li>How much code needs to be written for persistence (effort for programmer)<ul>
+<li>None at all would be nice but not realistic (<span class="caps">GUI</span> objects usually don’t need storing…)</li>
+</ul>
+</li>
+<li>Data is stored automatically</li>
+<li>Not always desirable: don’t need to store <span class="caps">UI</span>, messages …</li>
+<li>3 possible solutions<ol>
+<li>implicit: save all objects automatically</li>
+<li>explicit: objects need to be saved manually</li>
+<li>on class base (different granularity)</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><strong>Data Type Orthogonality</strong> all data objects should be allowed to be persistent (long-lived, transient)<ul>
+<li>The data types do not need to be modified (implicitly or explicitly) to allow persistence</li>
+<li>e.g Serializable interface in Java does not satisfy this criteria (classes that don’t implement the interface can’t be stored)</li>
+</ul>
+</li>
+<li><strong>Identification</strong>: mechanism for identifying persistent object not related to the type system<ul>
+<li>Transferring data from persistence storage to memory</li>
+<li>e.g specify which classes/objects should be stored persistence</li>
+<li>separation of concerns</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>No commercial <span class="caps">DB</span> system fully satisfies the above criteria</p>
+</blockquote>
+<h2 id="impedance-missmatch">Impedance Missmatch</h2>
+<ul>
+<li>Difference between models<ul>
+<li><span class="caps">OOP</span> data model is based on object trees</li>
+<li><a href="https://en.wikipedia.org/wiki/Relational_model">The Relational Model</a> is based on tables</li>
+</ul>
+</li>
+<li><span class="caps">OOP</span> Languages<ul>
+<li>Difference between attributes and relationships not clear</li>
+<li>Both are (usually) reference types in a class</li>
+</ul>
+</li>
+<li>Different models because there are different requirements</li>
+<li>Mapping code between the two models needed<ul>
+<li>A lot of solutions available</li>
+<li>Affects run-time (and often development)</li>
+</ul>
+</li>
+<li>Inheritance (<span class="caps">OOP</span>) is difficult to model in relational DBs<ul>
+<li>Objects spread over several tables (other approaches possible)</li>
+</ul>
+</li>
+</ul>
+<p>An overview of the mismatch is shown on <a href="http://www.tutorialspoint.com/hibernate/orm_overview.htm">Tutorialspoint</a></p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Mismatch</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Granularity</td>
+<td>An object model can have more classes than the number of corresponding tables in the <span class="caps">DB</span>.</td>
+</tr>
+<tr>
+<td>Inheritance</td>
+<td>In <span class="caps">OOP</span> inheritance is a base concept. The Relational Model doesn’t support this directly.</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td>The Relational Model defines identity. In <span class="caps">OOP</span> there is often a difference between equality and identity.</td>
+</tr>
+<tr>
+<td>Association</td>
+<td><span class="caps">OOP</span> uses references. The Relational Model uses foreign keys.</td>
+</tr>
+<tr>
+<td>Navigation</td>
+<td><span class="caps">OOP</span> uses following references in object tree. The Relational Model uses queries.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="relational-databases">Relational Databases</h2>
+<ul>
+<li>Tables, Rows, Columns…<ul>
+<li>Table: Relation (similar to class)</li>
+<li>Columns: Relation attributes (correspond to class attributes)</li>
+<li>Keys: Pointers (relationships)</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>It’s difficult to match the relational database model to the object oriented model</p>
+</blockquote>
+<h2 id="object-relational-mapping-orm">Object-relational mapping (<span class="caps">ORM</span>)</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Object-relational_mapping">Object-relational mapping</a> can be used against object-relational miss-match<ul>
+<li>But it’s not a very good approach</li>
+<li>There are a lot of solutions: Hibernate, <a href="http://www.qxorm.com/qxorm_en/home.html">QxOrm</a>, …</li>
+</ul>
+</li>
+</ul>
+<h2 id="develop-own-database">Develop own Database</h2>
+<ul>
+<li>Support application development (programming language)<ul>
+<li>Clients of the <span class="caps">DB</span> system are developers (not end user)</li>
+</ul>
+</li>
+<li>Support persistent data management</li>
+<li>One data model (<span class="caps">OOP</span>)</li>
+<li>One language (Java?)</li>
+</ul>
+<h2 id="sql"><span class="caps">SQL</span></h2>
+<h3 id="data-definition-language-ddl">Data Definition Language (<span class="caps">DDL</span>)</h3>
+<p>Definition of data models</p>
+<ul>
+<li>Concepts<ul>
+<li>Relations</li>
+<li>Relation attributes and domains</li>
+<li>Primary and foreign key</li>
+</ul>
+</li>
+<li>Operations<ul>
+<li>Create tables (<code>class</code> in Java)</li>
+<li>Declare relation attributes</li>
+<li>Declare primary and foreign keys</li>
+<li>Alter tables</li>
+</ul>
+</li>
+</ul>
+<h3 id="data-manipulation-language-dml">Data Manipulation Language (<span class="caps">DML</span>)</h3>
+<p>Creation and management of data</p>
+<ul>
+<li>Concepts<ul>
+<li>Relation touple</li>
+<li>Predicate</li>
+</ul>
+</li>
+<li>Operations<ul>
+<li>Insert</li>
+<li>Update</li>
+<li>Delete</li>
+<li>in Java: <code>new</code> and ‘setters’</li>
+</ul>
+</li>
+</ul>
+<h3 id="query-language-ql">Query Language (<span class="caps">QL</span>)</h3>
+<p>Retrieval of data</p>
+<ul>
+<li>Concepts<ul>
+<li>Query</li>
+<li>Predicate</li>
+<li>Query result</li>
+</ul>
+</li>
+<li>Operations (Relational Algebra)<ul>
+<li>Project</li>
+<li>Join</li>
+<li>Select</li>
+<li>in Java: ‘getters’</li>
+</ul>
+</li>
+</ul>
+<h2 id="ddl-dml-and-ql-in-sql-and-java"><span class="caps">DDL</span>, <span class="caps">DML</span> and <span class="caps">QL</span> in <span class="caps">SQL</span> and Java</h2>
+<p><span class="caps">DD</span>, <span class="caps">DM</span> supported in Java. Querying is very limited.</p>
+<ul>
+<li><span class="caps">DD</span></li>
+</ul>
+<p><span class="caps">SQL</span></p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">...</span><span class="w"></span>
+</code></pre></div>
+<p>Java</p>
+<div class="highlight"><pre><span></span><code><span class="kd">class</span> <span class="nc">Person</span> <span class="p">{</span>
+    <span class="n">String</span> <span class="n">name</span><span class="p">;</span>
+    <span class="n">String</span> <span class="n">email</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><span class="caps">DM</span></li>
+</ul>
+<p><span class="caps">SQL</span></p>
+<div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">...</span><span class="w"></span>
+</code></pre></div>
+<p>Java</p>
+<div class="highlight"><pre><span></span><code><span class="k">new</span> <span class="n">Person</span><span class="p">()</span>
+<span class="n">p</span><span class="p">.</span><span class="na">name</span> <span class="o">=</span> <span class="s">"Bill Stinnet"</span>
+</code></pre></div>
+<ul>
+<li>Querying</li>
+</ul>
+<p><span class="caps">SQL</span></p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="n">col_name</span><span class="w"> </span><span class="p">...</span><span class="w"></span>
+</code></pre></div>
+<p>Java</p>
+<div class="highlight"><pre><span></span><code><span class="p">...</span> <span class="o">=</span> <span class="n">p</span><span class="p">.</span><span class="na">name</span>
+</code></pre></div>
+<p><span class="caps">LINQ</span> is a powerful and compile time safe support for querying.</p>
+<h2 id="learning-goals">Learning Goals</h2>
+<ul>
+<li>Motivation for Database technologies (not relational)<ul>
+<li>Design- and run-time</li>
+<li>Complex application domains</li>
+<li>Schema and data evolution</li>
+</ul>
+</li>
+<li>Understanding of object-oriented data model<ul>
+<li>what is <span class="caps">OOP</span>?</li>
+<li><span class="caps">ODMG</span></li>
+</ul>
+</li>
+<li>New and alternative concepts and applications</li>
+<li>Develop an object database<ul>
+<li>Requirements</li>
+<li>Challenges<ul>
+<li>integration with application</li>
+<li>duplicate objects</li>
+<li><span class="caps">OO</span>-specific indexing</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Object database technologies<ul>
+<li>Products<ul>
+<li>db4o</li>
+<li>Object Store</li>
+<li>Objectivity</li>
+<li>Versant</li>
+</ul>
+</li>
+<li>General concepts</li>
+<li>Solutions to the challenges</li>
+</ul>
+</li>
+<li>Comparison to other database technologies<ul>
+<li>Android <span class="caps">SDK</span></li>
+<li>Hibernate</li>
+<li>Django</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+<!-- Lecture 1 Slides/Notes End -->
+<h1 id="general-topics-for-dbs">General Topics for <span class="caps">DB</span>’s</h1>
+<p>[Prepared Statement]</p>
+<h2 id="crud-and-acid"><span class="caps">CRUD</span> and <span class="caps">ACID</span></h2>
+<ul>
+<li>
+<p>The acronym <a href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete"><span class="caps">CRUD</span></a> stands for the basic functions of a database system</p>
+<ul>
+<li>Create</li>
+<li>Read</li>
+<li>Update</li>
+<li>Delete</li>
+</ul>
+</li>
+<li>
+<p>The acronym <a href="https://en.wikipedia.org/wiki/ACID"><span class="caps">ACID</span></a> stands for the properties that allow for concurrent database transactions</p>
+<ul>
+<li>Atomicity</li>
+<li>Consistency</li>
+<li>Isolation</li>
+<li>Durability</li>
+</ul>
+</li>
+</ul>
+<!-- Lecture 2 Slides/Notes Start -->
+<h1 id="odmg-standard"><span class="caps">ODMG</span> Standard</h1>
+<ul>
+<li>
+<p>What is an object?</p>
+<ul>
+<li>Something that can be pointed to?</li>
+<li>Can be passed on as a reference?</li>
+<li>Distinct from single values</li>
+<li>properties and behaviour</li>
+<li>representing something (moddeling the real world)</li>
+</ul>
+</li>
+<li>
+<p>Object:</p>
+<ul>
+<li>properties</li>
+<li>behaviour</li>
+<li>presenting something (modelling the real world)</li>
+</ul>
+</li>
+</ul>
+<p>Examples in Java:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th>Simple</th>
+<th>Complex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reference</td>
+<td><code>Integer</code></td>
+<td><code>Object</code></td>
+</tr>
+<tr>
+<td>Value</td>
+<td><code>int</code></td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p>In some languages (<span class="caps">PHP</span>, JavaScript, …) Objects and Associative Arrays are the same (or similar).</p>
+<ul>
+<li>
+<p>Some constructs can be extended over time</p>
+<ul>
+<li>possible with map (add key/value)</li>
+<li><em>not</em> possible with <em>class</em> in Java</li>
+</ul>
+</li>
+<li>
+<p>Object Orientation needs a broader definition!</p>
+<ul>
+<li>not coupled to a specific programming language</li>
+</ul>
+</li>
+<li>
+<p>Most database systems often independent of programming languages</p>
+<ul>
+<li>e.g <span class="caps">SQL</span> very different from the language where the <span class="caps">DB</span> is used (independent of language)</li>
+</ul>
+</li>
+<li>Object database systems are more coupled to one (or multiple) programming language</li>
+</ul>
+<h2 id="object-data-management-group-odmg">Object Data Management Group (<span class="caps">ODMG</span>)</h2>
+<h3 id="object-model">Object Model</h3>
+<ul>
+<li>Based on <a href="https://en.wikipedia.org/wiki/Object_Management_Group"><span class="caps">OMG</span></a> object model</li>
+<li>Basic modeling primitives<ul>
+<li><strong>object</strong>: unique identifier (identity)</li>
+<li><strong>literal</strong>: no identifier</li>
+</ul>
+</li>
+<li>Object state defined by the values (properties)<ul>
+<li>attributes</li>
+<li>relationships</li>
+</ul>
+</li>
+<li>
+<p>Object behavior</p>
+<ul>
+<li>set of operations (can be executed)</li>
+</ul>
+</li>
+<li>
+<p>Objects and literals are categorized by their type</p>
+<ul>
+<li>A type defines common properties and common behavior</li>
+</ul>
+</li>
+</ul>
+<h4 id="types">Types</h4>
+<ul>
+<li>Specification<ul>
+<li>properties<ul>
+<li>attributes</li>
+<li>relationships</li>
+</ul>
+</li>
+<li>operations</li>
+<li>exceptions</li>
+</ul>
+</li>
+<li>Implementation<ul>
+<li>language binding</li>
+<li>a specification can have more than one implementation</li>
+</ul>
+</li>
+<li>Similar to C++<ul>
+<li>Header-File: Specification</li>
+<li>Source-File: Implementation</li>
+</ul>
+</li>
+</ul>
+<h4 id="type-specifications">Type Specifications</h4>
+<ul>
+<li>Interface<ul>
+<li>defines only abstract behavior</li>
+<li><code>interface Employee {...};</code></li>
+</ul>
+</li>
+<li>Class<ul>
+<li>defines both abstract behavior and abstract state</li>
+<li><code>class Person {...};</code></li>
+</ul>
+</li>
+<li>Literal<ul>
+<li>defines abstract state</li>
+<li><code>struct Complex { float real; float imaginary; };</code></li>
+</ul>
+</li>
+</ul>
+<h4 id="type-implementation">Type Implementation</h4>
+<ul>
+<li>Representation<ul>
+<li>data structure</li>
+<li>derived from type’s abstract state by the language binding</li>
+<li>for each property contained in the abstract state there is an instance variable of an appropriate type defined</li>
+</ul>
+</li>
+<li>Methods<ul>
+<li>procedure bodies</li>
+<li>derived from type’s abstract behavior by the language binding</li>
+<li>also private methods with no counterpart in specification</li>
+</ul>
+</li>
+</ul>
+<h4 id="subtyping-and-inheritance">Subtyping and Inheritance</h4>
+<ul>
+<li>
+<p>Two types of inheritance relationships</p>
+<ol>
+<li><span class="caps">IS</span>-A relationship<ul>
+<li>inheritance of behavior</li>
+<li>multiple inheritance, name overloading disallowed</li>
+<li><code>interface Professor : Employee {...};</code></li>
+</ul>
+</li>
+<li><strong><span class="caps">EXTENDS</span></strong> relationship<ul>
+<li>inheritance of state and behavior</li>
+<li>single inheritance</li>
+<li><code>class EmplPers extends Person : Employee {...};</code></li>
+</ul>
+</li>
+</ol>
+</li>
+<li>
+<p>Co- and Contravariant rules must hold</p>
+<ul>
+<li>Input Arguments: Contravariant</li>
+<li>Return Values (and Exceptions): Covariant</li>
+</ul>
+</li>
+</ul>
+<h3 id="object-query-language-oql">Object Query Language (<span class="caps">OQL</span>)</h3>
+<p>Based on <span class="caps">ODMG</span> Object Model and <span class="caps">SQL</span>-92</p>
+<div class="highlight"><pre><span></span><code><span class="k">select</span><span class="w">  </span><span class="n">list_of_values</span><span class="w"></span>
+<span class="k">from</span><span class="w">    </span><span class="n">list_of_collections_and_typical_members</span><span class="w"></span>
+<span class="k">where</span><span class="w">   </span><span class="n">condition</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li><code>SELECT</code>: Get attributes</li>
+<li><code>FROM</code>: The base population of potential results to search in</li>
+<li><code>WHERE</code>: Predicates (conditions) that have to be true so that the results are selected as result</li>
+</ul>
+<p>Mapping to <span class="caps">OOP</span> not obvious.</p>
+<p>Table in relational DBs has tow roles:</p>
+<ol>
+<li>Defining Type</li>
+<li>Container of all values (of that type)</li>
+</ol>
+<p>In <span class="caps">OOP</span> 2. is missing. A class just defines a type but is not a container of all instances of that class.</p>
+<p><span class="caps">ODMG</span> defines Extents.</p>
+<h4 id="difference-to-sql">Difference to <span class="caps">SQL</span></h4>
+<p>This is illegal as the “dot” operator cannot be applied to a collection of objects:</p>
+<div class="highlight"><pre><span></span><code><span class="k">select</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">authors</span><span class="p">.</span><span class="n">title</span><span class="w"></span>
+<span class="k">from</span><span class="w">   </span><span class="n">Authors</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
+<span class="k">where</span><span class="w">  </span><span class="n">a</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">"Tilmann Zaeschke"</span><span class="w"></span>
+</code></pre></div>
+<p>Correct solution based on <em>correlated</em> variables:</p>
+<div class="highlight"><pre><span></span><code><span class="k">select</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">title</span><span class="w"></span>
+<span class="k">from</span><span class="w"> </span><span class="n">Authors</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">authors</span><span class="w"> </span><span class="n">p</span><span class="w"></span>
+<span class="k">where</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">"Tilmann Zaeschke"</span><span class="w"></span>
+</code></pre></div>
+<h4 id="return-types">Return Types</h4>
+<ul>
+<li>Queries return sets, bags or lists</li>
+</ul>
+<p>As a default, queries return a <em>bag</em></p>
+<div class="highlight"><pre><span></span><code><span class="k">select</span><span class="w"> </span><span class="k">first</span><span class="p">:</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">authored_by</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="k">year</span><span class="w"></span>
+<span class="k">from</span><span class="w">   </span><span class="n">Publications</span><span class="w"> </span><span class="n">p</span><span class="w"></span>
+</code></pre></div>
+<p>In Java:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Bag</span><span class="o">&lt;</span><span class="n">Struct</span> <span class="p">{</span> <span class="n">Author</span> <span class="n">first</span><span class="p">,</span> <span class="n">string</span> <span class="n">title</span><span class="p">,</span> <span class="n">integer</span> <span class="n">year</span> <span class="p">}</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>Queries with <code>DISTINCT</code> return a <em>set</em></p>
+<div class="highlight"><pre><span></span><code><span class="k">select</span><span class="w"> </span><span class="k">distinct</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">name</span><span class="w"></span>
+<span class="k">from</span><span class="w">   </span><span class="n">Authors</span><span class="w"> </span><span class="n">a</span><span class="w"></span>
+</code></pre></div>
+<p>In Java:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Set</span><span class="o">&lt;</span><span class="n">Struct</span> <span class="p">{</span> <span class="n">string</span> <span class="n">name</span> <span class="p">}</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>Queries with <code>ORDER BY</code> return a <em>list</em></p>
+<div class="highlight"><pre><span></span><code><span class="k">select</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">title</span><span class="w"></span>
+<span class="k">from</span><span class="w"> </span><span class="n">Publications</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="k">order</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="k">year</span><span class="w"> </span><span class="k">desc</span><span class="w"></span>
+</code></pre></div>
+<p>In Java:</p>
+<div class="highlight"><pre><span></span><code><span class="n">List</span><span class="o">&lt;</span><span class="n">Struct</span> <span class="p">{</span> <span class="n">string</span> <span class="n">name</span> <span class="p">}</span><span class="o">&gt;</span>
+</code></pre></div>
+<h4 id="extents">Extents</h4>
+<ul>
+<li>Extent of a type is the set (collection) of all active instances<ul>
+<li><code>class Person</code>: extent of class Person would be the set of all person objects in the data management system</li>
+</ul>
+</li>
+<li>Extents can be maintained automatically</li>
+</ul>
+<h3 id="collections">Collections</h3>
+<p><span class="caps">OMDG</span> supports collections:</p>
+<ul>
+<li>set: un-ordered, no duplicates</li>
+<li>bag: un-ordered, duplicates</li>
+<li>list: ordered, elements can be inserted</li>
+<li>array: ordered, elements can be replaced</li>
+<li>dictionary: maps keys to values</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th>Single elements</th>
+<th>Duplicates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ordered</td>
+<td>? (heap)</td>
+<td>list</td>
+</tr>
+<tr>
+<td>Un-ordered</td>
+<td>set</td>
+<td>bag</td>
+</tr>
+</tbody>
+</table>
+<p>Support for objects and literals:</p>
+<ul>
+<li>Collection objects: <code>Set&lt;t&gt;</code>, <code>Bag&lt;t&gt;</code>, <code>List&lt;t&gt;</code>, <code>Array&lt;t&gt;</code>, <code>Dictionary&lt;t,v&gt;</code></li>
+<li>Collection literals: <code>set&lt;t&gt;</code>, <code>bag&lt;t&gt;</code>, <code>list&lt;t&gt;</code>, <code>array&lt;t&gt;</code>, <code>dictionary&lt;t,v&gt;</code></li>
+</ul>
+<h4 id="sub-collections">Sub-collections</h4>
+<p><span class="caps">OMDG</span> supports sub-collections</p>
+<h3 id="relationships">Relationships</h3>
+<ul>
+<li>All relationships are binary<ul>
+<li>many-to-many</li>
+<li>many-to-one</li>
+<li>one-to-one</li>
+</ul>
+</li>
+<li>No support for ternary (or higher) relationships<ul>
+<li>can be simulated by creating classes to represent relationship touple</li>
+</ul>
+</li>
+<li>
+<p>System maintains referential integrity!</p>
+</li>
+<li>
+<p>Keywords for attributes and relationships</p>
+<ul>
+<li><code>attribute</code>: for normal class attributes</li>
+<li><code>relationship</code>: for relationship references (integrity checks can be performed)</li>
+</ul>
+</li>
+</ul>
+<h3 id="persistence">Persistence</h3>
+<ul>
+<li>Persistence by reachability<ul>
+<li>not necessary the best option</li>
+</ul>
+</li>
+<li>Database gives access to global names<ul>
+<li>explicitly <em>named root objects</em></li>
+<li>types defined in schema</li>
+<li>named extents of types</li>
+<li>store object graphs</li>
+</ul>
+</li>
+</ul>
+<h3 id="other-concepts-supported">Other Concepts Supported</h3>
+<ul>
+<li>Database operations</li>
+<li>Locking and concurrency control</li>
+<li>Transactions</li>
+<li>Access to meta-data</li>
+<li>Built-in structured literals and objects<ul>
+<li>dates</li>
+<li>times</li>
+<li>time-stamps</li>
+<li>intervals</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+<h3 id="object-definition-language-odl">Object Definition Language (<span class="caps">ODL</span>)</h3>
+<ul>
+<li>programming language independent, extensible and practical</li>
+<li>compatible to <span class="caps">OMG</span> Interface Definition Language (<span class="caps">IDL</span>)</li>
+</ul>
+<p><span class="caps">ODL</span> Syntax:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">class</span> <span class="nc">name</span> <span class="o">[</span> <span class="p">(</span> <span class="n">extent</span> <span class="n">name</span><span class="p">,</span> <span class="n">key</span> <span class="n">name</span> <span class="p">)</span> <span class="o">]</span> <span class="p">{</span>
+  <span class="p">{</span> <span class="n">exception</span> <span class="n">name</span> <span class="p">{</span> <span class="p">{</span> <span class="n">type</span> <span class="n">name</span> <span class="p">}</span> <span class="p">}</span> <span class="p">}</span>
+  <span class="p">{</span> <span class="n">attribute</span> <span class="n">type</span> <span class="n">name</span> <span class="p">}</span>
+  <span class="p">{</span> <span class="n">relationship</span> <span class="n">type</span> <span class="n">name</span> <span class="n">inverse</span> <span class="n">relationship</span> <span class="p">}</span>
+  <span class="p">{</span> <span class="n">type</span> <span class="nf">name</span><span class="p">({</span> <span class="p">(</span><span class="n">in</span><span class="o">|</span><span class="n">out</span><span class="o">|</span><span class="n">inout</span><span class="p">)</span> <span class="n">type</span> <span class="n">name</span> <span class="p">})</span><span class="o">[</span><span class="n">raises</span> <span class="p">({</span> <span class="n">exception</span> <span class="p">})</span><span class="o">]</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>extent and key of a class can be specified optionally</li>
+<li>relationships specify inverse to maintain referential integrity</li>
+<li>method signatures are implemented by language binding</li>
+</ul>
+<h3 id="collection-expressions">Collection Expressions</h3>
+<ul>
+<li>Aggregate operators<ul>
+<li><code>AVG</code>, <code>SUM</code>, <code>MIN</code>, <code>MAX</code>, and <code>COUNT</code> apply to collections that have a compatible member type</li>
+</ul>
+</li>
+<li>Operations for sets and bags<ul>
+<li><code>UNION</code>, <code>INTERSECTION</code> and <code>EXCEPT</code></li>
+<li>inclusion tests (subset, super-set)</li>
+</ul>
+</li>
+<li>Special operations for lists<ul>
+<li>Simple coercion</li>
+<li>a collection of one element can be coerced to that element using the <code>ELEMENT</code> operator</li>
+</ul>
+</li>
+<li>Flattening a collection of collections</li>
+</ul>
+<h3 id="language-bindings">Language Bindings</h3>
+<ul>
+<li>C++</li>
+<li>Java</li>
+<li>Smalltalk</li>
+<li>…</li>
+</ul>
+<h1 id="hibernate">Hibernate</h1>
+<ul>
+<li>Example of a <a href="https://en.wikipedia.org/wiki/Object-relational_mapping">Object-relational mapping</a> tool</li>
+<li>Challenges<ul>
+<li>Data has to outlive the execution of the program</li>
+<li>The program is written in an <span class="caps">OOP</span> language</li>
+</ul>
+</li>
+</ul>
+<p><img alt="Mappings" class="img-fluid" src="/images/object_databases/db_mappings.svg"/></p>
+<ul>
+<li>Problems of Object Identity<ul>
+<li>Two object graphs can point to same objects</li>
+<li>Duplicates can be created When deserialized</li>
+<li>Programmer must take care to avoid multiplicity!</li>
+</ul>
+</li>
+<li>Object Identity<ul>
+<li>Multiple models</li>
+<li>Impedance mismatch</li>
+<li>Transformation must be implemented (Design Time)</li>
+<li>Transformation must be carried out (Run Time)</li>
+<li>Must be implemented for each application</li>
+</ul>
+</li>
+<li>Possible use of <span class="caps">SQL</span><ul>
+<li>Integrating a relational database at the level of <span class="caps">SQL</span> (e.g. <span class="caps">JDBC</span>, Google Android, <span class="caps">PHP</span> mysqli)<ul>
+<li><span class="caps">OK</span> for simple application domains (e.g. few classes with base type attributes)</li>
+<li>Not <span class="caps">OK</span> for complex application domains (e.g. many classes with reference type attributes, multi-valued attributes, associations, inheritance)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="object-relational-mappings">Object-Relational Mappings</h2>
+<ul>
+<li>Map object-oriented domain model to relational database<ul>
+<li>Hibernate<ul>
+<li>Free implementation for Java</li>
+<li>maps Java types to <span class="caps">SQL</span> types</li>
+<li>transparent persistence for classes meeting certain requirements</li>
+<li>generates <span class="caps">SQL</span> for more than 25 dialects behind the scenes</li>
+<li>provides data query and retrieval using either <span class="caps">HQL</span> or <span class="caps">SQL</span></li>
+<li>can be used stand-alone with Java <span class="caps">SE</span> or in Java <span class="caps">EE</span> applications</li>
+</ul>
+</li>
+<li>Java Persistence <span class="caps">API</span> (<span class="caps">JPA</span>)<ul>
+<li>Defines interface (and annotations) to use y other systems</li>
+<li>Enterprise Java Beans Standard 3.0</li>
+<li>introduced annotations to define mapping</li>
+<li>javax.persistence package</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="main-concepts">Main Concepts</h2>
+<ul>
+<li><code>Configuration</code><ul>
+<li>Connection to database (hibernate.properties or hibernate.cfg.xml)</li>
+<li>Which <span class="caps">DBMS</span>? (MySQL, <span class="caps">HSQL</span>, …)</li>
+<li>Which <span class="caps">DB</span> Instance? (Database Name)</li>
+<li>Mappings between classes and database tables</li>
+<li>The Configuration object is created at first<ul>
+<li>usually created only once during application initialization</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>SessionFactory</code><ul>
+<li>Created by using the configuration object</li>
+<li>Session objects can be created and supplied with configuration</li>
+<li>Heavyweight object: create during start up and keep for later use</li>
+<li>multiple databases require multiple <code>SessionFactory</code> objects</li>
+</ul>
+</li>
+<li><code>Session</code> object<ul>
+<li>Used to get physical connection to the database</li>
+<li>lightweight</li>
+<li>designed to be instantiated each time an interaction with the <span class="caps">DB</span> is needed</li>
+<li>Persistent objects are <em>stored</em> and <em>retrieved</em> through <code>Session</code> object</li>
+<li>should not be kept open for a long time<ul>
+<li>usually not thread safe</li>
+<li>create before use</li>
+<li>destroy after use</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>Transaction</code> object<ul>
+<li>represent a unit of work with the <span class="caps">DB</span></li>
+<li>handled by underlying transaction manager and transaction (<span class="caps">JDBC</span> or <span class="caps">JTA</span>)</li>
+<li>optional object<ul>
+<li>transactions can be managed in own application code</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>Query</code> object<ul>
+<li><span class="caps">SQL</span> or Hibernate Query Language (<span class="caps">HQL</span>)</li>
+<li>bind query parameters</li>
+<li>limit number of results</li>
+<li>execute query</li>
+</ul>
+</li>
+<li><code>Criteria</code> object<ul>
+<li>used to create and execute <em>object oriented</em> criteria queries to retrieve objects</li>
+</ul>
+</li>
+</ul>
+<h2 id="configuration">Configuration</h2>
+<ul>
+<li>Hibernate needs to know where to find some information about class mappings and database</li>
+<li><span class="caps">XML</span> file: <em>hibernate.cfg.xml</em> (or Java properties file <em>hibernate.properties</em>)</li>
+</ul>
+<h3 id="properties">Properties</h3>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hibernate.dialect</td>
+<td>The <span class="caps">SQL</span> dialect used to generate persistence code</td>
+</tr>
+<tr>
+<td>hibernate.connection.driver_class</td>
+<td>The <span class="caps">JDBC</span> driver class</td>
+</tr>
+<tr>
+<td>hibernate.connection.url</td>
+<td>The <span class="caps">URL</span> to the database instance</td>
+</tr>
+<tr>
+<td>hibernate.connection.username</td>
+<td>The username for the database</td>
+</tr>
+<tr>
+<td>hibernate.connection.password</td>
+<td>The password for the database</td>
+</tr>
+<tr>
+<td>hibernate.connection.pool_size</td>
+<td>The number of connections in the Hibernate database connection pool</td>
+</tr>
+<tr>
+<td>hibernate.connection.autocommit</td>
+<td>Autocommit mode for the <span class="caps">JDBC</span> connection</td>
+</tr>
+</tbody>
+</table>
+<p>There are additional settings for using a database along with an application server and <span class="caps">JNDI</span>.</p>
+<h3 id="persistent-objects">Persistent Objects</h3>
+<p>Only Plain Old Java Object (<span class="caps">POJO</span>) can be saved in the <span class="caps">DB</span>.</p>
+<p>Requirements:</p>
+<ul>
+<li>Default constructor</li>
+<li>Class should contain an <span class="caps">ID</span><ul>
+<li>Maps to the primary key column in <span class="caps">DB</span> table</li>
+</ul>
+</li>
+<li>Attributes should be private<ul>
+<li>Public accessor functions (getter, setter) need to be provided</li>
+<li>JavaBean style accessors: getXYZ, setXYZ</li>
+</ul>
+</li>
+<li>Persistence class either<ul>
+<li>non-final or</li>
+<li>implementation of interface that declares all public methods</li>
+</ul>
+</li>
+<li>Some additional minor restrictions from <span class="caps">EJB</span> framework</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">SessionFactory</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Configuration</span><span class="p">().</span><span class="na">configure</span><span class="p">().</span><span class="na">buildSessionFactory</span><span class="p">();</span>
+</code></pre></div>
+<ul>
+<li>Session<ul>
+<li>Connection to a database instance</li>
+<li>Created when we want to work with a database</li>
+<li>Using a Session object, we can store and retrieve application data</li>
+<li>Methods:<ul>
+<li>save</li>
+<li>createQuery</li>
+<li>update</li>
+<li>delete</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Session</span> <span class="n">session</span> <span class="o">=</span> <span class="n">factory</span><span class="p">.</span><span class="na">openSession</span><span class="p">();</span>
+<span class="p">...</span>
+<span class="n">session</span><span class="p">.</span><span class="na">save</span><span class="p">(</span><span class="n">person</span><span class="p">);</span>
+<span class="p">...</span>
+<span class="n">session</span><span class="p">.</span><span class="na">close</span><span class="p">();</span>
+</code></pre></div>
+<ul>
+<li>Transaction<ul>
+<li>Opened with a Session object <code>beginTransaction()</code> and closed using <code>commit()</code></li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Transaction</span> <span class="n">tx</span> <span class="o">=</span> <span class="n">session</span><span class="p">.</span><span class="na">beginTransaction</span><span class="p">();</span>
+<span class="p">...</span>
+<span class="n">tx</span><span class="p">.</span><span class="na">commit</span><span class="p">();</span>
+</code></pre></div>
+<ul>
+<li>Query<ul>
+<li>Represents a query (e.g. <code>SELECT * FROM PERSONS</code>, <span class="caps">HQL</span>).</li>
+<li>Result is a list</li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">List</span> <span class="n">persons</span> <span class="o">=</span> <span class="n">session</span><span class="p">.</span><span class="na">createQuery</span><span class="p">(</span><span class="s">"FROM Persons"</span><span class="p">).</span><span class="na">list</span><span class="p">();</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">Object</span> <span class="n">p</span><span class="p">:</span> <span class="n">persons</span><span class="p">)</span>
+  <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>Criteria<ul>
+<li>An object-oriented representation of query criteria</li>
+</ul>
+</li>
+</ul>
+<h2 id="mapping-associations">Mapping Associations</h2>
+<ul>
+<li>Uni- and bidirectional associations</li>
+<li>Unordered and ordered associations</li>
+<li>Association cardanality types<ul>
+<li>one-to-one</li>
+<li>many-to-one</li>
+<li>one-to-many</li>
+<li>many-to-many</li>
+</ul>
+</li>
+<li>Join Tables to map complex associations</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">AUTHOR</span><span class="p">(</span><span class="n">AUTHOR_ID</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w"> </span><span class="p">...)</span><span class="w"></span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">AUTHORSPUBLICATIONS</span><span class="p">(</span><span class="w"></span>
+<span class="w">  </span><span class="n">AUTHOR_ID</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="n">PUBLICATION_ID</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">(</span><span class="n">AUTHOR_ID</span><span class="p">,</span><span class="w"> </span><span class="n">PUBLICATION_ID</span><span class="p">))</span><span class="w"></span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">PUBLICATION</span><span class="p">(</span><span class="n">PUBLICATION_ID</span><span class="w"> </span><span class="nb">BIGINT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">)</span><span class="w"></span>
+</code></pre></div>
+<h2 id="mapping-inheritance">Mapping Inheritance</h2>
+<ul>
+<li>Multiple strategies<ul>
+<li>One table per class hierarchy</li>
+<li>One table per subclass</li>
+<li>One table per concrete class</li>
+</ul>
+</li>
+<li>Mapping strategies can be mixed<ul>
+<li>Different parts of inheritance hierarchy can have different strategy</li>
+</ul>
+</li>
+<li>Implicit polymorphism<ul>
+<li>One table per concrete class</li>
+<li>Common interface <em>not</em> mentioned in the mapping</li>
+<li>Common properties are mapped in <em>every</em> table</li>
+</ul>
+</li>
+</ul>
+<h2 id="annotations">Annotations</h2>
+<ul>
+<li>Since Java 5</li>
+<li>Java Persistence <span class="caps">API</span> (<span class="caps">JPA</span>, Enterprise Java Beans 3.0)</li>
+<li>Annotations instead of <span class="caps">XML</span> for mapping</li>
+<li>Standardizes <span class="caps">ORM</span></li>
+<li>Hibernate implements <span class="caps">JPA</span></li>
+</ul>
+<h1 id="google-android">Google Android</h1>
+<ul>
+<li>Linux based <span class="caps">OS</span></li>
+<li>Default applications: Search, Maps, Mail, Calendar, Contacts…</li>
+<li>Java <span class="caps">SDK</span></li>
+<li>Support for persistent data management</li>
+<li>Smart Phone / Tablet</li>
+</ul>
+<h2 id="application-component-model">Application component model</h2>
+<ul>
+<li>Activity (<span class="caps">UI</span>)</li>
+<li>Service (<span class="caps">API</span>, Computation)</li>
+<li>Broadcast Receiver (Events)</li>
+<li>
+<p>Content Provider (Data Management)</p>
+</li>
+<li>
+<p>Manifest</p>
+<ul>
+<li>lists the application components</li>
+<li>sets activity to be shown at startup</li>
+<li>components can be made available to other applications</li>
+</ul>
+</li>
+<li>Intent: request the use of application components (integration with other apps)<ul>
+<li>showing activities</li>
+<li>using content provides</li>
+<li>listening to events</li>
+<li>starting services</li>
+<li>…</li>
+</ul>
+</li>
+<li><a href="http://developer.android.com/guide/components/activities.html">Application Life-cycle</a><ul>
+<li>States: New Activity, Running, Paused, Stopped, Destroyed</li>
+<li>Extend <code>Activity</code></li>
+<li>Application can react to state changes</li>
+</ul>
+</li>
+</ul>
+<h2 id="data-management">Data Management</h2>
+<ul>
+<li>Low-level: <span class="caps">SQL</span></li>
+<li>High-level: Content Provider</li>
+<li>Database Instance<ul>
+<li>SQLite</li>
+<li><strong><span class="caps">CRUD</span></strong><ul>
+<li><strong>C</strong>reate (Insert)</li>
+<li><strong>R</strong>ead (Retrieve, Query)</li>
+<li><strong>U</strong>pdate</li>
+<li><strong>D</strong>elete</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Cursor</p>
+<ul>
+<li>Iterator over result</li>
+<li>Methods <code>isLast()</code> and <code>moveToNext()</code></li>
+<li>Type specific getter methods (e.g <code>getInt(3)</code>)</li>
+<li>Access with index</li>
+<li>Index can be retrieved <code>getColumnIndex(String colName)</code></li>
+</ul>
+</li>
+<li>
+<p>Content Provider</p>
+<ul>
+<li>Abstract class implemented by application</li>
+<li>Uses<ul>
+<li>Cursor</li>
+<li><span class="caps">URI</span></li>
+<li>ContentValue</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- OODB Manifesto start -->
+<h1 id="object-oriented-databases-object-database-manifesto">Object-Oriented Databases: Object Database Manifesto</h1>
+<ul>
+<li>Avoid impedance mismatch</li>
+<li>Provide uniform data model</li>
+<li>
+<p>Combine features of</p>
+<ul>
+<li><span class="caps">OOP</span></li>
+<li>Database Management Systems</li>
+</ul>
+</li>
+<li>
+<p>The object-oriented database manifesto</p>
+<ul>
+<li>13 mandatory features</li>
+<li>5 optional characteristics</li>
+<li>4 open choices</li>
+<li>several important topics not addressed</li>
+</ul>
+</li>
+<li>
+<p>Object-oriented systems (mandatory)</p>
+<ul>
+<li>1. Complex objects</li>
+<li>2. Object identity</li>
+<li>3. Encapsulation</li>
+<li>4. Types and classes</li>
+<li>5. Type and class hierarchies</li>
+<li>6. Overriding, overloading and late binding</li>
+<li>7. Computational completeness</li>
+<li>8. Extensibility</li>
+</ul>
+</li>
+<li>
+<p>Database management systems (mandatory)</p>
+<ul>
+<li>9. Persistence</li>
+<li>10. Efficiency</li>
+<li>11. Concurrency</li>
+<li>12. Reliability</li>
+<li>13. Declarative query language</li>
+</ul>
+</li>
+</ul>
+<h2 id="objects-mandatory">Objects (mandatory)</h2>
+<ul>
+<li>Complex objects<ul>
+<li>build from simpler objects (constructor)</li>
+<li>collections</li>
+</ul>
+</li>
+<li>Object identity and equality<ul>
+<li>Object <span class="caps">ID</span> (<span class="caps">OID</span>)<ul>
+<li>unique and immutable</li>
+</ul>
+</li>
+<li>sharing of objects (references)</li>
+<li><em>identical</em> objects have same <span class="caps">OID</span></li>
+<li><em>equal</em> objects have same state</li>
+<li>shallow and deep equality</li>
+</ul>
+</li>
+<li>Touple: entities and their attributes</li>
+<li>Sets: collections of entities</li>
+<li>
+<p>Lists: order</p>
+</li>
+<li>
+<p>Constructor orthogonality</p>
+<ul>
+<li>supports arbitrary nesting such as<ul>
+<li>sets of sets</li>
+<li>set of records</li>
+<li>records containing records</li>
+<li>…</li>
+</ul>
+</li>
+<li>In contrast, relational databases only support<ul>
+<li>sets of records (relation with touple) and</li>
+<li>touple containing atomic values</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Complex objects also require<ul>
+<li>transitive retrieval and deletion of objects</li>
+<li>deep and shallow copying</li>
+<li>…</li>
+</ul>
+</li>
+<li>Encapsulation<ul>
+<li>interface<ul>
+<li>signatures of public methods</li>
+</ul>
+</li>
+<li>implementation<ul>
+<li>includes data and methods</li>
+</ul>
+</li>
+<li>object state modification only through public methods</li>
+<li>object data structure may be <em>exposed</em> for <em>declarative queries</em>!</li>
+</ul>
+</li>
+</ul>
+<h2 id="types-and-classes">Types and Classes</h2>
+<ul>
+<li>Data types<ul>
+<li>definition of object properties</li>
+<li>static part: object structure</li>
+<li>dynamic part: object behavior</li>
+<li>separation of interface and implementation</li>
+<li>Check of correctness at compile time</li>
+</ul>
+</li>
+<li>Object classes<ul>
+<li>container for objects of the same type</li>
+<li>objects can be added and removed</li>
+<li>used to add, remove and iterate over all existing objects<ul>
+<li>to present, manipulate … them</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="generalization-hierarchies">Generalization Hierarchies</h2>
+<ul>
+<li>Powerful modeling tool</li>
+<li>Reuse (specification and implementation)</li>
+<li>Inheritance<ul>
+<li>Substitution principle</li>
+<li>Inherited attributes and methods (from super-class)</li>
+<li>New attributes and methods can be added (in subclass)</li>
+</ul>
+</li>
+<li>Migration between classes<ul>
+<li>move objects between hierarchy levels</li>
+<li>object specialization and generalization</li>
+</ul>
+</li>
+</ul>
+<h2 id="durability-and-efficiency">Durability and Efficiency</h2>
+<ul>
+<li>Persistence<ul>
+<li>data has to survive the program execution</li>
+<li>orthogonal persistence</li>
+<li>implicit persistence</li>
+</ul>
+</li>
+<li>
+<p>Secondary storage management</p>
+<ul>
+<li>index management</li>
+<li>data clustering</li>
+<li>data buffering</li>
+<li>access path selection</li>
+<li>query optimization</li>
+</ul>
+</li>
+<li>
+<p>Orthogonality</p>
+<ul>
+<li>Persistence applicable to all objects of any type</li>
+<li>No additional code necessary</li>
+<li>Moving objects between persistent and memory representation is not needed</li>
+</ul>
+</li>
+<li>
+<p>Similar requirements for  secondary storage management</p>
+<ul>
+<li>As a rule of thumb:<ul>
+<li>a database should work without it, but with it, it should perform better</li>
+</ul>
+</li>
+<li>If this requirement is met, a complete separation of the logical and physical level is achieved</li>
+</ul>
+</li>
+</ul>
+<h2 id="concurrency-control-and-recovery">Concurrency Control and Recovery</h2>
+<ul>
+<li>Concurrency<ul>
+<li>management of multiple users concurrently interacting</li>
+<li>atomicity, consistency, isolation and durability</li>
+<li>serialisability of operations</li>
+</ul>
+</li>
+<li>Reliability<ul>
+<li>resiliency to user, software and hardware failures</li>
+<li>transactions can be committed or aborted</li>
+<li>restore previous coherent state of data</li>
+<li>redoing and undoing of transactions</li>
+<li>logging of operations</li>
+</ul>
+</li>
+</ul>
+<h2 id="declarative-query-language">Declarative Query Language</h2>
+<ul>
+<li>High-level language<ul>
+<li>express non-trivial queries concisely</li>
+<li>text-based or graphical interface</li>
+<li>declarative</li>
+</ul>
+</li>
+<li>Efficient execution<ul>
+<li>possibility for query optimization</li>
+<li>Application independent</li>
+<li>work on any possible database</li>
+<li>no need for additional methods on user-defined types</li>
+</ul>
+</li>
+</ul>
+<!-- OODB Manifesto end -->
+<!-- Lecture 5 Start -->
+<h1 id="db4o">db4o</h1>
+<ul>
+<li>Open Source project<ul>
+<li>Java and .<span class="caps">NET</span></li>
+</ul>
+</li>
+<li>Features<ul>
+<li>No conversion of mapping needed</li>
+<li>Classes don’t need to be changed to make them persistent (datatype orthogonality)</li>
+<li>One line of code to store (complex) objects</li>
+<li>local or client/server mode</li>
+<li><span class="caps">ACID</span> transaction model</li>
+<li>Automatic management and versioning of database schema</li>
+<li>Small memory foot-print (single 2Mb library)</li>
+</ul>
+</li>
+</ul>
+<h2 id="object-container">Object Container</h2>
+<ul>
+<li>Represents db4o databases<ul>
+<li>local file mode or</li>
+<li>client connections to db4o server</li>
+</ul>
+</li>
+<li>Owns one transaction<ul>
+<li>operations are executed transactions</li>
+<li>transaction is started when object container is opened</li>
+<li>after commit/rollback next transaction is started automatically</li>
+</ul>
+</li>
+<li>Manages link between stored and instantiated objects<ul>
+<li>object identities</li>
+<li>loading, updating, unloading</li>
+</ul>
+</li>
+</ul>
+<h2 id="storing-objects">Storing Objects</h2>
+<ul>
+<li>Store objects with method <code>ObjectContainer.store(...)</code></li>
+<li>Arbitrary complex objects can be stored</li>
+<li>Persistence by reachability</li>
+</ul>
+<h2 id="retrieving-objects">Retrieving Objects</h2>
+<ul>
+<li>3 Query languages<ol>
+<li>Query by Example<ul>
+<li>simple</li>
+<li>based on prototype objects</li>
+<li>selects <em>exact</em> matches only</li>
+</ul>
+</li>
+<li>Native Queries<ul>
+<li>expressed in application programming language</li>
+<li>type safe</li>
+<li>transformed to <span class="caps">SODA</span> (optimized)</li>
+</ul>
+</li>
+<li>Simple Object Data Access (<span class="caps">SODA</span>)<ul>
+<li>query <span class="caps">API</span> based on query graph</li>
+<li>methods for descending graph and applying constraints</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<h3 id="soda-queries"><span class="caps">SODA</span> Queries</h3>
+<ul>
+<li>Expressed using <code>Query</code> objects<ul>
+<li><code>descend</code> adds or traverses a node in the query tree</li>
+<li><code>constrain</code> adds a constraint to a node in the query tree</li>
+<li><code>sortBy</code> sorts the result set</li>
+<li><code>orderAscending</code> and <code>orderDescending</code></li>
+<li><code>execute</code> executes the query</li>
+</ul>
+</li>
+<li>Interface Constraint<ul>
+<li><code>greater</code> and <code>smaller</code> comparison modes</li>
+<li><code>identity</code>, <code>equal</code> and <code>like</code> evaluation modes</li>
+<li><code>and</code>, <code>or</code> and <code>not</code> operators</li>
+<li><code>startsWith</code> and <code>endsWith</code> string comparisons</li>
+<li><code>contains</code> to test collection membership</li>
+</ul>
+</li>
+</ul>
+<h2 id="updating-objects">Updating Objects</h2>
+<ul>
+<li>Update procedure for persistent object<ul>
+<li>retrieve desired object from the database</li>
+<li>perform the required changes/modifications</li>
+<li>store object back to the database (calling <code>store</code> method)</li>
+</ul>
+</li>
+<li>db4o uses IDs to connect in-memory objects with stored objects</li>
+<li>IDs are cached</li>
+</ul>
+<h2 id="deleting-objects">Deleting Objects</h2>
+<ul>
+<li>similar to updating objects</li>
+<li>Method <code>ObjectContainer.delete(...)</code> removes objects</li>
+</ul>
+<h2 id="simple-vs-complex-objects">Simple vs. Complex Objects</h2>
+<ul>
+<li>Simple Structured Objects (objects in classical sense):<ul>
+<li>properties</li>
+<li>methods</li>
+</ul>
+</li>
+<li>Complex Object Structures: multivalued attrivutes<ul>
+<li>arrays</li>
+<li>collections</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+<h2 id="simple-structured-objects">Simple Structured Objects</h2>
+<ul>
+<li>New objects are stored using the <code>store</code> method<ul>
+<li>Persistence by reachability<ul>
+<li>Object graph is traversed, each referenced object is stored</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Updating objects with <code>store</code> method<ul>
+<li>Update depth <em>1</em> by default</li>
+<li>Only primitives and strings are updated</li>
+<li>No traversal of object graph (performance)</li>
+</ul>
+</li>
+<li>Deleting objects with <code>delete</code> method<ul>
+<li>Not cascaded by default</li>
+<li>Referenced objects have to be deleted manually</li>
+<li>Cascading delete can be configured for individual classes</li>
+</ul>
+</li>
+</ul>
+<h3 id="updating-simple-structured-objects">Updating Simple Structured Objects</h3>
+<ul>
+<li>Cascading updates are configured per class with <code>ObjectClass.cascadeOnUpdate(..)</code></li>
+<li>Update depth can be configured<ul>
+<li><code>ExtObjectContainer.store(object, depth)</code> updates referenced objects to given depth</li>
+<li><code>ObjectClass.updateDepth(depth)</code> defines update depth for a class (and all its objects)</li>
+<li><code>Configuration.updateDepth(depth)</code> sets global update depth for all objects</li>
+</ul>
+</li>
+</ul>
+<h3 id="deleting-simple-structured-objects">Deleting Simple Structured Objects</h3>
+<ul>
+<li>Cascading deletes similar to cascading updates<ul>
+<li>configured per object class</li>
+<li><code>CommonConfiguration.objectClass (...)</code></li>
+<li><code>ObjectClass.cascadeOnDelete(..)</code></li>
+<li>What happens if deleted objects referenced elsewhere???</li>
+<li>Cache and disk can become inconsistent when deleting objects<ul>
+<li><code>ExtObjectContainer.refresh(..)</code> syncs objects</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="object-hierarchies">Object Hierarchies</h2>
+<ul>
+<li>Complex object structures are handled automatically<ul>
+<li>hierarchies, composite hierarchies</li>
+<li>inverse associations</li>
+<li>inheritance and interfaces</li>
+<li>multi-valued attributes, arrays and collections</li>
+</ul>
+</li>
+<li>db4o database-aware collections<ul>
+<li><code>ArrayList4</code> and <code>ArrayMap4</code> implement Collections <span class="caps">API</span></li>
+<li>as part of transparent persistence/activation framework</li>
+<li><code>ActivatableArrayList</code>, <code>ActivatableHashMap</code>, …</li>
+<li>complex object implementation becomes <em>db4o dependent</em></li>
+</ul>
+</li>
+</ul>
+<h2 id="transparent-persistence">Transparent Persistence</h2>
+<ul>
+<li>Persistence should be transparent to application logic<ul>
+<li>Store objects in database <em>once</em> (<code>store</code> method)</li>
+<li>avoid multiple calls of <code>store</code></li>
+</ul>
+</li>
+<li>Logic of transparent persistence framework<ul>
+<li><code>Activatable</code> interface (no datatype orthogonality)</li>
+<li>objects are made persistent by <code>store</code> method</li>
+<li>objects bound to transparent persistence framework with <code>bind</code>method</li>
+<li>commit: transparent persistent framework scans for modified objects and invokes <code>store</code></li>
+</ul>
+</li>
+</ul>
+<p>Enabling transparent persistence</p>
+<div class="highlight"><pre><span></span><code><span class="n">config</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span> <span class="n">TransparentPersistenceSupport</span><span class="p">());</span>
+</code></pre></div>
+<h2 id="activation">Activation</h2>
+<ul>
+<li>Activation controls depth of loaded fields<ul>
+<li>field values (objects) are loaded in memory to a certain depth when query retrieves objects</li>
+<li>activation depth: length of reference chain</li>
+<li>fields beyond activation depth: default value (e.g <code>null</code>)</li>
+</ul>
+</li>
+<li>Activation cases<ul>
+<li><code>ObjectSet.next(...)</code> called on an query result</li>
+<li>explicit <code>ObjectContainer.activate(...)</code></li>
+<li>db4o collection element accessed</li>
+<li>members of Java collections are activated automatically when collection is activated</li>
+</ul>
+</li>
+<li>Controlling activation<ul>
+<li>default depth: 5</li>
+<li><code>ObjectContainer.activate(..)</code> and <code>ObjectContainer.deactivate()</code></li>
+</ul>
+</li>
+<li>per class configuration</li>
+</ul>
+<p>Methods for per class configuration of activation depth</p>
+<div class="highlight"><pre><span></span><code><span class="n">ObjectClass</span><span class="err">#</span><span class="n">minimumActivationDepth</span><span class="p">(</span><span class="n">minDepth</span><span class="p">)</span>
+<span class="n">ObjectClass</span><span class="err">#</span><span class="n">maximumActivationDepth</span><span class="p">(</span><span class="n">maxDepth</span><span class="p">)</span>
+<span class="n">ObjectClass</span><span class="err">#</span><span class="n">cascadeOnActivate</span><span class="p">(</span><span class="n">bool</span><span class="p">)</span>
+<span class="n">ObjectClass</span><span class="err">#</span><span class="n">objectField</span><span class="p">(...).</span><span class="na">cascadeOnActivate</span><span class="p">(</span><span class="n">bool</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="transparent-activation">Transparent Activation</h3>
+<ul>
+<li>Make activation transparent to application logic<ul>
+<li>activate fields automatically when accessed</li>
+</ul>
+</li>
+<li>Logic of transparent activation framework<ul>
+<li><code>Activable</code> interface (no datatype orthogonality)</li>
+<li>at object instantiation db registers itself in object with <code>bind(..)</code></li>
+</ul>
+</li>
+</ul>
+<p>Enabling the transparent activation framework</p>
+<div class="highlight"><pre><span></span><code><span class="n">config</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span> <span class="n">TransparentActivationSupport</span><span class="p">());</span>
+</code></pre></div>
+<h2 id="db4o-transactions">db4o Transactions</h2>
+<ul>
+<li><span class="caps">ACID</span></li>
+<li>Data transaction journaling<ul>
+<li>no data loss in case of system failure</li>
+<li>automatic data recovery after system failure</li>
+</ul>
+</li>
+<li>thread-safe for simultaneous interactions</li>
+<li>all work in <code>ObjectContainer</code>is transactional<ul>
+<li>transaction started when container opened</li>
+<li>current transaction committed when container closed</li>
+<li>explicit commit and rollback possible<ul>
+<li><code>ObjectContainer.commit(...)</code></li>
+<li><code>ObjectContainer.rollback(...)</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="configuration_1">Configuration</h2>
+<ul>
+<li>Embedded<ul>
+<li><code>Db4oEmbedded.newConfiguration()</code></li>
+</ul>
+</li>
+<li>Client/Server<ul>
+<li><code>Db4oClientServer.newClientConfiguration()</code></li>
+<li><code>Db4oClientServer.newServerConfiguration()</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="external-tools">External tools</h2>
+<ul>
+<li>performance tuning</li>
+<li>database diagnostics</li>
+<li>Indexes<ul>
+<li>optimize query evaluation</li>
+</ul>
+</li>
+<li>Defragment<ul>
+<li>removes unused fields, classes, management information</li>
+<li>compacts db file, faster access</li>
+<li>command line interface or from application</li>
+</ul>
+</li>
+<li>Statistics<ul>
+<li>queries</li>
+<li>objects: stored, retrieved, activated, …</li>
+<li>I/O, Network, …</li>
+</ul>
+</li>
+<li>Logger<ul>
+<li>logs objects in db</li>
+<li>logs objects of a given class</li>
+<li>run from command line</li>
+</ul>
+</li>
+</ul>
+<h2 id="indexes">Indexes</h2>
+<ul>
+<li>Trade-off between<ul>
+<li>increased query performance</li>
+<li>decreased storage, update and delete performance</li>
+</ul>
+</li>
+<li>Set by configuration or annotation (<code>@Indexed</code>)</li>
+<li>B-Tree based indexes on single object fields</li>
+</ul>
+<h2 id="tuning-for-speed">Tuning for Speed</h2>
+<ul>
+<li>Heuristic to improve performance<ul>
+<li>weak references</li>
+<li>BTree node size</li>
+<li>free-space manager</li>
+<li>locking</li>
+<li>flushing</li>
+<li>callbacks</li>
+<li>caches</li>
+<li>…</li>
+</ul>
+</li>
+<li>Object loading<ul>
+<li>use appropriate activation depth</li>
+<li>use multiple object or session containers</li>
+<li>disable weak references if not required</li>
+</ul>
+</li>
+<li>Database tests<ul>
+<li>disable detection of schema changes</li>
+<li>disable instantiation tests of persistence classes at start-up</li>
+</ul>
+</li>
+<li>Query evaluation<ul>
+<li>set field indexes on most used objects to improve searches</li>
+<li>optimize native queries</li>
+</ul>
+</li>
+</ul>
+<h2 id="distribution-and-replication">Distribution and Replication</h2>
+<ul>
+<li>Embedded mode<ul>
+<li><span class="caps">DB</span> accessed by clients in same <em><span class="caps">JVM</span></em></li>
+<li>direct file access: 1 user and 1 thread at a time</li>
+<li>client session: 1 user and multiple threads</li>
+<li>Database file opened, locked and accessed directly<ul>
+<li><code>Db4oEmbedded.openFile(configuration, name)</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Client/Server mode<ul>
+<li>Clients in multiple <em>JVMs</em></li>
+<li><span class="caps">DB</span> access on server</li>
+<li>Client opens <span class="caps">TCP</span>/<span class="caps">IP</span> connection to server<ul>
+<li><code>Db4oClientServer.openServer(filename, port)</code></li>
+<li><code>Db4oClientServer.openClient(host, port, user, pass)</code></li>
+</ul>
+</li>
+<li>Client sends query, insert, update and delete instructions to server</li>
+<li>Client receives data from the server</li>
+</ul>
+</li>
+<li>Replication<ul>
+<li>redundant copies of database on multiple servers</li>
+<li>changes replicated form <em>master</em> to <em>client</em> servers</li>
+<li>several forms of replication supported<ul>
+<li>snapshot replication</li>
+<li>transactional replication</li>
+<li>merge replication</li>
+</ul>
+</li>
+<li>needs to be coded into application<ul>
+<li>cannot be configured on admin level</li>
+<li>replication only on demand</li>
+<li>client/server semantics introduced by developer</li>
+<li>one interface for all forms of replication</li>
+</ul>
+</li>
+<li>Replication Modes<ul>
+<li>Snapshot Replication<ul>
+<li>Snapshots of master replicated to client</li>
+<li>state-based</li>
+<li>periodical schedule</li>
+<li>special <span class="caps">SODA</span> query to detect all new and updated objects</li>
+</ul>
+</li>
+<li>Transactional Replication<ul>
+<li>Changes synchronized after transaction</li>
+<li>operation based</li>
+<li>changes replicated immediately</li>
+<li>Single object replication with <code>ReplicationSession</code></li>
+</ul>
+</li>
+<li>Merge Replication<ul>
+<li>Changes from clients merged to central server</li>
+<li>Other clients updated to reflect changes</li>
+<li>Transactionally of on a periodic basis</li>
+<li>Typically if subscribers are occasionally offline</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Replication System<ul>
+<li>Separated from db4o core</li>
+<li>uni- or bidirectional replication</li>
+<li>Replication of relational databases based on Hibernate</li>
+<li>Supported replication providers<ul>
+<li>db4o → db4o</li>
+<li>db4o → Hibernate</li>
+<li>Hibernate → db4o</li>
+<li>Hibernate → Hibernate</li>
+</ul>
+</li>
+<li>3 steps required<ol>
+<li>Generating unique IDs and version numbers</li>
+<li>Creating a <code>ReplicationSession</code></li>
+<li>Replicating objects</li>
+</ol>
+</li>
+<li>Mode dependent on implementation</li>
+<li>Bidirectional by default<ul>
+<li>Unidirectional can be configured<ul>
+<li><code>ReplicationSession.setDirection(from, to)</code></li>
+</ul>
+</li>
+<li><code>ReplicationSession.replicate(object)</code> newer object transferred to <span class="caps">DB</span></li>
+<li>Object granularity</li>
+</ul>
+</li>
+<li>Conflict handling has to be done by developer</li>
+</ul>
+</li>
+</ul>
+<h2 id="callbacks">Callbacks</h2>
+<ul>
+<li>Called in response to events<ul>
+<li>activate</li>
+<li>deactivate</li>
+<li>new</li>
+<li>update</li>
+<li>delete</li>
+</ul>
+</li>
+<li>Methods called before and after event<ul>
+<li><code>can...</code> called <em>before</em> event</li>
+<li><code>on...</code> called <em>after</em> event</li>
+</ul>
+</li>
+<li>Interface <code>ObjectCallbacks</code></li>
+<li>Use Cases<ul>
+<li>Recording or preventing updates<ul>
+<li><code>canUpdate()</code> and <code>onUpdate()</code></li>
+</ul>
+</li>
+<li>Setting default values after <em>refactoring</em><ul>
+<li><code>canNew()</code></li>
+</ul>
+</li>
+<li>Checking object integrity before storing objects<ul>
+<li><code>canNew()</code> and <code>canUpdate()</code></li>
+</ul>
+</li>
+<li>Restoring state when objects activated<ul>
+<li>Update <span class="caps">UI</span>, restore network connections, …</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="object-instantiation">Object Instantiation</h2>
+<ul>
+<li>Three different techniques for instantiation<ol>
+<li>Constructor</li>
+<li>Bypassing Constructor</li>
+<li>Translator</li>
+</ol>
+</li>
+<li>Bypassing Constructor is default (if available)</li>
+<li>Can be configured globally or per class</li>
+<li>Constructors<ul>
+<li>db4o tries first default constructor</li>
+<li>if not public default constructor available<ul>
+<li>all constructors are tested to create instance</li>
+<li>default values (e. g <code>null</code>) passed as arguments</li>
+<li>first successfully tested constructor is used</li>
+<li>if no instance of a class can be created, object can’t be stored</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Configuration interface:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// global setting (default: depends on environment)</span>
+<span class="n">CommonConfiguration</span><span class="err">#</span><span class="n">callConstructors</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+<span class="c1">// per class setting (default: depends on environment)</span>
+<span class="n">CommonConfiguration</span><span class="err">#</span><span class="n">objectClass</span><span class="p">(...).</span><span class="na">callConstructors</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+<span class="c1">// exceptions for debugging (default: true)</span>
+<span class="n">CommonConfiguration</span><span class="err">#</span><span class="n">exceptionsOnNotStorable</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>Bypassing Constructors<ul>
+<li>Constructors that cannot handle default values or <code>null</code> must be bypassed</li>
+<li>platform specific mechanism</li>
+<li>Not all environments support this feature</li>
+<li>Default setting (if supported by environment)</li>
+<li>Breaks classes that rely on constructors being executed</li>
+</ul>
+</li>
+<li>Translators<ul>
+<li>needed if neither Constructors nor Bypassing Constructors can be used</li>
+<li>if constructor needed to populate transient members</li>
+<li>if constructor fails when called with default values</li>
+<li>Interfaces <code>ObjectTranslator</code> and <code>ObjectConstructor</code></li>
+</ul>
+</li>
+<li>Type Handles<ul>
+<li>instead of Translators at lower level</li>
+<li>type handler registered for class that it handles</li>
+<li>write to and read from byte-arrays</li>
+</ul>
+</li>
+</ul>
+<!-- End Slides/Notes Week 5/6 ? -->
+<!-- Start Slides/Notes Week 7 -->
+<h1 id="versant">Versant</h1>
+<ul>
+<li>Highly scalable</li>
+<li>Distributed</li>
+<li>Many platforms and programming languages<ul>
+<li>C, C++, Java</li>
+</ul>
+</li>
+<li>db4o acquired by Versant</li>
+<li>Lot of features</li>
+<li>easy to use</li>
+<li>Full Persistence Orthogonality<ul>
+<li>but code is injected (into byte-code)</li>
+</ul>
+</li>
+</ul>
+<h2 id="indexing">Indexing</h2>
+<ul>
+<li>Like <span class="caps">SQL</span></li>
+<li>Point/Range queries</li>
+<li>Index structures for Relational DBs not ideal for Subtyping<ul>
+<li><em>Polymorphic indexes</em> in Versant</li>
+</ul>
+</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<ul>
+<li>Always network based<ul>
+<li>no embedded option (as db4o)</li>
+</ul>
+</li>
+<li>Client<ul>
+<li>Versant Manager</li>
+<li>Object cache</li>
+<li>Application logic</li>
+</ul>
+</li>
+<li>Versant Server<ul>
+<li>possible to use multiple servers</li>
+<li>Access to data<ul>
+<li>Volumes (page cache)</li>
+</ul>
+</li>
+<li>Logical log file</li>
+<li>Physical log file</li>
+</ul>
+</li>
+<li>Dual cache<ul>
+<li>Object cache (client)</li>
+<li>Page cache (server)</li>
+</ul>
+</li>
+</ul>
+<h2 id="database-volumes">Database Volumes</h2>
+<ul>
+<li>System Volume (created automatically)<ul>
+<li>Class descriptions</li>
+<li>Object instances</li>
+</ul>
+</li>
+<li>Data Volumes (optional)<ul>
+<li>Increase database capacity</li>
+<li>Partition data</li>
+</ul>
+</li>
+<li>Logical Log Volume (created automatically)<ul>
+<li>Transactions and redo information</li>
+<li>For recovery and rollback</li>
+</ul>
+</li>
+<li>Physical Log Volume (created automatically)<ul>
+<li>Physical data information</li>
+<li>For recovery and rollback</li>
+</ul>
+</li>
+</ul>
+<h2 id="versant-manager">Versant Manager</h2>
+<ul>
+<li>Presents objects to app</li>
+<li>Caches objects in virtual memory</li>
+<li>Manages transactions</li>
+<li>Distributes queries and updates to servers</li>
+<li>Conversion between Versant <span class="caps">DB</span> format and client machine format</li>
+</ul>
+<h2 id="cache">Cache</h2>
+<ul>
+<li>Cached Object Descriptor Table</li>
+<li>Map from <em>logical object identifier</em> (<span class="caps">LOID</span>) to object in memory<ul>
+<li>attributes pointing to other object: access object in memory or <span class="caps">DB</span></li>
+</ul>
+</li>
+</ul>
+<p><img alt="Nested Index" class="img-fluid" src="/images/object_databases/versant_cache.png"/></p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>pointer</th>
+<th><span class="caps">LOID</span></th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="caps">NULL</span></td>
+<td><span class="caps">NULL</span></td>
+<td>object deleted?</td>
+</tr>
+<tr>
+<td>not <span class="caps">NULL</span></td>
+<td><span class="caps">NULL</span></td>
+<td>not saved persistently</td>
+</tr>
+<tr>
+<td><span class="caps">NULL</span></td>
+<td>not <span class="caps">NULL</span></td>
+<td>not loaded in cache</td>
+</tr>
+<tr>
+<td>not <span class="caps">NULL</span></td>
+<td>not <span class="caps">NULL</span></td>
+<td>in <span class="caps">DB</span> and in cache</td>
+</tr>
+</tbody>
+</table>
+<p>Other entries:</p>
+<ul>
+<li>locking information</li>
+<li>state information</li>
+<li>…</li>
+</ul>
+<h2 id="versant-server">Versant Server</h2>
+<ul>
+<li>Object retrieval (disk and page cache)</li>
+<li>Transactions and locks</li>
+<li>Logging and recovery</li>
+<li>Indexing</li>
+</ul>
+<p>Versant doesn’t have the notion of activation. Data is retrieved automatically
+when dereferencing pointers.</p>
+<h2 id="processes-sessions-and-transactions">Processes, Sessions and Transactions</h2>
+<ul>
+<li>Session (same as ObjectContainer in db4o)<ul>
+<li>On client side</li>
+<li>Represents database instance</li>
+<li>Container</li>
+<li>A session object is always bound to one <em>single transaction</em></li>
+<li>It’s possible to have multiple threads attached to one session<ul>
+<li>This is dangerous!</li>
+<li>Not transaction support</li>
+</ul>
+</li>
+<li>Multiple sessions within separate threads</li>
+<li>or multiple session in one thread</li>
+<li>Each session object on the client is bound to one transaction thread in the server<ul>
+<li>Transaction (<span class="caps">ACID</span>) support</li>
+</ul>
+</li>
+<li>The server thread accesses the page cache</li>
+</ul>
+</li>
+</ul>
+<h2 id="java-versant-interface">Java Versant Interface</h2>
+<ul>
+<li>Easy-to-use storage of persistent Java objects<ul>
+<li>pure Java (syntax and semantics)</li>
+<li>instances of nearly all classes can be stored (and accessed)</li>
+<li>works with Java <span class="caps">GC</span></li>
+</ul>
+</li>
+<li>Client-server architecture<ul>
+<li>access to the Versant object <span class="caps">DB</span></li>
+<li>client libs cache objects for faster access</li>
+<li><span class="caps">DB</span> queries are executed on server</li>
+</ul>
+</li>
+<li>Configuration and code-generation integrated in build process</li>
+</ul>
+<h2 id="jvi-layers"><span class="caps">JVI</span> Layers</h2>
+<p>Versant provides different <span class="caps">API</span> layers.
+The fundamental layer is usually not directly needed by the application developer.</p>
+<h3 id="fundamental-layer">Fundamental Layer</h3>
+<ul>
+<li><span class="caps">DB</span> centric</li>
+<li>Create ‘Meta-classes’</li>
+<li>Objects manipulated indirectly through handles</li>
+<li>package <code>com.versant.fund</code></li>
+<li>
+<p>Query classes <code>FundQuery</code> and <code>FundQueryResult</code></p>
+</li>
+<li>
+<p>Create wrapper code for real classes (reflection)</p>
+</li>
+</ul>
+<h3 id="transparent-layer">Transparent Layer</h3>
+<ul>
+<li>language centric</li>
+<li>usually used by developer</li>
+<li>code is injected to application code</li>
+<li>build on top of fundamental layer</li>
+<li>package <code>com.versant.trans</code></li>
+<li>Java classes are mapped to objects in fundamental layer</li>
+<li>Persistent objects are cached in memory</li>
+<li>For persistent objects retrieved from a <span class="caps">DB</span> Java objects are constructed (in memory)</li>
+</ul>
+<h4 id="first-and-second-class-objects">First and Second Class Objects</h4>
+<p>Versant distinguishes first class and second class objects</p>
+<ul>
+<li>Configured externally in a file</li>
+<li>Configured on class basis</li>
+<li>First Class Objects (<span class="caps">FCO</span>)<ul>
+<li>main objects that can be saved and retrieved independently</li>
+<li>have a Logical Object Identifier (<span class="caps">LOID</span>)</li>
+<li>changes are saved automatically (independence)</li>
+<li>strong entities</li>
+</ul>
+</li>
+<li>Second Class Objects (<span class="caps">SCO</span>)<ul>
+<li>can be saved only as part of an <span class="caps">FCO</span></li>
+<li>can’t be results of queries</li>
+<li>can be part of first class objects</li>
+<li>stored as binary array</li>
+<li>weak entity</li>
+<li>used for optimization</li>
+</ul>
+</li>
+</ul>
+<h4 id="persistence-categories">Persistence Categories</h4>
+<ul>
+<li>
+<p>can be configured on class basis</p>
+</li>
+<li>
+<p>First class objects</p>
+<ul>
+<li>Persistent always (<em>p</em>)<ul>
+<li>becomes persistent at instantiation (independence)</li>
+<li>marked as dirty when modified</li>
+</ul>
+</li>
+<li>Persistence capable (<em>c</em>)<ul>
+<li>new instances are transient but can become persistent</li>
+<li>marked as dirty when modified</li>
+</ul>
+</li>
+<li>Super-class of <em>p</em> or <em>c</em> must also be <em>p</em> or <em>c</em> respectively</li>
+</ul>
+</li>
+<li>Second class objects<ul>
+<li>Transparent dirty owner (<em>d</em>)<ul>
+<li>changes to object automatically mark the owner object as dirty</li>
+<li>works only when the owner is stored (<span class="caps">FCO</span>)</li>
+</ul>
+</li>
+<li>Persistence aware (<em>a</em>)<ul>
+<li>for code that is aware of <span class="caps">FCO</span></li>
+<li>code needs to mark manually the <span class="caps">FCO</span> as dirty</li>
+</ul>
+</li>
+<li>Not persistent (<em>n</em>)<ul>
+<li>no managed by Versant system</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="persistence-and-navigation">Persistence and Navigation</h4>
+<ul>
+<li>Persistence by reachability is provided</li>
+<li>Database root<ul>
+<li>persist the root of an object graph</li>
+<li>name it (for retrieving it later)</li>
+<li>Methods <code>makeRoot()</code>, <code>deleteRoot()</code> and <code>findRoot()</code></li>
+</ul>
+</li>
+<li>Transparent navigation<ul>
+<li><span class="quo">‘</span>activation’ handled automatically and lazy</li>
+<li>objects are transparently locked and retrieved</li>
+<li>works across <span class="caps">DB</span> boundaries</li>
+</ul>
+</li>
+</ul>
+<h3 id="omdg-layer"><span class="caps">OMDG</span> Layer</h3>
+<ul>
+<li>language centric</li>
+<li><span class="caps">ODMG</span> database, transactions, collections</li>
+<li>build on transparent layer</li>
+<li>packages <code>com.versant.odmg</code> and <code>com.versant.odmg</code></li>
+</ul>
+<h2 id="application-development">Application Development</h2>
+<ul>
+<li>Develop Java classes<ul>
+<li>make code ‘persistence aware’</li>
+<li>sessions, transactions, concurrency</li>
+</ul>
+</li>
+<li>Create configuration file<ul>
+<li>specify persistence category for each Java class</li>
+</ul>
+</li>
+<li>Compile</li>
+<li>Run enhancer to make byte-code changes<ul>
+<li>persistence behavior inherited from <code>com.versant.trans.Persistent</code></li>
+<li>explicit at compile time or</li>
+<li>implicit at run time (class loader)</li>
+</ul>
+</li>
+<li>create <span class="caps">DB</span></li>
+<li>Run application</li>
+</ul>
+<h2 id="byte-code-enhancement">Byte-code Enhancement</h2>
+<ul>
+<li>Code which creates schema object in <span class="caps">DB</span></li>
+<li>Code for writing and reading to and from <span class="caps">DB</span></li>
+<li>Code for accessing attribute values</li>
+</ul>
+<h2 id="object-lifecycle">Object Lifecycle</h2>
+<ul>
+<li>Creation of persistent objects<ul>
+<li>Java objects in memory</li>
+<li>Each object has internal <span class="caps">DB</span> information in object cache</li>
+</ul>
+</li>
+<li>Commit<ul>
+<li>Object data written to <span class="caps">DB</span></li>
+<li>Proxy Java objects retained in memory</li>
+</ul>
+</li>
+<li>Rollback<ul>
+<li>New database objects will be dropped</li>
+</ul>
+</li>
+<li>Querying<ul>
+<li>Queries are passed to <span class="caps">DB</span> server</li>
+<li>Proxy object for every object in result</li>
+</ul>
+</li>
+<li>Accessing objects<ul>
+<li>Objects are fetched or de-serialized transparently</li>
+</ul>
+</li>
+</ul>
+<h2 id="versant-collections">Versant Collections</h2>
+<ul>
+<li>Standard collection classes can’t be byte-code enhanced</li>
+<li>Special collection classes for <em><span class="caps">FCO</span></em>s and <em><span class="caps">SCO</span></em>s</li>
+<li>Scalable large collections (<em><span class="caps">FCO</span></em>)</li>
+<li><span class="caps">OMDG</span> collections (are <em><span class="caps">FCO</span></em>s)<ul>
+<li>additional query facilities</li>
+</ul>
+</li>
+</ul>
+<h2 id="versant-query-language-vql">Versant Query Language (<span class="caps">VQL</span>)</h2>
+<ul>
+<li>Subset of <span class="caps">OQL</span> (<span class="caps">ODMG</span>)</li>
+<li>Similar to <span class="caps">SQL</span></li>
+<li>Executed on server</li>
+<li>Can be parameterised<ul>
+<li>prepared statements</li>
+</ul>
+</li>
+</ul>
+<h2 id="event-notification-and-persistent-object-hooks">Event Notification and Persistent Object Hooks</h2>
+<ul>
+<li>Like callbacks in db4o</li>
+<li>Event Notification<ul>
+<li>Propagation of events from <span class="caps">DB</span> to client</li>
+<li>Event types<ul>
+<li>class: create, modify or delete an instance</li>
+<li>object: modify or delete object or group of objects</li>
+<li>transactions: begin or end of transaction</li>
+<li>user-defined events</li>
+</ul>
+</li>
+<li>package <code>com.versant.event</code></li>
+</ul>
+</li>
+<li>Persistent Object Hooks<ul>
+<li>Allow intervention of state transitions</li>
+<li><code>activate()</code>, <code>deactivate()</code></li>
+<li><code>preRead(boolean act)</code> and <code>postRead(boolean act)</code></li>
+<li><code>preWrite(boolean deAct)</code> and <code>postWrite(boolean deAct)</code></li>
+<li><code>vDelete()</code>: can be used to maintain referential integrity (cascading delete)</li>
+</ul>
+</li>
+</ul>
+<!-- End of Notes/Slides Week 7 -->
+<!-- Start Notes/Slides Week 8 -->
+<h1 id="objectstore">ObjectStore</h1>
+<h2 id="general-topics-of-persistence">General Topics of Persistence</h2>
+<ul>
+<li>Orthogonal persistence is not always desired (<span class="caps">UI</span>, messages, …)</li>
+<li>Persistence identification: do we need to explicit store/retrieve objects</li>
+<li>Possibility to select what is in <span class="caps">DB</span> and what is in memory</li>
+<li>Declarative query language<ul>
+<li>what, not how</li>
+<li>more power-full</li>
+<li>easy to use</li>
+<li>more expressive</li>
+</ul>
+</li>
+<li>Difference between<ul>
+<li>persistent always: stored automatically</li>
+<li>persistent capable: needs to be stored explicitly</li>
+</ul>
+</li>
+</ul>
+<h2 id="architecture_1">Architecture</h2>
+<ul>
+<li>C++ and Java</li>
+<li>Client/Server application</li>
+<li>Lightweight and professional editions available</li>
+<li>Based on virtual memory mapping<ul>
+<li>pages</li>
+<li>cache forward architecture (very performant)</li>
+</ul>
+</li>
+<li>Virtual memory mapping architecture (extends operating system)<ul>
+<li>logical vs. physical address</li>
+<li>page fault</li>
+<li>address translation</li>
+</ul>
+</li>
+<li>Characteristics (ObjectStore)<ul>
+<li>virtual</li>
+<li>shared</li>
+<li>distributed</li>
+<li>heterogeneous</li>
+<li>persistent</li>
+<li>transactional</li>
+</ul>
+</li>
+<li>Logical vs. physical address<ul>
+<li>data is referenced uniquely using a 4-part key<ol>
+<li>database</li>
+<li>segment</li>
+<li>cluster</li>
+<li>offset (in cluster)</li>
+</ol>
+</li>
+<li>theoretical address space to <span class="math">\(2^{128}\)</span></li>
+<li>Reserved virtual memory region for persistence: Persistent Storage Region (<em><span class="caps">PSR</span></em>)</li>
+</ul>
+</li>
+<li>Physical memory and secondary storage<ul>
+<li>all data accessed by client must be in <em><span class="caps">PSR</span></em></li>
+<li>cache hold recently accessed data even across transactions</li>
+</ul>
+</li>
+<li>Data is cached on different levels</li>
+<li>Granularity: pages</li>
+<li>close to persistence capable (in Versant)<ul>
+<li>overloaded <code>new</code> operator</li>
+<li>instance based persistence</li>
+</ul>
+</li>
+</ul>
+<h2 id="virtual-memory-mapping-architecture">Virtual Memory Mapping Architecture</h2>
+<ul>
+<li>Page faults<ul>
+<li>ObjectStore maps data into app when page fault occurs</li>
+<li>data is paged into memory from cache if not in <em><span class="caps">PSR</span></em> or fetched from server if not in cache</li>
+</ul>
+</li>
+<li>Address translation<ul>
+<li>done when data is fetched into cache</li>
+<li>re-translation can occur (when <em><span class="caps">PSR</span></em> gets full)</li>
+<li>trade-off<ul>
+<li>nice to have the ability to use direct <span class="caps">SW</span> pointers</li>
+<li>translating pointers has scalability implications</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="server-side-components">Server Side Components</h2>
+<ul>
+<li>Server<ul>
+<li>Enforces <span class="caps">ACID</span> using ‘page permits’</li>
+<li>co-operation between servers with two-phase commits</li>
+<li>automatic recovery mechanism</li>
+</ul>
+</li>
+<li>Database<ul>
+<li>managed by one server<ul>
+<li>one server can manage multiple DBs (distribution)</li>
+</ul>
+</li>
+<li>binary files storing pages of memory containing C++ objects</li>
+</ul>
+</li>
+<li>Transaction log<ul>
+<li>each server owns transaction log</li>
+<li>pages only propagated to <span class="caps">DB</span> when transaction commits</li>
+<li>used for<ul>
+<li>automatic recovery</li>
+<li>faster commits</li>
+<li>Multi-version Concurrency Control (<span class="caps">MVCC</span>)</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="client-side-components">Client Side Components</h2>
+<ul>
+<li>Client<ul>
+<li>C++ program linked with ObjectStore libraries</li>
+<li>even Java programs using ObjectStore are embedded (session) in a C++ part</li>
+<li>interacts with <span class="caps">DB</span></li>
+<li>pages automatically fetched from <span class="caps">DB</span></li>
+</ul>
+</li>
+<li>Cache<ul>
+<li>one cache memory mapped file per client process</li>
+<li>pages fetched from <span class="caps">DB</span> are held in cache</li>
+<li>pages can be retained in cache between transactions</li>
+<li>Cache manager retrieves data from the server</li>
+</ul>
+</li>
+<li>meta-information (Commseg)<ul>
+<li>Commseg memory mapped file</li>
+<li>contains meta-information about pages in cache</li>
+<li>stores <em>permit</em> and <em>lock</em> for pages in cache</li>
+<li><em>permit</em>s can be retained between transactions</li>
+</ul>
+</li>
+<li>Cache manager<ul>
+<li>one manager per client machine</li>
+<li>shared by all clients on that machine</li>
+<li>handles permit revokes</li>
+<li>read/write cache and Commseg</li>
+<li>not directly involved in page fetch</li>
+</ul>
+</li>
+<li>Persistent Storage Region (<em><span class="caps">PSR</span></em>)<ul>
+<li>reserved area of virtual address space (in C++ part)</li>
+<li>addresses of persistent objects used by client are mapped to <em><span class="caps">PSR</span></em></li>
+<li>pointers of application will be in the range of the <em><span class="caps">PSR</span></em></li>
+<li>at end of transaction <em><span class="caps">PSR</span></em> is cleared<ul>
+<li>can be reused for next transaction</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="fetching-and-mapping-pages">Fetching and Mapping Pages</h2>
+<ul>
+<li>Client automatically fetches and maps pages<ul>
+<li><span class="quo">‘</span>lazy’ fetches</li>
+<li>held in client cache</li>
+</ul>
+</li>
+<li>Server <em>permits</em> and client <em>locks</em> acquired automatically<ul>
+<li>ensuring transaction consistency</li>
+</ul>
+</li>
+<li>Existing page can be swapped out<ul>
+<li>if not enough room in cache for new page</li>
+<li>updated pages are sent to the server</li>
+<li>read-only pages are dropped from cache (copy in <span class="caps">DB</span>)</li>
+</ul>
+</li>
+</ul>
+<h3 id="fetching-and-mapping-sequence">Fetching and Mapping Sequence</h3>
+<ul>
+<li>ObjectStore installs <code>SIGSEGV</code> (segmentation fault) handler</li>
+<li>Program obtains pointer <code>p</code> to object on page <em>x</em></li>
+<li>Dereferencing <code>p</code> causes <code>SIGSEGV</code> handler to be called</li>
+<li>Virtual mapping table is consulted</li>
+<li>Page is fetched from server and stored in cache</li>
+<li>Page <em>x</em> is mapped to address space</li>
+<li>Execution continues</li>
+</ul>
+<h2 id="cache-forward-architecture">Cache-Forward Architecture</h2>
+<ul>
+<li>To provide <em>high performance</em> in ObjectStore<ul>
+<li>data cached across transaction boundaries</li>
+<li>number of used locks is reduces</li>
+<li>cached data kept in globally consistent state</li>
+</ul>
+</li>
+<li>Two types of locks on pages<ul>
+<li><em>transaction locks</em>: represents state of page during transaction</li>
+<li><em>ownership permits</em>: represents state of page in cache</li>
+</ul>
+</li>
+<li><em>Permits</em> are tracked by <em>server</em><ul>
+<li>server serves permits on pages that are sent to client</li>
+</ul>
+</li>
+<li><em>Locks</em> are taken by <em>client</em><ul>
+<li>client can lock pages according to given permit</li>
+</ul>
+</li>
+</ul>
+<h2 id="shared-virtual-memory">Shared Virtual Memory</h2>
+<ul>
+<li>Lazy call-back mechanism for permits</li>
+<li>Server maintains table of permits for each client</li>
+<li>When client requests page from server<ul>
+<li>Server checks for other clients with permit for page (and permit type)</li>
+<li>Server issues call-back if one or more clients have conflicting permits</li>
+</ul>
+</li>
+</ul>
+<h2 id="page-permits-and-locks">Page Permits and Locks</h2>
+<ul>
+<li>Lock for client (locally)</li>
+<li>Permission for server (globally)</li>
+<li>Read permit<ul>
+<li>client can lock page for reading <em>without consulting server</em></li>
+<li>many clients can hold a read permit for the same page</li>
+</ul>
+</li>
+<li>Write permit<ul>
+<li>client can lock page for reading or writing <em>without asking server</em></li>
+<li>only one client can hold a write permit for a page at any given time</li>
+</ul>
+</li>
+<li>Cache manager inspects permit and lock status for call-back<ul>
+<li>✓: Positive</li>
+<li>✗: Negative, but permit is flagged to be revoked at transaction end</li>
+</ul>
+</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Permit</th>
+<th>Lock</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>read</td>
+<td>read</td>
+<td>✗ server only calls back permit of other client needs to write</td>
+</tr>
+<tr>
+<td>read</td>
+<td>no lock</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>write</td>
+<td>read</td>
+<td>✓ permit for page downgraded to read</td>
+</tr>
+<tr>
+<td>write</td>
+<td>write</td>
+<td>✗</td>
+</tr>
+<tr>
+<td>write</td>
+<td>no lock</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Pages on server are fetched with permission (read or write)</li>
+<li>Local locks don’t tell server about lock/un-lock about after transaction</li>
+</ul>
+<h2 id="distribution-and-heterogeneity">Distribution and Heterogeneity</h2>
+<ul>
+<li>Clients can access objects in different remote DBs in one transaction</li>
+<li>Clients and servers can run on different platforms<ul>
+<li>Win</li>
+<li>Linux</li>
+<li>Unix</li>
+<li>…</li>
+</ul>
+</li>
+<li>Physical object layout is transformed automatically<ul>
+<li>by client</li>
+<li>at run-time</li>
+<li>when page is mapped into cache</li>
+</ul>
+</li>
+</ul>
+<h2 id="persistence_1">Persistence</h2>
+<ul>
+<li>persistence by instantiation in C++</li>
+<li>Overloaded persistent <code>new</code> operator</li>
+<li>Several options for object allocation<ul>
+<li>transiently on the heap</li>
+<li><span class="caps">DB</span></li>
+<li>segment</li>
+<li>cluster</li>
+<li>…</li>
+</ul>
+</li>
+<li>Persistence is orthogonal to the type of an object (data-type orthogonality)</li>
+</ul>
+<h2 id="transactions">Transactions</h2>
+<ul>
+<li>Basic <span class="caps">ACID</span> properties</li>
+<li>Atomicity<ul>
+<li>after commit: guaranteed that data was written and is recoverable</li>
+<li>after abort: changes are undone</li>
+</ul>
+</li>
+<li>Consistency<ul>
+<li>it’s impossible to apply or lose update while data is written</li>
+</ul>
+</li>
+<li>Isolation<ul>
+<li>serialisability (<span class="caps">CPSR</span>) is guaranteed by 2-phase locking</li>
+<li><span class="caps">MVCC</span> provides serialisability for read-only transactions (using snapshots)</li>
+</ul>
+</li>
+<li>Durability<ul>
+<li>changes are written to transaction log first</li>
+<li>background process propagates changes to <span class="caps">DB</span></li>
+</ul>
+</li>
+</ul>
+<h3 id="transaction-types">Transaction Types</h3>
+<ul>
+<li>Read or Write</li>
+<li>Local or Global<ul>
+<li>local: only initiating thread is allowed</li>
+<li>global: allows all threads in a session to share transaction</li>
+</ul>
+</li>
+<li>Lexical or Dynamic transactions<ul>
+<li>Lexical transactions<ul>
+<li>automatically retry on lock</li>
+<li>must start and end in same code block</li>
+<li>always thread-local</li>
+</ul>
+</li>
+<li>Dynamic transactions<ul>
+<li>lower level of <code>os_transaction</code>class</li>
+<li>better suited for multi-threaded applications</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="database-layout">Database Layout</h2>
+<ul>
+<li>Memory pages held in hierarchy of clusters in segments</li>
+<li>Segments<ul>
+<li>logical partitioning of objects</li>
+<li>Segment 0: schema segment<ul>
+<li><span class="caps">DB</span> schema</li>
+<li><span class="caps">DB</span> roots</li>
+</ul>
+</li>
+<li>Segment 2: default segment</li>
+<li>Segment 4: first user-created segment</li>
+<li>max <span class="math">\(2^{32}\)</span> segments per <span class="caps">DB</span></li>
+</ul>
+</li>
+<li>Clusters<ul>
+<li>group closely related objects</li>
+<li>each segment has default cluster 0</li>
+<li>max <span class="math">\(2^{31}\)</span> clusters per segment</li>
+</ul>
+</li>
+</ul>
+<h2 id="developing-applications-api">Developing Applications (<span class="caps">API</span>)</h2>
+<ul>
+<li>
+<p>ObjectStore libraries</p>
+<ul>
+<li><code>objectstore</code>: run-time</li>
+<li><code>os_database</code>: <span class="caps">DB</span> management</li>
+<li><code>os_transactions</code>: transaction handles and functionality</li>
+<li><code>os_typespec</code>: determine type specification</li>
+<li><code>os_database_root</code>: manage roots</li>
+<li><code>os_segment</code>: segment access and management</li>
+<li><code>os_cluster</code>: cluster access and management</li>
+</ul>
+</li>
+<li>
+<p>Development process</p>
+<ul>
+<li>writing persistent classes, schema file, app logic</li>
+<li>compile schema file with <code>pssq</code> compiler</li>
+<li>compile classes with C++ compiler</li>
+<li>linking</li>
+</ul>
+</li>
+</ul>
+<h3 id="managing-databases">Managing Databases</h3>
+<ul>
+<li>provided by <code>os_database</code><ul>
+<li><code>create()</code>: creates new <span class="caps">DB</span></li>
+<li><code>open()</code>: opens <span class="caps">DB</span></li>
+<li><code>save()</code>: saves <span class="caps">DB</span>, changes permanent</li>
+<li><code>close()</code>: closes <span class="caps">DB</span>, but doesn’t save stat</li>
+<li><code>destroy()</code>: deletes <span class="caps">DB</span></li>
+</ul>
+</li>
+</ul>
+<h3 id="transactions_1">Transactions</h3>
+<ul>
+<li>provided by <code>os_transaction</code><ul>
+<li>all interactions with <span class="caps">DB</span> must be in a transactions</li>
+<li>can be nested</li>
+</ul>
+</li>
+<li>defining and working with transactions<ul>
+<li>directly using <code>os_transaction</code> class (dynamic)</li>
+<li>using macros (lexical)</li>
+</ul>
+</li>
+</ul>
+<h3 id="creating-persistent-objects">Creating Persistent Objects</h3>
+<p>Use overloaded <code>new</code> operator:</p>
+<div class="highlight"><pre><span></span><code><span class="n">os_database</span><span class="w"> </span><span class="o">*</span><span class="n">db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">os_database</span><span class="o">::</span><span class="n">open</span><span class="p">(</span><span class="s">"publications.db"</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span>
+<span class="n">Author</span><span class="w"> </span><span class="o">*</span><span class="n">scheel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="p">(</span><span class="n">db</span><span class="p">,</span><span class="w"> </span><span class="n">os_ts</span><span class="o">&lt;</span><span class="n">Author</span><span class="o">&gt;::</span><span class="n">get</span><span class="p">())</span><span class="w"> </span><span class="n">Author</span><span class="p">(</span><span class="s">"Matthias Geel"</span><span class="p">);</span><span class="w"></span>
+<span class="n">db</span><span class="o">-&gt;</span><span class="n">close</span><span class="p">();</span><span class="w"></span>
+</code></pre></div>
+<p>It’s also possible to instantiate persistent array of objects.</p>
+<h3 id="updating-and-deleting-persistent-objects">Updating and Deleting Persistent Objects</h3>
+<ul>
+<li>Changes to persistent objects are propagated to <span class="caps">DB</span> automatically<ul>
+<li>when pages are sent back to server</li>
+<li>client app updates memory-mapped persistent objects (using standard C++)</li>
+<li>persistent objects are deleted when memory-mapped objects are deleted (using standard C++)</li>
+</ul>
+</li>
+<li>Fully transparent to app developer</li>
+</ul>
+<h3 id="collections-and-relationships">Collections and Relationships</h3>
+<ul>
+<li>Relationships between classes modeled as collections</li>
+<li>library of non-templated and templated collection types available</li>
+<li>traversal, manipulation, retrieval</li>
+<li>classes <code>os_collection</code>, <code>os_Collection&lt;E&gt;</code> and sub-classes</li>
+</ul>
+<p>Relationships:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Relationship to the customers orders:</span>
+<span class="n">os_relationship_m_1</span><span class="p">(</span><span class="n">Customer</span><span class="p">,</span><span class="n">orders</span><span class="p">,</span><span class="n">Order</span><span class="p">,</span><span class="n">customer</span><span class="p">,</span><span class="n">os_List</span><span class="o">&lt;</span><span class="n">Order</span><span class="o">*&gt;</span><span class="p">)</span><span class="w"> </span><span class="n">orders</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>
+<p>Cursors over Collections</p>
+<ul>
+<li>used to navigate and manipulate collections</li>
+<li>class <code>os_Cursor</code></li>
+<li>cursors can be reused by rebinding to other collection</li>
+</ul>
+</li>
+<li>
+<p>Queries over Collections</p>
+<ul>
+<li>specify<ul>
+<li>element type</li>
+<li>query string</li>
+<li>schema <span class="caps">DB</span></li>
+</ul>
+</li>
+<li>query string indicates selection criterion<ul>
+<li>in C++</li>
+<li>or pattern matching expression</li>
+</ul>
+</li>
+<li>function calls in query strings restricted to basic types</li>
+<li>nested queries supported</li>
+</ul>
+</li>
+</ul>
+<h2 id="database-roots">Database Roots</h2>
+<ul>
+<li>persistent objects with a well-known name</li>
+<li>class <code>os_database_root</code><ul>
+<li>root name as <code>char *</code></li>
+<li>pointer to object as <code>void *</code></li>
+</ul>
+</li>
+</ul>
+<!-- End Notes/Slides Week 8 -->
+<!-- Start Slides/Notes Week 9 -->
+<!-- TODO Notes 0:00:00 -->
+<h1 id="objectivitydb">Objectivity/<span class="caps">DB</span></h1>
+<h2 id="key-features">Key Features</h2>
+<ul>
+<li>Logical and physical pages<ul>
+<li>non-destructive manipulation</li>
+<li>simple rollback/commit</li>
+</ul>
+</li>
+<li>Relationships<ul>
+<li>bidirectional relationship outside of class</li>
+</ul>
+</li>
+<li><span class="caps">LINQ</span></li>
+<li>Parallel Query Engine</li>
+<li>Graph Navigator</li>
+<li>Core implemented in C++</li>
+<li>Language support<ul>
+<li>C++</li>
+<li>C#</li>
+<li>Java</li>
+<li>Smaltalk</li>
+<li>Python</li>
+<li><span class="caps">SQL</span>++</li>
+<li><span class="caps">XML</span></li>
+</ul>
+</li>
+<li>Platform support<ul>
+<li>Windows</li>
+<li>Linux, Altix</li>
+<li><span class="caps">UNIX</span>: Solaris, <span class="caps">HP</span>-<span class="caps">UX</span>, <span class="caps">IBM</span> <span class="caps">RS</span>/6000</li>
+<li><span class="caps">OS</span> X</li>
+<li>32-bit and 64-bit</li>
+</ul>
+</li>
+</ul>
+<h2 id="architecture_2">Architecture</h2>
+<ul>
+<li>Client/Server</li>
+<li>Lock Servers</li>
+<li>Data Servers</li>
+<li>Query Servers (Parallel Query Engine)<ul>
+<li>task splitter</li>
+<li>multiple query server scanning portions of data in parallel</li>
+</ul>
+</li>
+<li>Client-side Objectivity Kernel</li>
+</ul>
+<h2 id="federation">Federation</h2>
+<blockquote>
+<p>Federation &gt; Database &gt; Container &gt; Objects</p>
+</blockquote>
+<ul>
+<li>A <em>Federation</em> contains several <em>DBs</em>.</li>
+<li>A <em><span class="caps">DB</span></em> contains several <em>Containers</em>.</li>
+<li>A <em>Container</em> contains several <em>Objects</em>.</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Logical</th>
+<th>Physical</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Federation</td>
+<td>File</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>Files</td>
+</tr>
+<tr>
+<td>Container</td>
+<td>Pages</td>
+</tr>
+<tr>
+<td>Objects</td>
+<td>Slots</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Federated <span class="caps">DB</span> contains one or more DBs</li>
+<li>A <span class="caps">DB</span> file can be copied to other machine</li>
+</ul>
+<h2 id="databases">Databases</h2>
+<ul>
+<li>Databases are files<ul>
+<li>contain objects in container</li>
+<li>up to 65530 databases per federation</li>
+<li>a database holds up to 65530 containers</li>
+</ul>
+</li>
+<li>can be moved or copied to any disk/machine</li>
+<li>can be marked read-only or taken off-line</li>
+</ul>
+<h2 id="containers">Containers</h2>
+<ul>
+<li>Collections of objects in <span class="caps">DB</span><ul>
+<li>contained objects can be of any size or type</li>
+<li>can grow up to 65530 pages</li>
+</ul>
+</li>
+<li>Useful for logical partitions<ul>
+<li>by owner</li>
+<li>by attribute</li>
+<li>by time</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+<h2 id="pages">Pages</h2>
+<ul>
+<li>Logical and Physical<ul>
+<li>logical page is permament part of object <span class="caps">ID</span> (<span class="caps">OID</span>)</li>
+<li>physical page is where the page is put in the file</li>
+</ul>
+</li>
+<li>Different age sizes possible</li>
+<li>Unit of transfer from disk or server</li>
+<li>Unit of locking<ul>
+<li>one writer</li>
+<li>multiple readers</li>
+</ul>
+</li>
+</ul>
+<h3 id="logical-and-physical-pages">Logical and Physical Pages</h3>
+<ul>
+<li>When page is modified<ul>
+<li>new page is written to container</li>
+<li>old page is kept</li>
+<li>journal file is written<ul>
+<li>containing current page map</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>When a transaction commits<ul>
+<li>page map is updated and written to disk</li>
+<li>old page is freed (for reuse)</li>
+<li>journal file is truncated</li>
+<li>lock removed on lock server</li>
+</ul>
+</li>
+<li>If a transaction aborts<ul>
+<li>new page is freed (for reuse)</li>
+<li>lock is removed from server</li>
+</ul>
+</li>
+</ul>
+<h2 id="persistent-object-model">Persistent Object Model</h2>
+<ul>
+<li>Language independent</li>
+<li>Persistence by inheritance</li>
+<li>Base types<ul>
+<li>numeric: sbyte, short, int, long, byte, ushort, uint, ulong, float, double</li>
+<li>string: <span class="caps">ASCII</span> (8-bit), <span class="caps">UTF8</span>, <span class="caps">UTF16</span></li>
+<li>boolean</li>
+<li>date/time</li>
+</ul>
+</li>
+<li>Complex types<ul>
+<li>embedded: stored as part of parent object</li>
+<li>referece: parent object stores object identifier</li>
+<li>enumeration</li>
+<li>arrays (fixed and variable-length)</li>
+</ul>
+</li>
+<li>Relationships</li>
+<li>Collections</li>
+</ul>
+<h2 id="relationships_1">Relationships</h2>
+<ul>
+<li>between objects declared in classes<ul>
+<li>unary and binary</li>
+<li>to-one and to-many</li>
+</ul>
+</li>
+<li>Storage and management of relationships<ul>
+<li>inline</li>
+<li>non-inline</li>
+<li>binary associations represented as separate construct internally</li>
+</ul>
+</li>
+<li>Consistency of relationships<ul>
+<li>referential integrity</li>
+<li>inverse relationship of binary relationship is updated automatically</li>
+<li>objects are removed from all relationships when deleted</li>
+</ul>
+</li>
+</ul>
+<h3 id="non-inline-relationships-default">Non-Inline Relationships (default)</h3>
+<ul>
+<li>Each object with relationships has a default relationship array<ul>
+<li>all non-inline relationships are stored in that array</li>
+</ul>
+</li>
+<li>Each relationship in the array is identified by<ul>
+<li>relationship name (id, not string)</li>
+<li>object id (<span class="caps">ODI</span>) of related object</li>
+</ul>
+</li>
+<li>Objectivity traverses relationships until it locates the desired relationship</li>
+<li>array is like part of an adjacent matrix</li>
+</ul>
+<h3 id="inline-relationships">Inline Relationships</h3>
+<ul>
+<li>To-one inline relationships: embedded as fields of an object</li>
+<li>To-many inline relationships: placed in their own array</li>
+</ul>
+<h2 id="deletion-and-lock-propagation">Deletion and Lock Propagation</h2>
+<ul>
+<li>Relationshis can have semantics</li>
+<li>Deletion propagation<ul>
+<li>if object is deleted all associated objects are deleted</li>
+</ul>
+</li>
+<li>Lock propagation<ul>
+<li>if object is locked all associated objects are locked</li>
+</ul>
+</li>
+<li>Developer specifies operation and direction of propagation</li>
+</ul>
+<h2 id="copy-and-versioning-behaviour">Copy and Versioning Behaviour</h2>
+<ul>
+<li>Policies define what happens to object relationships when a copy or a new version of an object is made<ul>
+<li>copy: old an new object associated with same objects</li>
+<li>drop: only old object is associated with other objects</li>
+<li>move: only new object is associated with other objects</li>
+</ul>
+</li>
+</ul>
+<h2 id="domain-classes">Domain Classes</h2>
+<ul>
+<li>.<span class="caps">NET</span> partial classes to separate app and persistence code</li>
+<li>Persistence by inheritance<ul>
+<li>both partial classes inherit form <code>ReferenceableObject</code></li>
+</ul>
+</li>
+<li>Persistence code class<ul>
+<li>defines schema class and attributes</li>
+<li>functionality to create and dispose objects</li>
+<li>properties for attributes defined by schema</li>
+<li>proxy cache for each relationship</li>
+<li>helper and utility functionality</li>
+</ul>
+</li>
+<li>App code class contains user-defined code</li>
+</ul>
+<h2 id="connection-sessions-and-threads">Connection, Sessions and Threads</h2>
+<ul>
+<li>Static funtions for startup, shutdown and connection</li>
+<li>One connection to federation per application process</li>
+<li>Seesions<ul>
+<li>manage resources (cache, transaction state …)</li>
+<li>one or many per thread or</li>
+<li>one shared by many threads</li>
+</ul>
+</li>
+<li>Cache<ul>
+<li>remains intact through commits and checkpoints</li>
+<li>flushed if transaction aborted</li>
+</ul>
+</li>
+</ul>
+<h2 id="persistent-collections">Persistent Collections</h2>
+<ul>
+<li>Built-in persistent collections: sets, lists and maps<ul>
+<li>automatically persistent (when created)</li>
+<li>conform to <code>System.Collections.Generic</code> interface</li>
+</ul>
+</li>
+<li>Types of persistent collections<ul>
+<li>ordered vs. unordered</li>
+<li>scalable vs.non-scalabse</li>
+</ul>
+</li>
+</ul>
+<h2 id="iterators">Iterators</h2>
+<ul>
+<li>Iterators are transient<ul>
+<li>provide access to persistent objects</li>
+</ul>
+</li>
+<li>Predicates can be supplied to iterators<ul>
+<li>no (or less) <code>if</code>s in loop</li>
+</ul>
+</li>
+<li>Not an efficient method for looking up objects<ul>
+<li>predicates evaluated on client (unless index is available)</li>
+<li>can be improved with indexes and scoping</li>
+</ul>
+</li>
+<li>Result is not built entirely before it is returned<ul>
+<li>clients can start process result (instead of getting blockes)</li>
+<li>sorting of result is not possible</li>
+</ul>
+</li>
+</ul>
+<h2 id="scope-names">Scope Names</h2>
+<ul>
+<li>Generalization of <span class="caps">DB</span> roots</li>
+<li>Unique name</li>
+<li>Possible on each storage level<ul>
+<li>container</li>
+<li>database</li>
+<li>federation</li>
+</ul>
+</li>
+</ul>
+<h2 id="retrieving-objects_1">Retrieving Objects</h2>
+<p>-Scope names
+- Creating links (and following them)
+- Individual and group lookup
+    - keys
+    - iteratos
+- Parallel query
+    - Parallel Query Engine
+    - divides query among several servers
+- Content-based filtering
+    - predicate-query language
+    - used to follow to-many relationships
+    - used in parallel queries</p>
+<h2 id="linq-overview"><span class="caps">LINQ</span> Overview</h2>
+<ul>
+<li>Part of .<span class="caps">NEW</span> (<code>System.Linq</code>)</li>
+<li>add native query capabilities to .<span class="caps">NET</span> languages</li>
+<li>Standard query operators defined by class <code>Enumerable</code></li>
+<li>Language extensions are translated into method calls</li>
+<li>Static safety</li>
+</ul>
+<!-- End Notes/Slides Week 9 -->
+<!-- Start Slides/Notes Week 10 -->
+<h1 id="graph-databases">Graph Databases</h1>
+<ul>
+<li>Domain specific solution<ul>
+<li>for a group of problems</li>
+<li>a kind of solution for a kind of problems</li>
+</ul>
+</li>
+<li>Technology models (describe the world):<ol>
+<li>Key-Value Map</li>
+<li>Relational Model</li>
+<li><span class="caps">OO</span> Model</li>
+</ol>
+</li>
+<li>Mapping between models</li>
+<li>There is no generic model for all domains</li>
+</ul>
+<h2 id="social-network-analysis">Social Network Analysis</h2>
+<ul>
+<li>People are connected to each other</li>
+<li>Networks may be represented as graphs<ul>
+<li>Nodes: peoples</li>
+<li>Edges: relationships</li>
+</ul>
+</li>
+<li><a href="http://www.orgnet.com/sna.html">Social Network Analysis</a> to gather information</li>
+</ul>
+<h2 id="graphs">Graphs</h2>
+<ul>
+<li>Nodes and Edges may have attributes<ul>
+<li>Often key-value pairs</li>
+</ul>
+</li>
+<li>Graph algorithms can compute different values</li>
+<li>Connections vary:<ul>
+<li>Uni- / Bidirectional connections</li>
+<li>Nodes with single / multiple connections</li>
+<li>Multiple connections with different attribute</li>
+<li>Explicit / implicit connections</li>
+<li>Transient / long lasting connections</li>
+<li>One-time / repeated connections<ul>
+<li>regular / irregular connections</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="graph-metrics">Graph Metrics</h3>
+<h4 id="path-lengths">Path Lengths</h4>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Dunbar%27s_number">Dunbar’s number</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Erd%C5%91s_number">Erdős number</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon">Bacon’s number</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Small-world_experiment">Small world phenomenon</a></li>
+</ul>
+<h4 id="node-properties">Node Properties</h4>
+<ul>
+<li>Degree Centrality<ul>
+<li>The number of direct connections a node has</li>
+</ul>
+</li>
+<li>Betweenness Centrality (Bridge)<ul>
+<li>A node is <em>between</em> two important nodes</li>
+<li>has great influence what flows in the network</li>
+</ul>
+</li>
+<li>Closeness Centrality<ul>
+<li>A node has the shortest path to all others</li>
+<li>good position to monitor information flow in network</li>
+</ul>
+</li>
+</ul>
+<h4 id="network-structure-properties">Network Structure Properties</h4>
+<ul>
+<li>Network Centralization<ul>
+<li>Dominated by one or few nodes</li>
+<li>(single) point of failure</li>
+</ul>
+</li>
+<li>Density/Cohesion<ul>
+<li>Proposition of direct connections relative to all possible connections</li>
+</ul>
+</li>
+<li>Distance (Small World)<ul>
+<li>Minimum numbers of edges needed to connect two particular nodes</li>
+</ul>
+</li>
+<li>Clustering Coefficients<ul>
+<li>Likelihood that two associates of a node are also associates to each other</li>
+<li><span class="quo">‘</span>cliquishness’</li>
+</ul>
+</li>
+</ul>
+<h3 id="general-model">General Model</h3>
+<ul>
+<li>Common representation</li>
+<li>Uniform graph representation<ul>
+<li>needed to apply algorithms</li>
+</ul>
+</li>
+<li>Always <em>2</em> core <em>identities</em> connected by <em>action</em></li>
+<li>e.g.<ul>
+<li>connect 2 authors that worked on same publication</li>
+<li>or connect publications that have the same author</li>
+</ul>
+</li>
+</ul>
+<h2 id="graph-database-implementations">Graph Database Implementations</h2>
+<ul>
+<li><span class="caps">API</span></li>
+<li>Support for <span class="caps">CRUD</span></li>
+<li>High-level operations for graph traversals</li>
+<li>Sometimes graph algorithms part of <span class="caps">DB</span></li>
+<li><span class="caps">ACID</span></li>
+<li>Scalable</li>
+<li>Examples:<ul>
+<li>Objectivity InfiniteGraph</li>
+<li>Neo4j</li>
+<li>OrientDB</li>
+</ul>
+</li>
+</ul>
+<h3 id="infinitegraph-objectivity">InfiniteGraph (Objectivity)</h3>
+<ul>
+<li>Graph library on top of Objectivity/<span class="caps">DB</span></li>
+<li>Distributed graph <span class="caps">DB</span></li>
+<li>Classes for Vertex and Edge are predefined and persistent capable<ul>
+<li><code>BaseVertex</code></li>
+<li><code>BaseEdge</code></li>
+</ul>
+</li>
+<li><span class="caps">DB</span> <span class="caps">API</span> extended with graph methods</li>
+<li>Traversing/Querying the graph: Navigator Engine<ol>
+<li>Put the current path from here</li>
+<li>Follow path from here</li>
+<li>if yes: which path to follow</li>
+</ol>
+</li>
+<li>Interfaces for Navigator Engine<ul>
+<li>Path Guide (path to go next)</li>
+<li>Path Qualifier (terminate current path?)</li>
+<li>Result Qualifier (put path in result set?)</li>
+<li>Result handler is called after navigation on result set</li>
+</ul>
+</li>
+<li>Properties of the Navigator Engine<ul>
+<li>not declarative</li>
+<li>interfaces to implement</li>
+<li>some predefined queries available</li>
+</ul>
+</li>
+</ul>
+<h3 id="neo4j">Neo4j</h3>
+<ul>
+<li><a href="https://neo4j.com/">Open Source <span class="caps">DB</span></a> for Java</li>
+<li>Distinction between marking transaction and finishing (committing)</li>
+<li>Only generic node class available<ul>
+<li>Generic Node (<code>GraphDatabaseService.createNode()</code>)</li>
+<li>Generic Edge (<code>Node.createRelationshipTo(...)</code>)</li>
+<li>set properties as key-values (<code>setProperty(...)</code>)</li>
+</ul>
+</li>
+<li>Generic nodes can be integrated into Java classes (different use of nodes)</li>
+<li>
+<p>Graph Traversal</p>
+<ul>
+<li>using <a href="https://en.wikipedia.org/wiki/Fluent_interface">fluent interface</a> (chaining method calls)</li>
+<li>Provides special methods for<ul>
+<li><code>breadthFirst()</code> or <code>depthFirst()</code></li>
+<li><code>evaluator(Evaluator)</code><ul>
+<li>Continue from here?</li>
+<li>Put node/path in result?</li>
+</ul>
+</li>
+<li>Relationships to follow (<code>relationships(RelationShipType, Direction)</code>)</li>
+</ul>
+</li>
+<li>all these methods return a <code>TraversalDescription</code> object, supports chaining</li>
+<li>evaluator looks at a Path object<ul>
+<li>decides if it should be in the result</li>
+<li>decides if the traverser should continue actual path</li>
+<li>Method to be implemented: <code>Evaluation evaluate(Path path)</code></li>
+<li>return value:<ul>
+<li><code>EXCLUDE_AND_CONTINUE</code></li>
+<li><code>EXCLUDE_AND_PRUNE</code></li>
+<li><code>INCLUDE_AND_CONTINUE</code></li>
+<li><code>INCLUDE_AND_PRUNE</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Iterator over result set</li>
+<li>Not declarative</li>
+</ul>
+</li>
+<li>
+<p>Graph algorithms</p>
+<ul>
+<li>find all paths between two nodes</li>
+<li><a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">Dijktra-based cheapest path</a></li>
+<li>Paths with given length</li>
+<li>Shortest paths</li>
+</ul>
+</li>
+<li><span class="caps">REST</span> <span class="caps">API</span><ul>
+<li>Management (<span class="caps">CRUD</span>) of nodes and edges<ul>
+<li><span class="caps">GET</span>/<span class="caps">POST</span></li>
+<li><span class="caps">JSON</span> in-/output</li>
+</ul>
+</li>
+<li>Graph traversals</li>
+<li>Graph algorithms</li>
+</ul>
+</li>
+<li>Query language: Cypher<ul>
+<li>Declarative</li>
+<li>pattern matching</li>
+<li>supports update operations</li>
+<li><span class="caps">ASCII</span> art</li>
+<li><a href="http://console.neo4j.org/">try it online</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="comparison-between-infinitegraph-and-neo4j">Comparison between InfiniteGraph and Neo4j</h3>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Infinite Graph (Objectivity)</th>
+<th>Neo4j</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>no</em> database orthogonality</td>
+<td>partly data-type orthogonality (<code>RelationshipTypes</code> need to be implemented)</td>
+</tr>
+<tr>
+<td>independence (persistence orthogonality)</td>
+<td>(no) independence (persistence orthogonality)</td>
+</tr>
+<tr>
+<td>Extend <code>BaseVertex</code> and <code>BaseEdge</code></td>
+<td>Only generic nodes and edges available</td>
+</tr>
+<tr>
+<td>Navigation with implementation of interfaces (Qualifiers)</td>
+<td>Navigation with fluent interface (chaining)</td>
+</tr>
+<tr>
+<td>Navigation not declarative</td>
+<td>Navigation not declarative</td>
+</tr>
+<tr>
+<td>Part of Objectivity (object database)</td>
+<td>Some graph algorithms included</td>
+</tr>
+<tr>
+<td></td>
+<td><span class="caps">REST</span> <span class="caps">API</span>: <span class="caps">CRUD</span>, <span class="caps">JSON</span>, algorithms</td>
+</tr>
+<tr>
+<td></td>
+<td>Cypher: <span class="caps">ASCII</span> Art, declarative query language</td>
+</tr>
+</tbody>
+</table>
+<!-- End Slides/Notes Week 10 -->
+<!-- Start Slides/Notes Week 11 -->
+<h1 id="version-models">Version Models</h1>
+<ul>
+<li>Various models proposed<ul>
+<li>temporal DBs</li>
+<li><span class="caps">CAD</span>/<span class="caps">CAM</span></li>
+<li><span class="caps">SW</span> configuration and engineering environments</li>
+</ul>
+</li>
+<li>Some object-oriented DBs provide versioning</li>
+</ul>
+<p>Comparison:</p>
+<ul>
+<li>Version Control Systems: unstructured data</li>
+<li>Versioning DBs: structured data</li>
+</ul>
+<h2 id="versioned-object">Versioned Object</h2>
+<ul>
+<li>Concept with number of states</li>
+<li>Different levels of granularity<ul>
+<li>entire files</li>
+<li>tuples of relation</li>
+<li>attributes of a class</li>
+<li>objects in <span class="caps">OOP</span> system</li>
+</ul>
+</li>
+<li>Each version is a possible representation of the object<ul>
+<li>corresponding directly to one of its states</li>
+</ul>
+</li>
+</ul>
+<h2 id="version-organsiations">Version Organsiations</h2>
+<ul>
+<li>Relations between version<ul>
+<li>not related (set)</li>
+<li>linerar versioning (time, list)</li>
+<li>trees (branches)</li>
+<li><span class="caps">DAG</span> (merging)</li>
+</ul>
+</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li>Specific reference<ul>
+<li>references single version of object directly</li>
+</ul>
+</li>
+<li>Generic reference<ul>
+<li>references entire object</li>
+<li>has to be dereferenced to a version when traversed</li>
+</ul>
+</li>
+<li>default version<ul>
+<li>it’s not always clear which version is the default one (e.g. <span class="caps">DAG</span>)</li>
+</ul>
+</li>
+</ul>
+<h2 id="storage-strategies">Storage Strategies</h2>
+<ul>
+<li>Representing versions at physical level<ul>
+<li>store complete versions of objects</li>
+<li>store changes (deltas) between versions</li>
+</ul>
+</li>
+<li>Delta-based approaches<ul>
+<li>forward or backward deltas</li>
+<li>state-based or operation-based delta</li>
+</ul>
+</li>
+<li>Different strategies have different perfomance<ul>
+<li>storage vs. retrieval</li>
+<li>space vs. time</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+<h2 id="operation-and-interaction-models">Operation and Interaction Models</h2>
+<ul>
+<li>Operations<ul>
+<li>Control evolution of versions (of single objects)</li>
+<li>create new version</li>
+<li>branch a parallel version</li>
+<li>merge two parallel versions</li>
+<li>delete a version</li>
+</ul>
+</li>
+<li>Interaction or transactions models<ul>
+<li>working with complex objects and object graphs</li>
+<li>automatic versioning transparent to user</li>
+<li>library model uses check-out and check-in operations</li>
+<li>long running and nested transactions</li>
+</ul>
+</li>
+</ul>
+<h2 id="queries-and-configurations">Queries and Configurations</h2>
+<ul>
+<li>additional constraint to seletc correct representations (versions)</li>
+<li>various implementations<ul>
+<li>configurator evaluates rules against versioned objects</li>
+<li>declarative queries express constraints in extended language</li>
+<li>logical (based on feature logic)</li>
+</ul>
+</li>
+<li>Dereferencing of generic references<ul>
+<li>query evaluator needs to select specific version</li>
+<li>access for parallel versions</li>
+<li>access for sequencial versions</li>
+</ul>
+</li>
+</ul>
+<h2 id="temporal-databases">Temporal Databases</h2>
+<ul>
+<li>one of the first application domains for version models</li>
+<li>manage different time-dependent data</li>
+<li>field of research</li>
+<li>numerous approaches</li>
+<li>mostly based on relational DBs</li>
+</ul>
+<h2 id="time-in-databases">Time in Databases</h2>
+<ul>
+<li>does time stored in a <span class="caps">DB</span> represent<ul>
+<li>time in the domain (e.g. event schedule)?</li>
+<li>time of <span class="caps">DB</span> operation (e.g. insertion, update)?</li>
+<li>can the time be <em>arbitrary modified</em>?</li>
+<li>is the time value provided by app or <span class="caps">DB</span>?</li>
+<li>…</li>
+</ul>
+</li>
+<li>different types of time to characterise temporal data<ul>
+<li>Transaction, Registration or Physical time<ul>
+<li>transaction or registration time</li>
+<li>captures when values were stored in <span class="caps">DB</span></li>
+<li><code>AS-OF</code> operation</li>
+</ul>
+</li>
+<li>Valid or logical time<ul>
+<li>real-world time</li>
+<li>used to express when values existed in <em>real world</em></li>
+<li><code>WHEN</code> operation</li>
+</ul>
+</li>
+<li>Bitemporal: combination of physical and logical time</li>
+<li>User-defined time<ul>
+<li>all other aspects of time</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="classification-of-temporal-databases">Classification of Temporal Databases</h2>
+<ul>
+<li>Static or snapshot <span class="caps">DB</span><ul>
+<li>conventional <span class="caps">DB</span></li>
+<li>does not manage temporal data</li>
+<li>supports only one single version</li>
+<li>if value is updated, previous value is lost</li>
+</ul>
+</li>
+<li>Static roll-back <span class="caps">DB</span><ul>
+<li>like version control system (more or less)</li>
+<li>changes can be made only on actual version<ul>
+<li>errors in older versions can’t be fixed</li>
+</ul>
+</li>
+<li>keeps track of transaction time</li>
+<li>supports <code>AS-OF</code> operation</li>
+<li>no way to correct an error</li>
+<li>space or computation overhead (destructive vs. non-destructive)</li>
+</ul>
+</li>
+<li>Historical <span class="caps">DB</span><ul>
+<li>keeps track of <em>valid time</em></li>
+<li>supports <code>WHEN</code></li>
+<li>changes can be made to previous values</li>
+</ul>
+</li>
+<li>Temporal <span class="caps">DB</span><ul>
+<li>bi-temporal</li>
+<li>keept track of <em>transaction</em> and <em>valid</em> time</li>
+<li>supports <code>AS-OF</code> and <code>WHEN</code> operations</li>
+</ul>
+</li>
+<li>Spatio-Temporal <span class="caps">DB</span><ul>
+<li><span class="caps">DB</span> for moving objects</li>
+<li>continuous update of location</li>
+<li>uncertainty of location value</li>
+</ul>
+</li>
+</ul>
+<h3 id="querying-moving-objects-with-uncertainity">Querying Moving Objects with Uncertainity</h3>
+<ul>
+<li>Point Queries<ul>
+<li>operators over singel trajectory<ul>
+<li><code>Where_At(trajectory T, time t)</code>: expected location on route <code>T</code> at time <code>t</code></li>
+<li><code>When_At(trajectory T, location l)</code>: times object expected to be at location <code>l</code> on <code>T</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Spatio-Temporal Range Queries</p>
+<ul>
+<li>set of <em>6 boolean predicates</em></li>
+<li>give <em>qualitative</em> description of relative position</li>
+</ul>
+</li>
+<li>
+<p>location changes continuously: condition satisfied <em>sometime</em> or <em>always</em> within <span class="math">\([t_b,t_e]\)</span></p>
+</li>
+<li>
+<p>due to uncerainty: condition satisfied <em>possibly</em> or <em>definitely</em> at point <span class="math">\(p \in [t_b,t_e]\)</span></p>
+</li>
+<li>
+<p><em>possibly</em>: trajectory with uncretainity</p>
+</li>
+<li><em>sometime</em>: don’t care about time</li>
+</ul>
+<p>Leads to 8 possible operators</p>
+<ol>
+<li><code>Possibly_Sometime_Inside( T, R, tb te)</code></li>
+<li><code>Sometime_Possibly_Inside ( T, R, tb, te)</code></li>
+<li><code>Possibly_Always_Inside( T, R, tb, te)</code></li>
+<li><code>Always_Possibly_Inside( T, R, tb, te)</code></li>
+<li><code>Definitely_Always_Inside( T, R, tb, te)</code></li>
+<li><code>Always_Definitely_Inside( T, R, tb, te)</code></li>
+<li><code>Definitely_Sometime_Inside( T, R, tb, te)</code></li>
+<li><code>Sometime_Definitely_Inside( T, R, tb, te)</code></li>
+</ol>
+<p>Some of them are semantically equivalent</p>
+<h2 id="representing-temporal-data">Representing Temporal Data</h2>
+<ul>
+<li>Tuple Versioning<ul>
+<li>tuple is extended with attribute for temporal dimension</li>
+<li>can be realised without violating <em>relational first normal form</em></li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Employee</th>
+<th>Office</th>
+<th>Salary</th>
+<th><span class="caps">TS</span></th>
+<th><span class="caps">TE</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anne</td>
+<td>A12</td>
+<td>5500</td>
+<td>2000</td>
+<td>now</td>
+</tr>
+<tr>
+<td>Bob</td>
+<td>B 34</td>
+<td>4000</td>
+<td>2002</td>
+<td>2003</td>
+</tr>
+<tr>
+<td>Bob</td>
+<td>B 34</td>
+<td>5500</td>
+<td>2003</td>
+<td>now</td>
+</tr>
+<tr>
+<td>Charles</td>
+<td>C 56</td>
+<td>6700</td>
+<td>1995</td>
+<td>2000</td>
+</tr>
+<tr>
+<td>Charles</td>
+<td>C 56</td>
+<td>7500</td>
+<td>2000</td>
+<td>2006</td>
+</tr>
+<tr>
+<td>Charles</td>
+<td>C 56</td>
+<td>7000</td>
+<td>2006</td>
+<td>now</td>
+</tr>
+<tr>
+<td>Denise</td>
+<td>B 34</td>
+<td>3000</td>
+<td>1990</td>
+<td>1995</td>
+</tr>
+<tr>
+<td>Denise</td>
+<td>B 34</td>
+<td>5300</td>
+<td>1995</td>
+<td>2002</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Attribute Versioning<ul>
+<li>each attribute is extended with temporal information</li>
+<li>requires non-first normal form <span class="math">\(NF^3\)</span> relational systems</li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Employee</th>
+<th>Office</th>
+<th>Salary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anne</td>
+<td>A12</td>
+<td>(5500, 2000, now)</td>
+</tr>
+<tr>
+<td>Bob</td>
+<td>B 34</td>
+<td>(4000, 2002, 2003) (5500, 2003, now)</td>
+</tr>
+<tr>
+<td>Charles</td>
+<td>C 56</td>
+<td>(6700, 1995, 2000) (7500, 2000, 2006) (7000, 2006, now)</td>
+</tr>
+<tr>
+<td>Denise</td>
+<td>B 34</td>
+<td>(3000, 1990, 1995) (5300, 1995, 2002)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="conceptual-and-data-models">Conceptual and Data Models</h2>
+<ul>
+<li>Early models: extend relational of E/R model</li>
+<li>Bitemporal Conceptual Data Model (<span class="caps">BCDM</span>)<ul>
+<li>tuple versioning</li>
+<li>using <em>4</em> additional columns per tuple</li>
+<li><em>transation time</em> and <em>valid time</em><ul>
+<li>special ‘until changed’ and ‘now’ values indicate if a tuple is current</li>
+</ul>
+</li>
+<li>query language <span class="caps">TSQL2</span><ul>
+<li>extension of <span class="caps">SQL</span></li>
+<li>introduces <code>VALIDTIME</code> and <code>WHEN</code> clause</li>
+<li>integrated into <span class="caps">SQL3</span> as <span class="caps">SQL</span>/Temporal</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="homogeneous-and-heterogenous-models">Homogeneous and Heterogenous Models</h2>
+<ul>
+<li>homogenous if temporal domain does not vary from one attribute to another<ul>
+<li>all models that use tuple versioning are homogenous</li>
+</ul>
+</li>
+<li>heterogenous if attributes of a tuple associated to different times</li>
+</ul>
+<h2 id="storage-models">Storage Models</h2>
+<ul>
+<li>Temporal relation as 3-dimensional data structure<ul>
+<li>sequence of relations</li>
+<li>data cube</li>
+</ul>
+</li>
+<li>implemented using a two level store structure<ul>
+<li>primary store contains current versions<ul>
+<li>satisfy all non-temporal queries</li>
+</ul>
+</li>
+<li>history store hold in remaining history versions</li>
+</ul>
+</li>
+<li>traditional access methods cannot be used in such a storage model</li>
+<li>Two-level Storage Structures<ul>
+<li>Reverse Chaining</li>
+<li>Accession Lists</li>
+<li>Clustering</li>
+<li>Stacked Versions</li>
+</ul>
+</li>
+</ul>
+<h2 id="engineering-databases">Engineering Databases</h2>
+<ul>
+<li>Engineering application domains<ul>
+<li>Computer-Aided Design (<span class="caps">CAD</span>)</li>
+<li>Computer-Aided Manufacturing (<span class="caps">CAM</span>)</li>
+</ul>
+</li>
+<li>support development and maintenance of products</li>
+<li>Requirements<ul>
+<li>data structures</li>
+<li>concurrency control concepts</li>
+<li>define and manage complex (and hierarchical) design objects</li>
+<li>versionen support for complex objects</li>
+<li>iterative development</li>
+<li>alternatives and trial-and-error experiments</li>
+</ul>
+</li>
+<li>2-dimensional version models<ul>
+<li>linear revision dimension</li>
+<li>non-sequential variation dimension</li>
+</ul>
+</li>
+</ul>
+<h2 id="design-space-version-model">Design Space Version Model</h2>
+<ul>
+<li>Modeling primitives</li>
+<li>component hierarchies (<em>is-a-part-of</em>)</li>
+<li>version histories (<em>is-a-kind-of</em>, <em>is-derved-from</em>)</li>
+<li>configurations combine hierarchies and version histories</li>
+</ul>
+<h2 id="software-configuration-systems">Software Configuration Systems</h2>
+<ul>
+<li>Developed for <span class="caps">SW</span> development</li>
+<li><span class="caps">SW</span> Configuration Management (<span class="caps">SCM</span>)</li>
+<li><span class="caps">SW</span> Engineering Environments (<span class="caps">SEE</span>)</li>
+<li>manage product directly</li>
+<li>fully automting process of building final product</li>
+<li>built around source files and program modules</li>
+<li>reference and dependencies management complex<ul>
+<li>hidden inside source code files</li>
+</ul>
+</li>
+</ul>
+<h2 id="product-space-representation">Product Space Representation</h2>
+<ul>
+<li>Data model with type relationships<ul>
+<li>composition tree with files as leaves</li>
+<li>dependencies are sepresented within tree</li>
+<li>build information can be computed from composition and dependency relationships</li>
+</ul>
+</li>
+<li>Without spanning tree<ul>
+<li>all files of one module are summarised as one object</li>
+<li>only source dependencies are represented</li>
+<li>directly corresponds to logical structure</li>
+</ul>
+</li>
+</ul>
+<h2 id="version-space">Version Space</h2>
+<ul>
+<li>Version model defines how objects are versioned<ul>
+<li>versioned object is container for set of object version</li>
+<li>common properties shared by all versions (invariants)</li>
+<li>differences (deltas) between versions<ul>
+<li>symmetric deltas</li>
+<li>directed deltas (changes)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Definition of version set<ul>
+<li><em>extentional</em> versioning enumerates all member of version set</li>
+<li><em>intentional</em> versioning uses predicate defining version set members</li>
+</ul>
+</li>
+<li>Evolution<ul>
+<li>revisions: track of history</li>
+<li>variants: alternatives</li>
+<li>can be used for cooperation and collaboration</li>
+</ul>
+</li>
+</ul>
+<h3 id="version-space-representation">Version Space Representation</h3>
+<ul>
+<li>One-level representation<ul>
+<li>Successor relationship (Sequence)</li>
+<li>Branch (Tree) and Merge (<span class="caps">DAG</span>)</li>
+</ul>
+</li>
+<li>Two-level representation<ul>
+<li>Revision</li>
+<li>Variants</li>
+</ul>
+</li>
+</ul>
+<!-- End Slides/Notes Week 11 -->
+<!-- Start Slides/Notes Week 12 -->
+<h1 id="indexing_1">Indexing</h1>
+<p>Make OODBs faster and more performant</p>
+<ul>
+<li>Compare <span class="caps">OOP</span> model to Relational model</li>
+</ul>
+<p>Main differences between <span class="caps">OOP</span> and Relational model:</p>
+<ol>
+<li>inheritance (is-a)</li>
+<li>multitype attributes (sets, collections)<ul>
+<li>First normal form in Relational Databases disallows mutlivalued attributes (collections) in a field</li>
+</ul>
+</li>
+<li>dereferencing a path of pointers/references (traversing the object graph)</li>
+</ol>
+<blockquote>
+<p><span class="caps">OODB</span> systems can be faster when using additional information that a RDBMSs doesn’t have</p>
+</blockquote>
+<p>Different approaches to:</p>
+<ul>
+<li>Mapping (<span class="caps">ORM</span>)</li>
+<li>Physically represent data differently (eg. Objectivity)</li>
+<li>Use additional (meta-) data but keep the representation of the data<ul>
+<li>secondary datastructures</li>
+<li>index structures</li>
+</ul>
+</li>
+<li>Group record: pages, clusters …</li>
+</ul>
+<h2 id="type-hierarchy-indexing">Type Hierarchy Indexing</h2>
+<h3 id="key-vs-type-grouping">Key- vs Type-Grouping</h3>
+<ul>
+<li>Key-Grouping<ul>
+<li>build index along the actual attribute value</li>
+<li>as <span class="math">\(B^+\)</span>-trees</li>
+<li>additional information about typing and sub-typing in the leafs</li>
+</ul>
+</li>
+<li>Type-Grouping<ul>
+<li>index built along typing information</li>
+<li>values are secondary datastructure</li>
+</ul>
+</li>
+</ul>
+<h3 id="extent-and-full-extent">Extent and Full Extent</h3>
+<ul>
+<li>Extent: all objects of a given class (without sub-classes)</li>
+<li>Full Extent: all objects of a given class and it’s sub-classes</li>
+</ul>
+<h3 id="single-class-index-sc-index">Single Class Index (<span class="caps">SC</span>-Index)</h3>
+<ul>
+<li>Index construction for attribute of a type <em>t</em><ul>
+<li>incorporate only direct instances of a particular type in index</li>
+<li>construct search structure for all types in sub-hierarchy of t</li>
+<li>search data structures (called <em><span class="caps">SC</span>-Index components</em>)</li>
+<li>Evaluator needs to traverse all components referenced by query</li>
+</ul>
+</li>
+<li>Usually implemented using <span class="math">\(B^+\)</span>-trees</li>
+<li>Type-Grouping</li>
+</ul>
+<h3 id="class-hierarchy-index-ch-index">Class Hierarchy Index (<span class="caps">CH</span>-Index)</h3>
+<ul>
+<li>One search structure for all objects of all types of indexed hierarchy</li>
+<li>One index on the common attribute for all classes of a inheritance graph</li>
+<li>Leaf node consists of<ul>
+<li>key-value</li>
+<li>key directory<ul>
+<li>contains an entry for each class that has instances with the key-value in the indexed attribute</li>
+<li>entry for a class consist of class identifier and offset for list of OIDs in index record</li>
+</ul>
+</li>
+<li>number of elements in list of OIDs (for each class in the inheritance graph)</li>
+<li>list of OIDs</li>
+</ul>
+</li>
+<li>Evaluator scans through <span class="math">\(B^+\)</span>-tree once<ul>
+<li>selects OIDs f types referenced by query</li>
+<li>discards other OIDs</li>
+</ul>
+</li>
+<li>Point queries perform good</li>
+<li>Range queries depend on number of referenced types<ul>
+<li>good when queries aim at indexed type and all sub-types</li>
+<li>bad if only few types of indexed hierarchy hit by query</li>
+</ul>
+</li>
+<li>Key-grouping structure</li>
+</ul>
+<h3 id="h-tree">H-Tree</h3>
+<ul>
+<li>Set of nested <span class="math">\(B^+\)</span>-trees</li>
+<li>Combining class hierarchy with <span class="caps">SC</span>-Index</li>
+<li>Nesting reflects indexed type hierarchy<ul>
+<li>each H-tree component is nested with H-trees of immediate sub-types</li>
+<li>H-tree index for attribute of inheritance sub-graph is H-tree hierarchy nested according to super-type-sub-type relation</li>
+</ul>
+</li>
+<li>Avoids full scans of each B-tree component when several types queried</li>
+<li>Single type look-up: don’t search nested trees</li>
+<li>
+<p>Type hierarchy look-up: traverse nested trees</p>
+</li>
+<li>
+<p>Type-grouping structure</p>
+</li>
+</ul>
+<h3 id="class-division-index-cd-index">Class Division Index (<span class="caps">CD</span>-Index)</h3>
+<ul>
+<li>Compromise between<ul>
+<li>indexing for each type</li>
+<li>indexing extent for each type</li>
+</ul>
+</li>
+<li>Specific family of type sets for indexed hierarchy</li>
+<li>Look at all possible combinations of full extends for all types</li>
+<li>Combine parts of sub-type hierarchies to use one index structure (like <span class="caps">SC</span>-index)</li>
+<li>Each typeset managed with search data structure</li>
+<li>Parameters <em>q</em> and <em>r</em> give bounds<ul>
+<li><em>q</em>: number of index structures needed to build a type extent</li>
+<li><em>r</em>: number of times a type set is managed redundantly or replicated</li>
+<li>big <em>q</em>: slow queries</li>
+<li>big <em>r</em>: slow updates</li>
+</ul>
+</li>
+<li>Multiple index structures need to be accessed for a query<ul>
+<li>trade-off between:<ul>
+<li>number of index structures to access for a query</li>
+<li>number of index structures to maintain</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Type-grouping structure</li>
+</ul>
+<h3 id="multi-key-type-index-mt-index">Multi-Key Type Index (<span class="caps">MT</span>-Index)</h3>
+<ul>
+<li><em>Multi-Dimensional</em> indexing (locality)</li>
+<li>Type information as additional attribute available</li>
+<li>Compromise between<ul>
+<li>type grouping</li>
+<li>key grouping</li>
+</ul>
+</li>
+<li>Type membership as additional object attribute<ul>
+<li>symmetrical indexing of object types and attributes</li>
+<li>indexing of more than one attribute with single search structure</li>
+</ul>
+</li>
+<li>Linearization</li>
+<li>Key-grouping structure (type is handled as an attribute)</li>
+</ul>
+<h2 id="aggregation-path-indexing">Aggregation Path Indexing</h2>
+<ul>
+<li>Backward queries<ul>
+<li>without full object tree traverses</li>
+</ul>
+</li>
+<li>Forward queries<ul>
+<li>without retrieving intermediate objects</li>
+<li>less hops to get to objects referenced over seversl levels</li>
+<li>shortcut forward</li>
+</ul>
+</li>
+</ul>
+<h3 id="nested-index-nx">Nested Index (<span class="caps">NX</span>)</h3>
+<ul>
+<li>Direct association between<ul>
+<li>an <em>ending</em> object and</li>
+<li>corresponding starting objects along a path</li>
+</ul>
+</li>
+<li>Bypassing intermediate objects</li>
+<li>Only allows backwards traversals of full path</li>
+<li>Equivalent to backward traversal in <span class="caps">ASR</span> canonical</li>
+<li>A Nested Index <em><span class="caps">NX</span>(P)</em> for path <em>P</em> with length <em>1</em> is equivalent to a Multi-Index <em><span class="caps">MX</span>(P)</em> for the same path</li>
+<li>Updating index structure is expensive</li>
+</ul>
+<p><img alt="Nested Index" class="img-fluid" src="/images/object_databases/nested_index.png"/></p>
+<h3 id="path-index-px">Path Index (<span class="caps">PX</span>)</h3>
+<ul>
+<li>Records all sub-paths leading to an ending object</li>
+<li>Predicates can be evaluated on all classes along the path</li>
+<li>Equivalent to backwards traversal of right-complete <span class="caps">ASR</span></li>
+<li>A Path-Index <em><span class="caps">PX</span>(P)</em> for path <em>P</em> with length <em>1</em> is equivalent to Multi-Index <em><span class="caps">MX</span>(P)</em> an a Nested Index <em><span class="caps">NX</span>(P)</em> for the same path</li>
+<li>Updating index structure better than with <em><span class="caps">NX</span></em></li>
+</ul>
+<p><img alt="Path Index" class="img-fluid" src="/images/object_databases/path_index.png"/></p>
+<h3 id="join-index-jx">Join-Index (<span class="caps">JX</span>)</h3>
+<ul>
+<li>Originally for optimization of <em>joins</em> in Relational DBs</li>
+<li>Consists of a set of binary join indexes (Slides p. 33)</li>
+<li>Forward references are also indexed</li>
+<li>Cost compared to <em><span class="caps">MX</span></em> doubled</li>
+</ul>
+<h3 id="multi-index-mx">Multi-Index (<span class="caps">MX</span>)</h3>
+<ul>
+<li>Like Join-Indexes in Relational DBs</li>
+<li>Divide path (of arbitrary length) into sub-paths<ul>
+<li>sub-paths have length <em>1</em></li>
+<li>index maintained over sub-paths</li>
+</ul>
+</li>
+<li>Query evaluation<ul>
+<li>concatenating <em>n</em> index edges requires <em>n</em> index scans</li>
+<li>supports backward traversals and queries</li>
+<li><em>no</em> forward traversals and queries</li>
+</ul>
+</li>
+<li>Each index enty is represented as a pair<ol>
+<li>A key-value</li>
+<li>set of OIDs of objects holding this key-value (for indexed attribute)</li>
+</ol>
+</li>
+<li>Updates cheap</li>
+<li>Complex queries expensive (hop over nodes)</li>
+<li>each reference in object has index structure for backward references</li>
+</ul>
+<p><img alt="Multi Index" class="img-fluid" src="/images/object_databases/multi_index.png"/></p>
+<h3 id="access-support-relations-asr">Access Support Relations (<span class="caps">ASR</span>)</h3>
+<ul>
+<li>Given a path create <em>4</em> index structures that support all desired queries (Nested Index, Path Index, Multi-Index)<ol>
+<li>Canonical representation</li>
+<li>Full representation</li>
+<li>Left representation</li>
+<li>Right representation
+- Related to Relational <span class="caps">DB</span> Joins: canonical is like regular join in <span class="caps">SQL</span></li>
+</ol>
+</li>
+<li><span class="caps">ASR</span> Compositions Index Graph<ul>
+<li>Queries that do not traverse the path at either endpoint can’t be answered efficiently</li>
+<li>Aggregation path can be split in sub-paths (partitions)</li>
+<li>Set of partions: decompositions of an <span class="caps">ASR</span></li>
+</ul>
+</li>
+</ul>
+<h3 id="overview-aggregation-path-indexing">Overview: Aggregation Path Indexing</h3>
+<ul>
+<li>Nested Index and Path Index implemented using<ul>
+<li>trees or</li>
+<li>hash tables</li>
+</ul>
+</li>
+</ul>
+<h2 id="collection-operations">Collection Operations</h2>
+<ul>
+<li>For: sets, bags, lists, arrays</li>
+<li>new modelling features, enhanced expressiveness</li>
+<li>increased complexity of indexing and query optimisation</li>
+<li><span class="caps">OQL</span> provides constructors and operators for collections</li>
+</ul>
+<h3 id="signature-files">Signature Files</h3>
+<ul>
+<li>Index construction for a multi-valued property of a type</li>
+<li>Query over multi-valued properties</li>
+<li>Compute signatures for attribute values, elements …</li>
+<li>Use mathematical operation<ul>
+<li>Super-set, sub-set …</li>
+<li><span class="quo">‘</span>actual drop’: true positive</li>
+<li><span class="quo">‘</span>false drop’: false positive</li>
+</ul>
+</li>
+</ul>
+<!-- End Slides/Notes Week 12 -->
+<!-- Start Slides Week 13 -->
+<h1 id="the-om-data-model">The <span class="caps">OM</span> Data Model</h1>
+<ul>
+<li>Extended Entity-Relationship model</li>
+<li>for <span class="caps">OOP</span> data management</li>
+<li>special features<ul>
+<li>difference between typing and classification</li>
+<li>types (model):<ul>
+<li>names</li>
+<li>attributes</li>
+<li>behaviour</li>
+<li>relationships</li>
+</ul>
+</li>
+<li>objects: attributes and methods</li>
+<li>multiple inheritance, multiple instantiation (gain/lose roles), multiple classification</li>
+<li>collections as first-class concepts</li>
+<li>binary associations as first-class concepts</li>
+<li>constraints for integrity, classification and evolution</li>
+<li>data definition, manipulation and query language (<span class="caps">OML</span>)</li>
+</ul>
+</li>
+</ul>
+<h2 id="typing-and-classification">Typing and Classification</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Typing</th>
+<th>Classification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>static</td>
+<td>dynamic</td>
+</tr>
+<tr>
+<td>representation of entities</td>
+<td>roles of entities</td>
+</tr>
+<tr>
+<td>defines format of data values</td>
+<td>defines semantic groupings as collections of values</td>
+</tr>
+<tr>
+<td>defines operations</td>
+<td>defines constraits among collection</td>
+</tr>
+<tr>
+<td>defines inheritance properties</td>
+<td>Collections: member type</td>
+</tr>
+<tr>
+<td>‘Java’ classes</td>
+<td></td>
+</tr>
+<tr>
+<td>multiple inheritance/instantiation</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>better understanding of issues<ul>
+<li>important to recognise the two concepts</li>
+</ul>
+</li>
+<li>Reduces complexity of type graphs<ul>
+<li>no need to introduce subtypes to represent each classification</li>
+</ul>
+</li>
+<li>Rich classification structures</li>
+<li>Support for relationships between objects<ul>
+<li>accociation over collections instead embedded in objects</li>
+</ul>
+</li>
+<li>Integration of:<ul>
+<li>Database</li>
+<li>Programming Languages</li>
+</ul>
+</li>
+<li>Collections<ul>
+<li>semantic groupings of objects</li>
+</ul>
+</li>
+<li>Member types of collections<ul>
+<li>constrain membership in a collection</li>
+<li>can define a <em>view</em> of object accessed in <em>context</em> of collection</li>
+</ul>
+</li>
+<li>Object evolution<ul>
+<li>objects can gain/loose roles by being added or deleted form collections</li>
+<li>type change not always required (???) <!-- slides week 13 p.7 --></li>
+</ul>
+</li>
+</ul>
+<h2 id="om-data-model-layers"><span class="caps">OM</span> Data Model Layers</h2>
+<ul>
+<li><span class="caps">OM</span> distinguishes<ul>
+<li>typing from</li>
+<li>classification</li>
+</ul>
+</li>
+<li>Type-layer<ul>
+<li>object representation<ul>
+<li>objects: type units</li>
+<li>can gain and lose types dynamically: dressing and stripping</li>
+</ul>
+</li>
+<li>multiple inheritance</li>
+<li>multiple instantiation<ul>
+<li>objects can have types from parallel inheritance hierarchies</li>
+<li>objects can have types that are completely unrelated</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Classification-layer<ul>
+<li>based on types from type layer</li>
+<li>semantic groupings: collections<ul>
+<li>membership constrained by type</li>
+<li>associations to link objects together</li>
+<li>kinds and roles</li>
+<li>constraints<ul>
+<li>subcollections and supercollections</li>
+<li>cardinality to describe associations</li>
+<li>evolution constraints</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>multiple classification</li>
+<li>collections and associations</li>
+</ul>
+</li>
+<li>
+<p>Associations can be nested</p>
+<ul>
+<li>model n-ary relationships</li>
+<li>clearer semantics</li>
+<li>allow uniform query language</li>
+</ul>
+</li>
+<li>
+<p>Things that exist</p>
+<ul>
+<li>types</li>
+<li>values for attributes</li>
+</ul>
+</li>
+<li>
+<p>Collection is not just contains objects</p>
+<ul>
+<li>relationship to objects</li>
+<li>name</li>
+<li>constraint (subset relation)<ul>
+<li>joint</li>
+<li>disjoint</li>
+</ul>
+</li>
+<li>associations<ul>
+<li>collection to pairs</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>e.g: A person becomming a friend or an enemy doesn’t change (or add/remove) any properties of a person type</p>
+</li>
+<li>
+<p>Objects can gain state and behavior dynamically</p>
+<ul>
+<li>distinguish<ul>
+<li>object: can refer to, identity, can be pointed to</li>
+<li>instance: container of values of a particular type</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Relationships</p>
+</li>
+<li>
+<p>intentional / extensional</p>
+</li>
+<li>
+<p>Query</p>
+<ul>
+<li>Decide if something in a collection or not</li>
+<li>Traversing result (iterator, cursor)</li>
+</ul>
+</li>
+<li><span class="caps">SQL</span><ul>
+<li>relationships mapped by primary-/foreign-key</li>
+<li><code>select</code> can be used instead of <code>joins</code> to follow relationships</li>
+<li>A selection query is fully specified when:<ul>
+<li>providing a <em>set of candidates</em> and</li>
+<li>a function that takes <em>individual candidates</em> and returns <em>true</em> or <em>false</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><span class="caps">OM</span> Model queries<ul>
+<li>Declaritive query language</li>
+<li>Collections are <em>sets of candidates</em> for queries</li>
+</ul>
+</li>
+<li>Map-Reduce</li>
+</ul>
+<h2 id="collection-constraint">Collection Constraint</h2>
+<ul>
+<li>Disjoint: <span class="caps">XOR</span></li>
+<li>Cover: <span class="caps">OR</span></li>
+<li>Partition: one and only one needs to be true</li>
+</ul>
+<h2 id="associations-relationships">Associations (Relationships)</h2>
+<ul>
+<li>binary relation between 2 collections</li>
+<li>cardinality</li>
+<li>tuple as type of collection</li>
+<li>can be nested: n-ary relationships</li>
+</ul>
+<!-- End Slides/Notes Week 13 -->
+<!-- Begin Slides/Notes Week 14 -->
+<h2 id="object-model-language-oml">Object Model Language (<span class="caps">OML</span>)</h2>
+<ul>
+<li>Declarative <span class="caps">OOP</span> language for <span class="caps">OM</span> data model</li>
+<li><span class="caps">OML</span> Data Definition Language<ul>
+<li>object and structured type definition</li>
+<li>method definition and emplementation</li>
+<li>collection, association and constraint definition</li>
+</ul>
+</li>
+<li><span class="caps">OML</span> Data Manipulation Language<ul>
+<li>creating and updating objects</li>
+<li>ceate, update, delete, dress and strip operations</li>
+</ul>
+</li>
+<li><span class="caps">OML</span> Query Language<ul>
+<li>expressions and functions for values of base types</li>
+<li>operations on objects<ul>
+<li>access attributes</li>
+<li>invoke methods</li>
+</ul>
+</li>
+<li>operations on collections (collection algebra)</li>
+</ul>
+</li>
+<li>map-reduce<ul>
+<li>very important operations after selection</li>
+</ul>
+</li>
+</ul>
+<h3 id="collection-algebra">Collection Algebra</h3>
+<ul>
+<li>Operations defined for collections of <span class="caps">OM</span> model<ul>
+<li>union</li>
+<li>intersections</li>
+<li>difference</li>
+<li>selection</li>
+<li>map<ul>
+<li>takes a set of objects and applies a function on <em>each object</em></li>
+<li>the result set has the same carinality</li>
+</ul>
+</li>
+<li>reduce<ul>
+<li>take a set of values (objects)</li>
+<li>return one value (object)</li>
+</ul>
+</li>
+<li>flatten</li>
+</ul>
+</li>
+<li>Sematics of operations depend on collection behaviour<ul>
+<li>set theory defines semantics</li>
+<li>generalisation for <em>bag</em>, <em>sequence</em> and <em>ranking</em></li>
+<li>mixing and converting collection types</li>
+</ul>
+</li>
+</ul>
+<h3 id="binary-collections">Binary Collections</h3>
+<ul>
+<li>All collections-operations can be applied to binary collection</li>
+<li>Binary collections suort additional operations<ul>
+<li>domain and range<ul>
+<li>not same as collection with tuple containing ‘range’ and ‘domain’</li>
+</ul>
+</li>
+<li>domain and range restriction (selection)</li>
+<li>subtraction</li>
+<li>inverse<ul>
+<li>swapping domain and range</li>
+</ul>
+</li>
+<li>nest<ul>
+<li>grouping of binary collections</li>
+</ul>
+</li>
+<li>compose<ul>
+<li>find associatd objects in <span class="caps">DB</span> it may be necessary to compose (<em>join</em>) associations</li>
+</ul>
+</li>
+<li>closure<ul>
+<li>repeatedly compose binary collection with itself</li>
+</ul>
+</li>
+<li>division<ul>
+<li>divide a binary collection with a unary collection</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- End Slides/Notes Week 14 -->
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./synchronization_primitives_(read-modify-write).html" title="Previous: Synchronization Primitives (Read-Modify-Write)">Synchronization Primitives (Read-Modify-Write)</a></li>
+                <li class="next-article"><a href="./files_and_file_descriptors_on_linux.html" title="Next: Files and File descriptors on Linux">Files and File descriptors on Linux</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2016-04-20T14:30:43+02:00">Apr 20, 2016</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-10T21:39:06+02:00">Apr 10, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#eth-ref">ETH
+                    <span>7</span>
+</a></li>
+                <li><a href="./tags#oop-ref">OOP
+                    <span>7</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

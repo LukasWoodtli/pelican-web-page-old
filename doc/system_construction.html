@@ -1,0 +1,2673 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="ETH, Assembler, Programming, " />
+
+<meta property="og:title" content="System Construction "/>
+<meta property="og:url" content="./system_construction.html" />
+<meta property="og:description" content="My Notes for the System Construction Course at ETH Minos on Raspberry PI 2 (Case Study 1) ARM A7 The ARM Architecture is not the same thing as the ARM Processor-Families Documentation There is a lot of good documentation for the ARM processors available. But it’s difficult to find …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2015-11-07T22:20:50+01:00" />
+<meta property="og:article:modified_time" content="2022-04-11T21:00:54+02:00" />
+<meta name="twitter:title" content="System Construction ">
+<meta name="twitter:description" content="My Notes for the System Construction Course at ETH Minos on Raspberry PI 2 (Case Study 1) ARM A7 The ARM Architecture is not the same thing as the ARM Processor-Families Documentation There is a lot of good documentation for the ARM processors available. But it’s difficult to find …">
+
+        <title>System Construction  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./system_construction.html"> System&nbsp;Construction  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#minos-on-raspberry-pi-2-case-study-1">Minos on Raspberry <span class="caps">PI</span> 2 (Case Study 1)</a><ul>
+<li><a href="#arm-a7"><span class="caps">ARM</span> A7</a><ul>
+<li><a href="#documentation">Documentation</a></li>
+<li><a href="#6-kinds-of-instructions">6 Kinds Of Instructions</a></li>
+<li><a href="#execution-modes">Execution Modes</a></li>
+<li><a href="#special-registers">Special Registers</a></li>
+<li><a href="#typical-procedure-call">Typical Procedure Call</a></li>
+<li><a href="#exceptions">Exceptions</a></li>
+<li><a href="#misc">Misc</a></li>
+</ul>
+</li>
+<li><a href="#raspberry-pi-2">Raspberry <span class="caps">PI</span> 2</a><ul>
+<li><a href="#booting">Booting</a></li>
+<li><a href="#mmu"><span class="caps">MMU</span></a></li>
+<li><a href="#gpio"><span class="caps">GPIO</span></a></li>
+</ul>
+</li>
+<li><a href="#minos-and-oberon">Minos and Oberon</a><ul>
+<li><a href="#history-of-oberon">History of Oberon</a></li>
+<li><a href="#oberon">Oberon</a><ul>
+<li><a href="#oberon07">Oberon07</a></li>
+<li><a href="#language-constructs">Language Constructs</a><ul>
+<li><a href="#program-units">Program Units</a></li>
+<li><a href="#data-types">Data Types</a></li>
+<li><a href="#structured-types">Structured Types</a></li>
+<li><a href="#control-structures">Control Structures</a><ul>
+<li><a href="#if"><span class="caps">IF</span></a></li>
+<li><a href="#while"><span class="caps">WHILE</span></a></li>
+<li><a href="#repeat"><span class="caps">REPEAT</span></a></li>
+<li><a href="#for"><span class="caps">FOR</span></a></li>
+</ul>
+</li>
+<li><a href="#built-in-functions">Built-in Functions</a></li>
+</ul>
+</li>
+<li><a href="#modules">Modules</a></li>
+<li><a href="#pseudo-module-system">Pseudo Module <span class="caps">SYSTEM</span></a><ul>
+<li><a href="#system-arm-specific"><span class="caps">SYSTEM</span>: <span class="caps">ARM</span> Specific</a></li>
+<li><a href="#interrupt-procedures">Interrupt Procedures</a></li>
+<li><a href="#special-flags-and-features">Special Flags and Features</a></li>
+<li><a href="#type-declarations">Type Declarations</a></li>
+<li><a href="#inheritance">Inheritance</a></li>
+<li><a href="#run-time-support-for-inheritance">Run-time Support for Inheritance</a></li>
+</ul>
+</li>
+<li><a href="#module-loading-and-commands">Module Loading and Commands</a></li>
+<li><a href="#compilation-and-linking">Compilation and Linking</a></li>
+<li><a href="#object-file-format">Object File Format</a></li>
+<li><a href="#boot-file">Boot-file</a></li>
+</ul>
+</li>
+<li><a href="#minos-kernel">Minos Kernel</a><ul>
+<li><a href="#system-start-up">System Start-up</a></li>
+<li><a href="#initialisation-of-interrupts">Initialisation of Interrupts</a></li>
+<li><a href="#task-scheduling-minos">Task Scheduling (Minos)</a><ul>
+<li><a href="#stack-minos">Stack (Minos)</a></li>
+<li><a href="#scheduler-minos">Scheduler (Minos)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#serial-communication">Serial Communication</a><ul>
+<li><a href="#spi"><span class="caps">SPI</span></a><ul>
+<li><a href="#setup">Setup</a></li>
+</ul>
+</li>
+<li><a href="#uart"><span class="caps">UART</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#a2-case-study-2">A2 (Case Study 2)</a><ul>
+<li><a href="#intel-x86">Intel x86</a><ul>
+<li><a href="#resources-x86-compatible-hw">Resources (x86 compatible <span class="caps">HW</span>)</a></li>
+<li><a href="#interrupt-system-x86">Interrupt System (x86)</a><ul>
+<li><a href="#apic"><span class="caps">APIC</span></a></li>
+<li><a href="#multiprocessor-specification">MultiProcessor Specification</a></li>
+<li><a href="#exception-numbers">Exception Numbers</a></li>
+<li><a href="#configuring-apic">Configuring <span class="caps">APIC</span></a></li>
+</ul>
+</li>
+<li><a href="#pci-local-bus"><span class="caps">PCI</span> Local Bus</a></li>
+</ul>
+</li>
+<li><a href="#active-oberon-language">Active Oberon Language</a><ul>
+<li><a href="#locks-vs-monitors">Locks vs. Monitors</a></li>
+<li><a href="#threads-vs-active-objects">Threads vs. Active Objects</a></li>
+<li><a href="#object-model-active-oberon">Object Model (Active Oberon)</a></li>
+<li><a href="#signal-wait-implementations">Signal-Wait Implementations</a></li>
+<li><a href="#monitors-in-active-oberon">Monitors in Active Oberon</a></li>
+</ul>
+</li>
+<li><a href="#active-object-system-a2">Active Object System (A2)</a><ul>
+<li><a href="#modular-kernel-structure">Modular Kernel Structure</a></li>
+<li><a href="#atomic-operations-hw-support">Atomic Operations (<span class="caps">HW</span> Support)</a><ul>
+<li><a href="#intel-x86_1">Intel (x86)</a></li>
+<li><a href="#arm"><span class="caps">ARM</span></a></li>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#compare-and-swap-cas">Compare-And-Swap (<span class="caps">CAS</span>)</a></li>
+<li><a href="#implementation-of-a-spinal-using-cas">Implementation of a spinal using <span class="caps">CAS</span></a></li>
+</ul>
+</li>
+<li><a href="#boot-procedure-a2">Boot Procedure (A2)</a><ul>
+<li><a href="#processor-startup">Processor Startup</a></li>
+</ul>
+</li>
+<li><a href="#a2-activities-states">A2 Activities States</a></li>
+<li><a href="#run-time-data-structures">Run-Time Data Structures</a></li>
+<li><a href="#stack-management">Stack Management</a></li>
+<li><a href="#context-switch">Context Switch</a><ul>
+<li><a href="#coroutines-synchronous">Coroutines (Synchronous)</a></li>
+<li><a href="#asynchronous-context-switch">Asynchronous Context Switch</a></li>
+</ul>
+</li>
+<li><a href="#synchronisation">Synchronisation</a><ul>
+<li><a href="#object-locking">Object Locking</a></li>
+<li><a href="#priority-inversion">Priority Inversion</a></li>
+<li><a href="#priority-inheritance">Priority Inheritance</a></li>
+</ul>
+</li>
+<li><a href="#lock-free-programming">Lock-Free Programming</a><ul>
+<li><a href="#a2">A2</a><ul>
+<li><a href="#goals">Goals</a></li>
+<li><a href="#guiding-principles">Guiding Principles</a></li>
+<li><a href="#lock-free-kernel">Lock-Free Kernel</a></li>
+<li><a href="#memory-model-for-lock-free-active-oberon">Memory Model for Lock-Free Active Oberon</a></li>
+</ul>
+</li>
+<li><a href="#aba-problem"><span class="caps">ABA</span> Problem</a><ul>
+<li><a href="#hazard-pointers">Hazard Pointers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#cooperative-multitasking-implicit">Cooperative Multitasking (implicit)</a><ul>
+<li><a href="#interrupts">Interrupts</a></li>
+<li><a href="#queue-data-structures">Queue Data Structures</a><ul>
+<li><a href="#scheduling-activities">Scheduling (Activities)</a></li>
+<li><a href="#task-switch-finalizer">Task Switch Finalizer</a></li>
+</ul>
+</li>
+<li><a href="#stack-management_1">Stack Management</a><ul>
+<li><a href="#interrupts_1">Interrupts</a></li>
+<li><a href="#lock-free-memory-management">Lock-Free Memory Management</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#portability">Portability</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#oberon-risc-case-study-3">Oberon <span class="caps">RISC</span> (Case Study 3)</a></li>
+<li><a href="#active-cells-case-study-4">Active Cells (Case Study 4)</a><ul>
+<li><a href="#tiny-register-machine-trm">Tiny Register Machine (<span class="caps">TRM</span>)</a></li>
+<li><a href="#active-cells">Active Cells</a></li>
+<li><a href="#programming-language-vs-hdl">Programming Language vs. <span class="caps">HDL</span></a><ul>
+<li><a href="#programming-language">Programming Language</a></li>
+<li><a href="#hardware-description-language">Hardware Description Language</a></li>
+</ul>
+</li>
+<li><a href="#singlecycle-datapath-trm">Single/Cycle Datapath (<span class="caps">TRM</span>)</a><ul>
+<li><a href="#instruction-fetch">Instruction Fetch</a></li>
+<li><a href="#register-read">Register Read</a></li>
+<li><a href="#alu"><span class="caps">ALU</span></a></li>
+<li><a href="#control-path">Control Path</a></li>
+<li><a href="#write-result-back-to-rd">Write Result Back to Rd</a></li>
+<li><a href="#trm-stalling"><span class="caps">TRM</span> Stalling</a></li>
+<li><a href="#load-ld">Load (<span class="caps">LD</span>)</a></li>
+<li><a href="#store-st">Store (<span class="caps">ST</span>)</a></li>
+<li><a href="#set-flag-registers">Set Flag Registers</a></li>
+<li><a href="#branch-instructions">Branch instructions</a></li>
+<li><a href="#separate-compilation-trm">Separate Compilation (<span class="caps">TRM</span>)</a><ul>
+<li><a href="#compilation-steps">Compilation Steps</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#problems-with-active-cells-1">Problems with Active Cells 1</a><ul>
+<li><a href="#generic-communication-interface">Generic Communication Interface</a></li>
+</ul>
+</li>
+<li><a href="#active-cells-2">Active Cells 2</a></li>
+<li><a href="#active-cells-3">Active Cells 3</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <blockquote>
+<p>My Notes for the <em>System Construction</em> Course at <span class="caps">ETH</span></p>
+</blockquote>
+
+<h1 id="minos-on-raspberry-pi-2-case-study-1">Minos on Raspberry <span class="caps">PI</span> 2 (Case Study 1)</h1>
+<h2 id="arm-a7"><span class="caps">ARM</span> A7</h2>
+<p>The <span class="caps">ARM</span> <em>Architecture</em> is not the same thing as the <span class="caps">ARM</span> <em>Processor-Families</em></p>
+<h3 id="documentation">Documentation</h3>
+<p>There is a lot of good documentation for the <span class="caps">ARM</span> processors available. But it’s difficult to
+find the right documents.</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Document</th>
+<th>Main Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="caps">ARM</span> Architecture Reference Manual (ARMv7-<span class="caps">AR</span>, <span class="caps">ARM</span> <span class="caps">ARM</span>)</td>
+<td>Possibility of implementing the processor. For compilers and tools. Partly used for system programming</td>
+</tr>
+<tr>
+<td><span class="caps">ARM</span> Technical System Reference (<span class="caps">ARM</span> Cortex-A7MPCore Family)</td>
+<td>Particular Implementation. Some redundant information to <span class="caps">ARM</span> <span class="caps">ARM</span>.</td>
+</tr>
+<tr>
+<td>System On Chip Implementation Manual (<span class="caps">BCM</span> 2835)</td>
+<td>How the core is embedded on the chip with peripherals. Address map. Peripheral information.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="6-kinds-of-instructions">6 Kinds Of Instructions</h3>
+<ol>
+<li>Data Processing</li>
+<li>Branch Instructions</li>
+<li>Status Register Transfer</li>
+<li>Load and Store (<span class="caps">RISC</span>)</li>
+<li>Generic Coprocessor Instructions</li>
+<li>Exception Generation</li>
+</ol>
+<ul>
+<li>Load-/Store: No memory operands (not as x86)<ul>
+<li>Load: from memory to register</li>
+<li>Store: from register to memory</li>
+</ul>
+</li>
+<li>Multiple-Data-Transfer commands (<code>stmdb sp!,{fp,lr}</code>, <code>!</code>: Write-Back)</li>
+<li>Link Register: <code>bl</code>: Branch-and-Link (stores <span class="caps">PC</span> in link register)</li>
+<li><span class="caps">PC</span>-Relative Addressing: Loading large constants (that have no space in instruction encoding) form code</li>
+</ul>
+<h3 id="execution-modes">Execution Modes</h3>
+<ul>
+<li>7 Modes</li>
+<li>for exception handling</li>
+<li>Processor starts in supervisor mode</li>
+<li>Registers are shadowed (banked) in different modes</li>
+<li>System Mode: privileged but same registers as user mode</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Privilege Level</th>
+<th>Mode</th>
+<th>Description/Cause</th>
+<th>Exception/Normal Execution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>privileged</td>
+<td>Supervisor</td>
+<td>Reset / Software Interrupt</td>
+<td>exception</td>
+</tr>
+<tr>
+<td>privileged</td>
+<td><span class="caps">FIQ</span></td>
+<td>Fast Interrupt</td>
+<td>exception</td>
+</tr>
+<tr>
+<td>privileged</td>
+<td><span class="caps">IRQ</span></td>
+<td>Normal Interrupt</td>
+<td>exception</td>
+</tr>
+<tr>
+<td>privileged</td>
+<td>Abort</td>
+<td>Memory Access Violation</td>
+<td>exception</td>
+</tr>
+<tr>
+<td>privileged</td>
+<td>Undef</td>
+<td>Undefined Instruction</td>
+<td>exception</td>
+</tr>
+<tr>
+<td>privileged</td>
+<td>System</td>
+<td>Privileged Mode with same registers as in User Mode</td>
+<td>normal execution</td>
+</tr>
+<tr>
+<td><strong>un</strong>privileged</td>
+<td>User</td>
+<td>Regular Application Mode</td>
+<td>normal execution</td>
+</tr>
+</tbody>
+</table>
+<h3 id="special-registers">Special Registers</h3>
+<ul>
+<li>R15: <span class="caps">PC</span> (Program Counter)</li>
+<li>R14: <span class="caps">LR</span> (Return address for procedure)</li>
+<li>R13: <span class="caps">SP</span> (‘top’ of the stack)</li>
+<li>R12: <span class="caps">FP</span> (by convention, stored <span class="caps">SP</span> before procedure call)</li>
+<li><span class="caps">CPSR</span> (Processor Status Register)<ul>
+<li>Mode Bits</li>
+<li><span class="caps">IRQ</span> Disable</li>
+<li>Condition Flags</li>
+<li>…</li>
+</ul>
+</li>
+</ul>
+<h3 id="typical-procedure-call">Typical Procedure Call</h3>
+<ul>
+<li>
+<p>Caller</p>
+<ul>
+<li>Pushes params</li>
+<li><code>BL #address</code>: Stores <span class="caps">PC</span> of next instruction in <span class="caps">LR</span></li>
+</ul>
+</li>
+<li>
+<p>Callee</p>
+<ul>
+<li>Save <span class="caps">LR</span> and <span class="caps">FP</span> on stack: <code>stmdb sp!, {fp, lr}</code></li>
+<li>Set new <span class="caps">FP</span>: <code>mov fp, sp</code></li>
+<li>Execute procedure content</li>
+<li>Reset stack pointer: <code>mov lr, sp</code></li>
+<li>Restore <span class="caps">FP</span> and jump back to caller address: <code>ldmia sp!, {fp, pc}</code></li>
+</ul>
+</li>
+<li>
+<p>Caller</p>
+<ul>
+<li>Clean up parameters from stack: <code>add sp,sp, #n</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="exceptions">Exceptions</h3>
+<ul>
+<li>Interrupt: asynchronous event triggered by a device signal</li>
+<li>Trap / Syscall: intentional exception</li>
+<li>Fault: error condition that a handler might be able to correct</li>
+<li>Abort: error condition that cannot be corrected</li>
+</ul>
+<h3 id="misc">Misc</h3>
+<ul>
+<li><span class="caps">FIRQ</span> is about having more stacked registers</li>
+<li>Return Link type: Different sizes because of pipe-line</li>
+</ul>
+<h2 id="raspberry-pi-2">Raspberry <span class="caps">PI</span> 2</h2>
+<ul>
+<li>Quad Core</li>
+<li>1 <span class="caps">GB</span> <span class="caps">RAM</span></li>
+<li>40 Pin <span class="caps">GPIO</span>, …</li>
+<li><span class="caps">UART</span>, <span class="caps">SPI</span>, <span class="caps">USB</span>, Ethernet, …</li>
+<li>Powered from MicroUSB</li>
+</ul>
+<h3 id="booting">Booting</h3>
+<ul>
+<li>Kernel is copied to address: <code>0x8000h</code> and branches there (instead to <code>0x00</code>)</li>
+<li><span class="caps">MMU</span> is disabled</li>
+<li>Only one core is running</li>
+</ul>
+<h3 id="mmu"><span class="caps">MMU</span></h3>
+<ul>
+<li>Memory translation is complicated due to two different <span class="caps">MMU</span>’s</li>
+<li><span class="caps">ARM</span>’s memory mapped registers start from <code>0x3f000000</code>, opposed to <code>0x7e000000</code> in <span class="caps">BMC</span> manual</li>
+</ul>
+<h3 id="gpio"><span class="caps">GPIO</span></h3>
+<ul>
+<li>Some <span class="caps">GPIO</span> Registers need Read-Modify-Write (i.e GPFSELn)</li>
+<li>Other Registers support setting or clearing single bits:<ul>
+<li>i.e Set <span class="caps">GPIO</span> Pin: GPSETn</li>
+<li>i.e Clear <span class="caps">GPIO</span> Pin: GPCLRn</li>
+</ul>
+</li>
+</ul>
+<h2 id="minos-and-oberon">Minos and Oberon</h2>
+<h3 id="history-of-oberon">History of Oberon</h3>
+<p><img alt="Oberon Language and OS Family" class="img-fluid" src="/images/syscon_oberon_history.png"/></p>
+<h3 id="oberon">Oberon</h3>
+<ul>
+<li>Modules can be compiled separately</li>
+<li>Strongly typed<ul>
+<li>Static type checking at compile time</li>
+<li>Run-time support for type guards / tests</li>
+</ul>
+</li>
+<li>High Level (minimal Assembler code)</li>
+<li>Special low level functions in <code>SYSTEM</code> pseudo module (compiler directives)</li>
+</ul>
+<h4 id="oberon07">Oberon07</h4>
+<ul>
+<li>Minimal</li>
+<li>No type <code>OBJECT*</code> no member functions (methods)</li>
+</ul>
+<h4 id="language-constructs">Language Constructs</h4>
+<h5 id="program-units">Program Units</h5>
+<ul>
+<li><code>MODULE</code></li>
+<li><code>PROCEDURE</code><ul>
+<li>Value, <code>VAR</code> (in-out) and <code>CONST</code> parameters</li>
+</ul>
+</li>
+</ul>
+<h5 id="data-types">Data Types</h5>
+<ul>
+<li><code>BOOLEAN</code>, <code>CHAR</code>, <code>SHORTINT</code>, <code>INTEGER</code>, <code>LONGINT</code>, <code>HUGEINT</code>, <code>REAL</code>, <code>LONGREAL</code>, <code>SET</code>, <code>ADDRESS</code>, <code>SIZE</code></li>
+</ul>
+<h5 id="structured-types">Structured Types</h5>
+<ul>
+<li><code>ARRAY</code>, <code>POINTER TO ARRAY</code></li>
+<li><code>RECORD</code> (with type extension), <code>POINTER TO RECORD</code></li>
+</ul>
+<h5 id="control-structures">Control Structures</h5>
+<h6 id="if"><code>IF</code></h6>
+<div class="highlight"><pre><span></span><code><span class="k">IF</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">THEN</span>
+    <span class="cm">(* statement sequence *)</span>
+<span class="k">END</span><span class="o">;</span>
+</code></pre></div>
+<h6 id="while"><code>WHILE</code></h6>
+<div class="highlight"><pre><span></span><code><span class="k">WHILE</span> <span class="n">x</span><span class="o">&lt;</span><span class="n">n</span> <span class="k">DO</span>
+    <span class="cm">(* statement sequence *)</span>
+<span class="k">END</span><span class="o">;</span>
+</code></pre></div>
+<h6 id="repeat"><code>REPEAT</code></h6>
+<div class="highlight"><pre><span></span><code><span class="k">REPEAT</span>
+    <span class="cm">(* statement sequence *)</span>
+<span class="k">UNTIL</span> <span class="n">x</span><span class="o">=</span><span class="n">n</span><span class="o">;</span>
+</code></pre></div>
+<h6 id="for"><code>FOR</code></h6>
+<div class="highlight"><pre><span></span><code><span class="k">FOR</span> <span class="n">i</span> <span class="o">:=</span> <span class="mi">0</span> <span class="k">TO</span> <span class="mi">100</span> <span class="k">DO</span>
+    <span class="cm">(* statement seq *)</span>
+<span class="k">END</span><span class="o">;</span>
+</code></pre></div>
+<h5 id="built-in-functions">Built-in Functions</h5>
+<p>Increment and decrement</p>
+<div class="highlight"><pre><span></span><code><span class="nb">INC</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="nb">DEC</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="nb">INC</span><span class="p">(</span><span class="n">x</span><span class="o">,</span><span class="n">n</span><span class="p">)</span><span class="o">;</span>
+<span class="nb">DEC</span><span class="p">(</span><span class="n">x</span><span class="o">,</span><span class="n">n</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Sets</p>
+<div class="highlight"><pre><span></span><code><span class="n">INCL</span><span class="p">(</span><span class="k">set</span><span class="o">,</span> <span class="n">element</span><span class="p">)</span><span class="o">;</span>
+<span class="n">EXCL</span><span class="p">(</span><span class="k">set</span><span class="o">,</span> <span class="n">element</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Assert and Halt</p>
+<div class="highlight"><pre><span></span><code><span class="nb">ASSERT</span><span class="p">(</span><span class="n">b</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span><span class="o">;</span>
+<span class="nb">HALT</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Allocation</p>
+<div class="highlight"><pre><span></span><code><span class="k">NEW</span><span class="p">(</span><span class="n">x</span><span class="o">,</span> <span class="o">...</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Shifts</p>
+<div class="highlight"><pre><span></span><code><span class="n">ASH</span><span class="p">(</span><span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="p">)</span><span class="o">;</span>
+<span class="n">LSH</span><span class="p">(</span><span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="p">)</span><span class="o">;</span>
+<span class="n">ROT</span><span class="p">(</span><span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Conversion</p>
+<div class="highlight"><pre><span></span><code><span class="n">SHORT</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">LONG</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="nb">ORD</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span><span class="o">;</span>
+<span class="nb">CHR</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">;</span>
+<span class="n">ENTIER</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Arrays</p>
+<div class="highlight"><pre><span></span><code><span class="n">LEN</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">LEN</span><span class="p">(</span><span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="p">)</span><span class="o">;</span>
+<span class="n">DIM</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Misc</p>
+<div class="highlight"><pre><span></span><code><span class="nb">ABS</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="nb">MAX</span><span class="p">(</span><span class="k">type</span><span class="p">)</span><span class="o">;</span>
+<span class="nb">MIN</span><span class="p">(</span><span class="k">type</span><span class="p">)</span><span class="o">;</span>
+<span class="nb">ODD</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">;</span>
+<span class="n">CAP</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Addresses and Sizes</p>
+<div class="highlight"><pre><span></span><code><span class="n">ADDRESS</span> <span class="k">OF</span> <span class="n">x</span><span class="o">;</span>
+<span class="n">ADDRESSOF</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SIZE</span> <span class="k">OF</span> <span class="n">t</span><span class="o">;</span>
+<span class="nb">SIZEOF</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<h4 id="modules">Modules</h4>
+<ul>
+<li><code>PROCEDURE Write* ...</code>: Exported (<code>*</code>)</li>
+<li>Module body is executed first and only once</li>
+<li>Module can be loaded only once (keeps state, can be unloaded)</li>
+<li>Procedures without params can be executed as commands</li>
+<li>Comments: <code>(* ... *)</code></li>
+<li>Special Type: <code>SET</code> contains ints up to <span class="caps">CPU</span> bit size: i.e 1..32 (<code>{12, 5}</code>)</li>
+<li><code>SYSTEM</code> Pseudo Module<ul>
+<li>Unsafe!</li>
+<li>Memory Access</li>
+<li><code>SYSTEM.BYTE</code>: raw binary data (with length and bound checks)</li>
+<li>Type Casts: can be unsafe!</li>
+</ul>
+</li>
+<li>Procedure Flags:<ul>
+<li><code>INTERRUPT</code>: for <span class="caps">ISR</span>’s</li>
+<li><code>PCOFFSET=k</code>: offset for returning from <span class="caps">ISR</span></li>
+</ul>
+</li>
+<li>Unsafe Pointer: can write to memory address</li>
+</ul>
+<h4 id="pseudo-module-system">Pseudo Module <code>SYSTEM</code></h4>
+<p>Direct Memory Access Functions</p>
+<div class="highlight"><pre><span></span><code><span class="n">SYSTEM</span><span class="o">.</span><span class="n">PUT</span> <span class="p">(</span><span class="n">a</span><span class="o">,</span> <span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">GET</span> <span class="p">(</span><span class="n">a</span><span class="o">,</span> <span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">PUT8</span><span class="err">|</span><span class="mi">16</span><span class="err">|</span><span class="mi">32</span><span class="err">|</span><span class="mi">64</span><span class="p">(</span><span class="n">a</span><span class="o">,</span> <span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">x</span> <span class="o">:=</span> <span class="n">SYSTEM</span><span class="o">.</span><span class="n">GET8</span><span class="err">|</span><span class="mi">16</span><span class="err">|</span><span class="mi">32</span><span class="err">|</span><span class="mi">64</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">MOVE</span><span class="p">(</span><span class="n">src</span><span class="o">,</span> <span class="n">dest</span><span class="o">,</span> <span class="nb">length</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Data Type</p>
+<div class="highlight"><pre><span></span><code><span class="n">SYSTEM</span><span class="o">.</span><span class="kt">BYTE</span>
+</code></pre></div>
+<p>Type Cast</p>
+<div class="highlight"><pre><span></span><code><span class="n">b</span> <span class="o">:=</span> <span class="n">SYSTEM</span><span class="o">.</span><span class="n">VAL</span><span class="p">(</span><span class="n">a</span><span class="o">,</span> <span class="n">t</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Example of Low-Level access</p>
+<div class="highlight"><pre><span></span><code><span class="n">IMPORT</span> <span class="n">SYSTEM</span><span class="o">;</span>
+
+<span class="k">PROCEDURE</span> <span class="nf">LetThereBeLight</span><span class="o">;</span>
+<span class="k">CONST</span> <span class="n">GPSET0</span> <span class="o">=</span> <span class="mi">03</span><span class="n">F20001CH</span><span class="o">;</span>
+<span class="k">BEGIN</span>
+    <span class="n">SYSTEM</span><span class="o">.</span><span class="n">PUT</span><span class="p">(</span><span class="n">GPSET0</span><span class="o">,</span> <span class="cm">{21}</span><span class="p">)</span><span class="o">;</span>
+<span class="k">END</span> <span class="n">LetThereBeLight</span><span class="o">;</span>
+</code></pre></div>
+<h5 id="system-arm-specific"><code>SYSTEM</code>: <span class="caps">ARM</span> Specific</h5>
+<p>Register Access</p>
+<div class="highlight"><pre><span></span><code><span class="n">SYSTEM</span><span class="o">.</span><span class="n">SP</span><span class="p">()</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">FP</span><span class="p">()</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">LNK</span><span class="p">()</span><span class="o">;</span>
+
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">SETSP</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">SETFP</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">SETLR</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">LDPSR</span><span class="p">(</span><span class="n">b</span><span class="o">,</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">STPSR</span><span class="p">(</span><span class="n">b</span><span class="o">,</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">LDCPR</span><span class="p">(</span><span class="n">a</span><span class="o">,</span><span class="n">b</span><span class="o">,</span><span class="n">c</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">STCPR</span><span class="p">(</span><span class="n">a</span><span class="o">,</span><span class="n">b</span><span class="o">,</span><span class="n">c</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">FLUSH</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>Floating Point</p>
+<div class="highlight"><pre><span></span><code><span class="n">SYSTEM</span><span class="o">.</span><span class="n">NULL</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">;</span>
+<span class="n">SYSTEM</span><span class="o">.</span><span class="n">MULD</span><span class="p">(</span><span class="n">a</span><span class="o">,</span><span class="n">b</span><span class="o">,</span><span class="n">c</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<h5 id="interrupt-procedures">Interrupt Procedures</h5>
+<div class="highlight"><pre><span></span><code><span class="k">PROCEDURE</span> <span class="nf">Handler</span> <span class="cm">{INTERRUPT, PCOFFSET=k}</span><span class="o">;</span>
+<span class="k">BEGIN</span> <span class="cm">(* k is the offset to the next instruction</span>
+<span class="cm">         cf. table of exceptions *)</span>
+<span class="k">END</span> <span class="n">Handler</span><span class="o">;</span>
+</code></pre></div>
+<h5 id="special-flags-and-features">Special Flags and Features</h5>
+<p>Procedure without activation frame</p>
+<div class="highlight"><pre><span></span><code><span class="k">PROCEDURE</span> <span class="cm">{NOTAG}</span>
+</code></pre></div>
+<p>Procedure that is linked to the beginning of a kernel</p>
+<div class="highlight"><pre><span></span><code><span class="k">PROCEDURE</span> <span class="cm">{INITIAL}</span>
+</code></pre></div>
+<p>Inline assembler block</p>
+<div class="highlight"><pre><span></span><code><span class="n">CODE</span> <span class="o">...</span> <span class="k">END</span>
+</code></pre></div>
+<p>Alignment of a symbol (i. e variable)</p>
+<div class="highlight"><pre><span></span><code><span class="n">symbol</span> <span class="cm">{ALIGNED(32)}</span>
+</code></pre></div>
+<p>Pinning of a symbol</p>
+<div class="highlight"><pre><span></span><code><span class="n">symbol</span> <span class="err">{</span><span class="n">FIXED</span><span class="p">(</span><span class="mi">0</span><span class="n">x8000</span><span class="p">))</span>
+</code></pre></div>
+<p>Unsafe pointer that is assignment compatible with type <code>ADDRESS</code></p>
+<div class="highlight"><pre><span></span><code><span class="kt">POINTER</span> <span class="cm">{UNSAFE}</span> <span class="k">TO</span> <span class="o">...</span>
+</code></pre></div>
+<p>Symbol that is invisible to a Garbage Collector</p>
+<div class="highlight"><pre><span></span><code><span class="n">symbol</span> <span class="cm">{UNTRACED}</span>
+</code></pre></div>
+<h5 id="type-declarations">Type Declarations</h5>
+<div class="highlight"><pre><span></span><code><span class="k">TYPE</span>
+
+<span class="n">Device</span><span class="o">*</span> <span class="o">=</span> <span class="kt">POINTER</span> <span class="k">TO</span> <span class="n">DeviceDesc</span><span class="o">;</span>  <span class="cm">(* Pointer to record (reference type)*)</span>
+<span class="n">DeviceDesc</span><span class="o">*</span> <span class="o">=</span> <span class="k">RECORD</span>              <span class="cm">(* Record: Value type *)</span>
+    <span class="n">id</span><span class="o">*:</span> <span class="kt">INTEGER</span><span class="o">;</span>
+    <span class="n">Open</span><span class="o">*:</span> <span class="k">PROCEDURE</span><span class="p">(</span><span class="n">dev</span><span class="o">:</span> <span class="n">Device</span><span class="p">)</span><span class="o">;</span>
+    <span class="nb">Close</span><span class="o">*:</span> <span class="k">PROCEDURE</span><span class="p">(</span><span class="n">dev</span><span class="o">:</span> <span class="n">Device</span><span class="p">)</span><span class="o">;</span>
+    <span class="n">next</span><span class="o">*:</span> <span class="n">Device</span><span class="o">;</span>
+<span class="k">END</span><span class="o">;</span>
+
+<span class="cm">(* Procedure type with signature *)</span>
+<span class="n">TrapHandler</span><span class="o">*</span> <span class="o">=</span> <span class="k">PROCEDURE</span><span class="p">(</span><span class="k">type</span><span class="o">,</span> <span class="nb">addr</span><span class="o">,</span> <span class="n">fp</span><span class="o">:</span> <span class="kt">INTEGER</span><span class="o">;</span> <span class="k">VAR</span> <span class="n">res</span><span class="o">:</span> <span class="kt">INTEGER</span><span class="p">)</span><span class="o">;</span>
+
+<span class="n">NumberType</span><span class="o">*</span> <span class="o">=</span> <span class="kt">REAL</span><span class="o">;</span> <span class="cm">(* Type alias *)</span>
+
+<span class="n">DeviceName</span><span class="o">*</span> <span class="k">ARRAY</span> <span class="n">DeviceNameLength</span> <span class="k">OF</span> <span class="kt">CHAR</span><span class="o">;</span> <span class="cm">(* Array Type *)</span>
+
+<span class="n">Data</span><span class="o">*</span> <span class="kt">POINTER</span> <span class="k">TO</span> <span class="k">ARRAY</span> <span class="k">OF</span> <span class="kt">CHAR</span><span class="o">;</span> <span class="cm">(* Dynamic array type *)</span>
+</code></pre></div>
+<h5 id="inheritance">Inheritance</h5>
+<div class="highlight"><pre><span></span><code><span class="n">Task</span><span class="o">*</span> <span class="o">=</span> <span class="kt">POINTER</span> <span class="k">TO</span> <span class="n">TaskDesc</span><span class="o">;</span>
+<span class="n">TaskDesc</span><span class="o">*</span> <span class="o">=</span> <span class="k">RECORD</span>
+    <span class="n">task</span> <span class="n">task</span> <span class="n">task</span>
+    <span class="n">task</span> <span class="n">task</span>
+    <span class="n">proc</span><span class="o">:</span><span class="k">PROCEDURE</span><span class="p">(</span><span class="n">me</span><span class="o">:</span><span class="n">Task</span><span class="p">)</span><span class="o">;</span> <span class="cm">(* This procedure is executed in the task *)</span>
+    <span class="n">next</span><span class="o">:</span> <span class="n">Task</span><span class="o">;</span>              <span class="cm">(* The next task in the list of tasks *)</span>
+<span class="k">END</span><span class="o">;</span>
+
+<span class="n">PeriodicTask</span><span class="o">*</span> <span class="o">=</span> <span class="kt">POINTER</span> <span class="k">TO</span> <span class="n">PeriodicTaskDesc</span><span class="o">;</span>
+<span class="n">PeriodicTaskDesc</span><span class="o">*</span> <span class="o">=</span> <span class="k">RECORD</span> <span class="p">(</span><span class="n">TaskDesc</span><span class="p">)</span> <span class="cm">(* inherits TaskDesc *)</span>
+    <span class="n">priority</span><span class="o">:</span> <span class="kt">LONGINT</span><span class="o">;</span> <span class="cm">(* The priority determines the execution order *)</span>
+    <span class="n">interval</span><span class="o">:</span> <span class="kt">LONGINT</span><span class="o">;</span> <span class="cm">(* The task is executed every "interval" msecs *)</span>
+<span class="k">END</span><span class="o">;</span>
+</code></pre></div>
+<p>Type Test</p>
+<div class="highlight"><pre><span></span><code><span class="k">IF</span> <span class="n">task</span> <span class="k">IS</span> <span class="n">PeriodicTask</span> <span class="k">THEN</span> <span class="o">...</span> <span class="k">END</span><span class="o">;</span>
+</code></pre></div>
+<p>Type Guard (cast)</p>
+<div class="highlight"><pre><span></span><code><span class="k">IF</span> <span class="n">task</span><span class="p">(</span><span class="n">PeriodicTask</span><span class="p">)</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">THEN</span> <span class="o">...</span> <span class="k">END</span><span class="o">;</span>
+</code></pre></div>
+<p>Type Test and Guard</p>
+<div class="highlight"><pre><span></span><code><span class="k">WITH</span> <span class="n">task</span><span class="o">:</span> <span class="n">PeriodicTask</span> <span class="k">DO</span> <span class="o">...</span> <span class="k">END</span><span class="o">;</span>
+</code></pre></div>
+<h5 id="run-time-support-for-inheritance">Run-time Support for Inheritance</h5>
+<ul>
+<li><span class="caps">RTTI</span> is supported</li>
+<li>Each type gets an unique type descriptor (<code>LONGINT</code>)</li>
+<li>The variables contain an array of up to 3 tags</li>
+<li>The tags point to the type descriptors</li>
+<li>Inheritance level is restricted to 3</li>
+</ul>
+<h4 id="module-loading-and-commands">Module Loading and Commands</h4>
+<ul>
+<li>Modules are loaded on demand (first use)</li>
+<li>Statically linked modules are loaded at boot-time</li>
+<li>Exported Procedures without parameters act as commands</li>
+<li>Modification of modules needs reloading</li>
+<li>Unloading possible, if no other loaded module (static or dynamic) depends on it</li>
+<li>If a command of a not loaded module is executed the module is loaded first</li>
+</ul>
+<h4 id="compilation-and-linking">Compilation and Linking</h4>
+<ul>
+<li>A module (.mod) is compiled to an executable file / object file (.arm) and a symbol file (.smb)</li>
+<li>The executable file contains a fingerprint</li>
+<li>The linker adds fingerprint to dependent object files (fix-up)</li>
+</ul>
+<h4 id="object-file-format">Object File Format</h4>
+<p>Compiler flags:</p>
+<div class="highlight"><pre><span></span><code>Compiler.Compile -b<span class="o">=</span>ARM --objectFile<span class="o">=</span>Minos
+</code></pre></div>
+<ul>
+<li>The object file is very compact</li>
+<li>Key: Fingerprint</li>
+<li>Fix-ups → Fix-up-root (relocation table) linked list to fix-ups</li>
+<li>Downsides:<ul>
+<li>Module file is limited</li>
+<li>Not very maintainable</li>
+</ul>
+</li>
+</ul>
+<p><img alt="Minos Object Files" class="img-fluid" src="/images/syscon_minos_object_file.png"/></p>
+<p>This image is taken from the lecture slides provided by Felix Friedrich</p>
+<h4 id="boot-file">Boot-file</h4>
+<ul>
+<li>Linked Modules of Kernel files (hierarchy)</li>
+<li>Predefined loading address and entry point (0x8000 for <span class="caps">RPI2</span>)</li>
+</ul>
+<p>Boot-Linking command in host system</p>
+<div class="highlight"><pre><span></span><code>MinosLinker.Link minimalinit.img 108000H kernel.img OFSRamVolumes SerialLog Minos  ~
+</code></pre></div>
+<ul>
+<li>Image header: <code>minimalinit.img</code></li>
+<li>Start address: <code>108000H</code></li>
+<li>Image file name: <code>kernel.img</code></li>
+<li>Object file names (compiled): <code>OFSRamVolumes SerialLog Minos  ~</code></li>
+</ul>
+<!-- Beginning of Slides Week 3 -->
+<h3 id="minos-kernel">Minos Kernel</h3>
+<h4 id="system-start-up">System Start-up</h4>
+<ul>
+<li>
+<p>Firmware (<span class="caps">RPI2</span>, <span class="caps">GPU</span>)</p>
+<ol>
+<li>Initialise <span class="caps">HW</span></li>
+<li>Copy boot image to <span class="caps">RAM</span></li>
+<li>Jump to boot image (initializer)</li>
+</ol>
+</li>
+<li>
+<p>Initializer</p>
+<ol>
+<li>Set <em>stack registers</em> for all processor modes</li>
+<li>Setup <em>free heap</em> and <em>module</em> list</li>
+<li>Initialise <em><span class="caps">MMU</span></em> and <em>page table</em></li>
+<li>Setup <em>interrupt handler</em> and <em>vectors</em></li>
+<li>Start <em>timer</em> and <em>enable interrupts</em></li>
+<li>Initializer UARTs, <span class="caps">RAM</span> disks, …</li>
+<li>Enter scheduling loop on <span class="caps">OS</span></li>
+</ol>
+</li>
+</ul>
+<p>The Minos Kernel is modular:</p>
+<ul>
+<li>Minos: Command interpreter and scheduler</li>
+<li>Modules: Module loader, dynamic linker</li>
+<li>File System: RamVolumes, <span class="caps">OFS</span>, …</li>
+<li>Kernel: Memory management, device drivers</li>
+<li>I/O: Kernel logging, …</li>
+<li>Run-time: Memory allocation (heaps), <span class="caps">FPU</span> emulation, …</li>
+</ul>
+<!-- Slides Week 3 09-29 p. 84 (6) -->
+<p>…</p>
+<!-- Slides and Notes Week 4 -->
+<h4 id="initialisation-of-interrupts">Initialisation of Interrupts</h4>
+<ol>
+<li>Set handlers of <span class="caps">IRQ</span>’s<ul>
+<li>Write handlers for needed interrupts</li>
+<li>Put jumps to handlers into interrupt table</li>
+</ul>
+</li>
+<li>Enable <span class="caps">IRQ</span>’s</li>
+</ol>
+<p>Usually Interrupts need to be configured in 3 parts:</p>
+<ul>
+<li><span class="caps">CPU</span> (enable, masking…)</li>
+<li>Interrupt Controller</li>
+<li>Device</li>
+</ul>
+<p>The <span class="caps">RPI2</span> has 3 memory-mapped <span class="caps">IRQ</span> registers (32-bit):</p>
+<ul>
+<li><em>Pending Bits</em> indicate which interrupts are pending</li>
+<li>Need to be checked in the <em><span class="caps">IRQ</span> Trap Handler</em> (1st level handler)</li>
+<li>Call <em><span class="caps">IRQ</span> Handler</em> (2nd level) depending on pending bits</li>
+</ul>
+<h4 id="task-scheduling-minos">Task Scheduling (Minos)</h4>
+<p>3 Task types:</p>
+<ul>
+<li>High Priority (every 5 ms)</li>
+<li>Low Priority (every 20 ms)</li>
+<li>Background tasks</li>
+</ul>
+<p>Preemption:</p>
+<ul>
+<li>High priority tasks preempt low priority and background tasks</li>
+<li>Low priority tasks preempt only low priority tasks</li>
+<li>Background tasks don’t preempt any tasks</li>
+</ul>
+<p>Task Descriptors for</p>
+<ul>
+<li>Synchronous (periodic) tasks</li>
+<li>Asynchronous (background) tasks</li>
+</ul>
+<h5 id="stack-minos">Stack (Minos)</h5>
+<ul>
+<li>One stack for all processes</li>
+<li>Every task needs to run to completion</li>
+<li>Preemption is possible<ul>
+<li>Preempting task needs to be completed before returning</li>
+</ul>
+</li>
+</ul>
+<h5 id="scheduler-minos">Scheduler (Minos)</h5>
+<p>Recursive interrupt procedure</p>
+<ul>
+<li>Prolog: Interrupts masked</li>
+<li>Scheduling: Interrupts allowed</li>
+<li>Epilogue: Interrupts masked</li>
+</ul>
+<p>Scheduler procedure must be <em>reentrant</em></p>
+<ul>
+<li>Register values on stack</li>
+<li>Private variables</li>
+</ul>
+<p>Assumptions for scheduler</p>
+<ul>
+<li>Linked list stores tasks sorted by period and priority</li>
+<li>Tasks run to completion within given period</li>
+</ul>
+<!-- End of Week 4 -->
+<!-- Beginning of Week 5 -->
+<h2 id="serial-communication">Serial Communication</h2>
+<ul>
+<li>Directionally<ul>
+<li>Simplex</li>
+<li>Half duplex</li>
+<li>Full duplex</li>
+</ul>
+</li>
+<li>Synchrony<ul>
+<li>Synchronous</li>
+<li>Asynchronous</li>
+</ul>
+</li>
+</ul>
+<p>Examples:</p>
+<ul>
+<li><span class="caps">RS</span>-232</li>
+<li><span class="caps">RS</span>-458</li>
+<li><span class="caps">SPI</span> (<span class="caps">SSP</span>, Microwire)</li>
+<li>I<span class="math">\(^2\)</span>C</li>
+<li>1-Wire</li>
+<li><span class="caps">USB</span></li>
+</ul>
+<h3 id="spi"><span class="caps">SPI</span></h3>
+<ul>
+<li>Very simple</li>
+<li>4 Wires:<ul>
+<li><span class="caps">SCLK</span>: Serial bit-rate Clock</li>
+<li><span class="caps">MOSI</span>: Master data Output, Slave data Input</li>
+<li><span class="caps">MISO</span>: Master data Input, Slave data Output</li>
+<li><span class="caps">SS</span>: Slave Select</li>
+</ul>
+</li>
+<li>Configurations:<ul>
+<li>Single slave mode: 1 Master, 1 Slave</li>
+<li>multiple slave mode: 1 Master, N Slaves</li>
+</ul>
+</li>
+<li>Synchronous bidirectional data transfer</li>
+<li>Data transfer initiated by master</li>
+<li>Bandwidth some KBits/s up to several MBits/s</li>
+<li>Simple implementation in software possible (bit-banging)</li>
+<li>Master and Slave have shift registers for data (in and output)<ul>
+<li>During communication data ‘circles around’ between the two shift registers</li>
+</ul>
+</li>
+</ul>
+<p>Communication</p>
+<ol>
+<li>Master pulls <span class="caps">SS</span> to low</li>
+<li>Master pushed data out of shift register</li>
+<li>Slave pushes data out of shift register at the same time</li>
+<li>Sampling happens at <span class="caps">SCLK</span></li>
+<li>To finish communication master stops <span class="caps">SCLK</span></li>
+</ol>
+<ul>
+<li>No acknowledgment mechanism</li>
+<li>No device interrupts</li>
+</ul>
+<h4 id="setup">Setup</h4>
+<ul>
+<li>Polarity (<span class="caps">SCLK</span>):<ul>
+<li>0: Sampling happens on rising <span class="caps">SCLK</span> edge</li>
+<li>1: Sampling happens on falling <span class="caps">SCLK</span> edge</li>
+</ul>
+</li>
+<li>Phase (<span class="caps">SCLK</span>):<ul>
+<li>0: Rising <span class="caps">SCLK</span> edge in the middle of data</li>
+<li>1: Rising <span class="caps">SCLK</span> edge on beginning of data</li>
+</ul>
+</li>
+</ul>
+<h3 id="uart"><span class="caps">UART</span></h3>
+<ul>
+<li>Serial transmission (least significant bit first)</li>
+<li>Configurable<ul>
+<li>Number of data bits: 5, 6, 7, 8</li>
+<li>Parity: odd, even, none</li>
+<li>Stop-bits: 1, 1.5, 2</li>
+<li>Transfer rate (bits per second): 75, 110, 300, …, 115200</li>
+<li>Flow control exists in some implementations</li>
+</ul>
+</li>
+</ul>
+<!-- End of Week 5 -->
+<!-- Beginning of Week 6 -->
+<h1 id="a2-case-study-2">A2 (Case Study 2)</h1>
+<h2 id="intel-x86">Intel x86</h2>
+<ul>
+<li>Shared Memory (for all processors)</li>
+<li>Symmetrical Multiple Processors (<span class="caps">SMP</span>)</li>
+</ul>
+<h3 id="resources-x86-compatible-hw">Resources (x86 compatible <span class="caps">HW</span>)</h3>
+<p><a href="http://wiki.osdev.org">osdev.org</a></p>
+<ul>
+<li><span class="caps">SDM</span>: Intel® 64 and <span class="caps">IA</span>-32 Architectures Software Developer’s Manual (4000 p., 3 volumes)<ol>
+<li>Architecture</li>
+<li>Instruction Set Reference</li>
+<li>System Programming Guide</li>
+</ol>
+</li>
+<li><span class="caps">MP</span> Spec: Intel Multiprocessor Specification, version 1.4 (100 p.)</li>
+<li><span class="caps">ACPI</span> Spec: Advanced Configuration and Power Interface Specification (1000 p.)</li>
+<li><span class="caps">PCI</span> Spec: <span class="caps">PCI</span> Local Bus Specification Rev. 2.2 (322 p.)</li>
+</ul>
+<h3 id="interrupt-system-x86">Interrupt System (x86)</h3>
+<ul>
+<li>External <span class="caps">IRQ</span>’s (asynchronous)<ul>
+<li>I/O Devices</li>
+<li>Timer</li>
+<li>Inter-processor interrupts</li>
+</ul>
+</li>
+<li>Software <span class="caps">IRQ</span>’s (synchronous)<ul>
+<li>Traps/Syscall: special instructions</li>
+</ul>
+</li>
+<li>Processor exceptions (synchronous)<ul>
+<li>Faults (restartable): i.e page fault</li>
+<li>Aborts (Fatal): i.e machine check</li>
+</ul>
+</li>
+</ul>
+<h4 id="apic"><span class="caps">APIC</span></h4>
+<ul>
+<li>Each <span class="caps">CPU</span> has local <span class="caps">APIC</span> (local interrupts)</li>
+<li>
+<p>I/O <span class="caps">APIC</span> for all <span class="caps">CPU</span>’s (external interrupts)</p>
+</li>
+<li>
+<p>Messages to processors</p>
+<ul>
+<li>Start Processor: Activation and Initialisation of individual processors</li>
+<li>Halt Processor: Deactivation of individual processors</li>
+<li>Halt Process, schedule new process: Interrupt in order to transfer control to scheduler</li>
+</ul>
+</li>
+<li>Local timers<ul>
+<li>Periodical interrupts</li>
+</ul>
+</li>
+</ul>
+<h4 id="multiprocessor-specification">MultiProcessor Specification</h4>
+<ul>
+<li>Standard by Intel (<span class="caps">MP</span> Spec 1.4)</li>
+<li>Hardware Specification<ul>
+<li>Memory Map</li>
+<li><span class="caps">APIC</span></li>
+<li>Interrupt Modes</li>
+</ul>
+</li>
+<li><span class="caps">MP</span> Configuration Table<ul>
+<li>Processor, Bus, I/O <span class="caps">APIC</span></li>
+<li>Table address searched via “floating pointer structure”</li>
+</ul>
+</li>
+</ul>
+<h4 id="exception-numbers">Exception Numbers</h4>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Vector #</th>
+<th>Description</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Div error</td>
+<td>div / idiv instruction</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Debug</td>
+<td>Code / data reference</td>
+</tr>
+<tr>
+<td>2</td>
+<td><span class="caps">NMI</span></td>
+<td>Non maskable external <span class="caps">IRQ</span></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Breakpoint</td>
+<td>int 3 instruction</td>
+</tr>
+<tr>
+<td>4 – 19</td>
+<td>Other processor exceptions</td>
+<td>E.g. page fault etc.</td>
+</tr>
+<tr>
+<td>20-31</td>
+<td>reserved</td>
+<td></td>
+</tr>
+<tr>
+<td>32-255</td>
+<td>Maskable Interrupts</td>
+<td>External Interrupts from <code>INTR</code> pin <code>INT</code> n instruction</td>
+</tr>
+</tbody>
+</table>
+<h4 id="configuring-apic">Configuring <span class="caps">APIC</span></h4>
+<ul>
+<li>Local Vector Table (for local interrupt sources)<ul>
+<li>Vector Number, Trigger Mode, Status, Interrupt Vector Mask</li>
+<li>Timer Mode (one shot / periodic)</li>
+</ul>
+</li>
+<li>Command Register: Inter Processor Interrupt with<ul>
+<li>vector number,</li>
+<li>delivery mode: fixed, nmi, init, startup (..)</li>
+<li>logical / physical destination (including self and broadcasts with / without self</li>
+</ul>
+</li>
+</ul>
+<h3 id="pci-local-bus"><span class="caps">PCI</span> Local Bus</h3>
+<ul>
+<li>Connect Peripheral Components</li>
+<li>Standardised Configuration Address Space for all <span class="caps">PCI</span> Devices</li>
+<li>Interrupt Routing Configuration</li>
+</ul>
+<p>Access mechanism</p>
+<ul>
+<li><span class="caps">PCI</span> <span class="caps">BIOS</span>: offers functionality such as “find device by classcode”. Presence determined by floating data structure in <span class="caps">BIOS</span> <span class="caps">ROM</span></li>
+<li>Addressable via in / out instructions operating on separate I/O memory address space</li>
+<li><span class="caps">PCI</span> Express now Memory Mapped I/O</li>
+</ul>
+<h2 id="active-oberon-language">Active Oberon Language</h2>
+<h3 id="locks-vs-monitors">Locks vs. Monitors</h3>
+<ul>
+<li>Lock based<ul>
+<li>shared data</li>
+<li>protected from concurrent access by locks</li>
+</ul>
+</li>
+<li>Monitor based<ul>
+<li>locks code (methods) that access shared data</li>
+<li>No direct locking of data structures needed</li>
+</ul>
+</li>
+</ul>
+<h3 id="threads-vs-active-objects">Threads vs. Active Objects</h3>
+<ul>
+<li>Threads<ul>
+<li>Concurrently running code</li>
+</ul>
+</li>
+<li>Active Objects<ul>
+<li>Objects that contain threads</li>
+<li>Threads in form of Monitors</li>
+</ul>
+</li>
+</ul>
+<h3 id="object-model-active-oberon">Object Model (Active Oberon)</h3>
+<ul>
+<li>
+<p><code>EXCLUSIVE</code>: Protection (mutual exclusion)</p>
+<ul>
+<li><em>Methods</em> tagged <code>EXCLUSIVE</code> run under <em>mutual exclusion</em></li>
+<li>As <code>synchronized</code> in Java</li>
+</ul>
+</li>
+<li>
+<p><code>AWAIT</code>: Synchronisation</p>
+<ul>
+<li>Wait until condition of <code>AWAIT</code> becomes true</li>
+</ul>
+</li>
+<li>
+<p><code>ACTIVE</code>: Parallelism</p>
+<ul>
+<li>Body marked <code>ACTIVE</code> <em>executed as thread</em> for each instance</li>
+</ul>
+</li>
+</ul>
+<h3 id="signal-wait-implementations">Signal-Wait Implementations</h3>
+<ul>
+<li>Signal-and-Continue<ul>
+<li>Java uses this</li>
+<li>Race conditions can occur</li>
+</ul>
+</li>
+<li>Signal-and-Exit<ul>
+<li>Active Oberon uses this</li>
+<li>Can be achieved in Java by looping on wait condition</li>
+</ul>
+</li>
+</ul>
+<p>Active Oberon:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Semaphore</span> <span class="o">=</span> <span class="k">OBJECT</span>
+    <span class="n">number</span> <span class="o">:=</span> <span class="mi">1</span><span class="o">:</span> <span class="kt">LONGINT</span><span class="o">;</span>
+
+    <span class="k">PROCEDURE</span> <span class="nf">enter</span><span class="o">;</span>
+    <span class="k">BEGIN</span><span class="cm">{EXCLUSIVE}</span>
+        <span class="n">AWAIT</span> <span class="n">number</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="nb">DEC</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+    <span class="k">END</span> <span class="n">enter</span><span class="o">;</span>
+
+    <span class="k">PROCEDURE</span> <span class="k">exit</span><span class="o">;</span>
+    <span class="k">BEGIN</span><span class="cm">{EXCLUSIVE}</span>
+        <span class="nf">INC</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+    <span class="k">END</span> <span class="k">exit</span><span class="o">;</span>
+
+<span class="k">END</span> <span class="n">Semaphore</span><span class="o">;</span>
+</code></pre></div>
+<p>Equivalent Java code:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">class</span> <span class="nc">Semaphore</span><span class="p">{</span>
+    <span class="kt">int</span> <span class="n">number</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">enter</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">number</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1">// while needed!</span>
+            <span class="k">try</span> <span class="p">{</span> <span class="n">wait</span><span class="p">();}</span>
+            <span class="k">catch</span> <span class="p">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="p">)</span> <span class="p">{</span> <span class="p">};</span>
+        <span class="n">number</span><span class="o">--</span><span class="p">;</span>
+    <span class="p">}</span>
+
+
+    <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">exit</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">number</span><span class="o">++</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">number</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">notify</span><span class="p">();</span>  <span class="cm">/* notifyAll() needed if different threads</span>
+<span class="cm">                          evaluate different conditions */</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="monitors-in-active-oberon">Monitors in Active Oberon</h3>
+<ul>
+<li>No <em>notify()</em> (or <em>notifyAll()</em>): Every <code>EXCLUSIVE</code> procedure triggers reevaluation of <code>AWAIT</code> when it returns</li>
+<li>Downsides of Monitors:<ul>
+<li>Wasting of processor time on looping on ‘locks’</li>
+<li>Ordering can not be influenced</li>
+</ul>
+</li>
+</ul>
+<h2 id="active-object-system-a2">Active Object System (A2)</h2>
+<h3 id="modular-kernel-structure">Modular Kernel Structure</h3>
+<ul>
+<li>Cover: Kernel</li>
+<li>Activity Scheduler: Objects</li>
+<li>Module Loader (Memory Management): Modules, Heaps</li>
+<li>Hardware Abstraction: Machine</li>
+</ul>
+<h3 id="atomic-operations-hw-support">Atomic Operations (<span class="caps">HW</span> Support)</h3>
+<p>The supported operations are typically a lot slower than simple read and write operations.</p>
+<h4 id="intel-x86_1">Intel (x86)</h4>
+<p>From <span class="caps">AMD64</span> Architecture Programmer’s Manual:</p>
+<ul>
+<li><code>CMPXCHG mem, reg</code></li>
+</ul>
+<p><span class="dquo">“</span>compares the value in Register A with the value in a memory location If the two values are equal,
+the instruction copies the value in the second operand to the first operand and sets the <span class="caps">ZF</span> flag
+in the flag registers to 1. Otherwise it copies the value in the first operand to A register and
+clears <span class="caps">ZF</span> flag to 0”</p>
+<ul>
+<li>Lock Prefix</li>
+</ul>
+<p><span class="dquo">“</span>The lock prefix causes certain kinds of memory read-modify- write instructions to occur atomically”</p>
+<h4 id="arm"><span class="caps">ARM</span></h4>
+<p>From <span class="caps">ARM</span> Architecture Reference Manual:</p>
+<ul>
+<li><code>LDREX &lt;rd&gt;, &lt;rn&gt;</code></li>
+</ul>
+<p><span class="dquo">“</span>Loads a register from memory and if the address has the shared memory attribute, mark the physical
+address as exclusive access for the executing processor in a shared monitor”</p>
+<ul>
+<li><code>STREX &lt;rd&gt;, &lt;rm&gt;, &lt;rn&gt;</code></li>
+</ul>
+<p><span class="dquo">“</span>performs a conditional store to memory. The store only occurs if the executing processor has
+exclusive access to the memory addressed”</p>
+<h4 id="overview">Overview</h4>
+<p>Some typical instructions for atomic operations and implementation examples.</p>
+<ul>
+<li>Test-And-Set (<span class="caps">TAS</span>)<ul>
+<li><code>TSL register, flag</code> (Motorola 68000)</li>
+</ul>
+</li>
+<li>Compare-And-Swap (<span class="caps">CAS</span>)<ul>
+<li><code>LOCK CMPXCHG</code> (Intel x86)</li>
+<li><code>CASA</code> (Sparc)</li>
+</ul>
+</li>
+<li>Load Linked / Store Conditional<ul>
+<li><code>LDREX</code> / <code>STREX</code> (<span class="caps">ARM</span>)</li>
+<li><code>LL</code> / <code>SC</code> (<span class="caps">MIPS</span>)</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>These hardware instructions are often much slower than simple read and write.
+Caches can’t be exploited (direct access to memory)!</p>
+</blockquote>
+<ul>
+<li>Compare-And-Swap is the most universal instruction</li>
+</ul>
+<h4 id="compare-and-swap-cas">Compare-And-Swap (<span class="caps">CAS</span>)</h4>
+<p>Atomic operation implemented in processor.</p>
+<p>Compares memory location with an value. If it’s same a new (given) value is written at the
+memory address. Returns the previous value at memory position in any case.</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">CAS</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">old</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">new</span><span class="p">)</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>If value <code>old</code> is at memory location of <code>a</code>: safe <code>new</code> at <code>a</code></li>
+<li>Return previous value at <code>a</code> in any case</li>
+</ul>
+<h4 id="implementation-of-a-spinal-using-cas">Implementation of a spinal using <span class="caps">CAS</span></h4>
+<div class="highlight"><pre><span></span><code><span class="cm">(* Initialisation *)</span>
+<span class="n">Init</span><span class="p">(</span><span class="n">lock</span><span class="p">)</span>
+    <span class="n">lock</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+
+<span class="cm">(* Acquire Lock *)</span>
+<span class="n">Acquire</span> <span class="p">(</span><span class="k">var</span> <span class="n">lock</span><span class="o">:</span> <span class="kt">word</span><span class="p">)</span>
+    <span class="k">repeat</span>
+        <span class="n">res</span> <span class="o">:=</span> <span class="n">CAS</span><span class="p">(</span><span class="n">lock</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">;</span>
+    <span class="k">until</span> <span class="n">res</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+
+<span class="cm">(* Release Lock *)</span>
+<span class="n">Release</span> <span class="p">(</span><span class="k">var</span> <span class="n">lock</span><span class="o">:</span> <span class="kt">word</span><span class="p">)</span>
+    <span class="n">CAS</span><span class="p">(</span><span class="n">lock</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">;</span> <span class="cm">(* atomicy not needed but visibility/ordering *)</span>
+</code></pre></div>
+<!-- End of Notes Week 6 -->
+<!-- Beginning of Notes Week 7 -->
+<h3 id="boot-procedure-a2">Boot Procedure (A2)</h3>
+<ul>
+<li>Start <span class="caps">BIOS</span> Firmware</li>
+<li>Load A2 Boot-file</li>
+<li>Initialise modules<ul>
+<li>Module <em>Machine</em></li>
+<li>Module <em>Heaps</em></li>
+<li>…</li>
+<li>Module <em>Objects</em><ul>
+<li>Setup scheduler and self process</li>
+</ul>
+</li>
+<li>Module <em>Kernel</em><ul>
+<li>Start all processors</li>
+</ul>
+</li>
+<li>…</li>
+<li>Module Boot-console<ul>
+<li>read configuration and execute boot commands</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>This all happens on the Boot Processor (<span class="caps">BP</span>)</p>
+</blockquote>
+<h4 id="processor-startup">Processor Startup</h4>
+<ul>
+<li>Start processor <strong>P</strong> (Boot-processor)<ol>
+<li>Setup boot program (<code>Machine.InitProcessors</code>)</li>
+<li>Enter processor IDs into table (<code>Machine.InitBootPage</code>)</li>
+<li>Send <em>startup</em> message to <strong>P</strong> via <span class="caps">APIC</span> (<code>Machine.ParseMPConfig</code>)</li>
+<li>Wait with timeout on <em>started</em> flag by P (<code>Machine.StartProcessor</code>)</li>
+</ol>
+</li>
+<li>Boot program (For each processor)<ol>
+<li>Set 32-bit run-time environment (<code>Machine.EnterMP</code>)</li>
+<li>Initializer control registers, memory management, interrupt handling, <span class="caps">APIC</span></li>
+<li>Set <em>started</em> flag (<code>Machine.StartMP</code>)</li>
+<li>Setup Scheduler (<code>Objects.Start</code>)</li>
+<li>Boot-processor proceeds with boot console</li>
+</ol>
+</li>
+</ul>
+<h3 id="a2-activities-states">A2 Activities States</h3>
+<ul>
+<li>Ready: ready to be scheduled</li>
+<li>Running: currently scheduled</li>
+<li>Waiting<ul>
+<li>Condition (<code>AWAIT</code>): waiting until condition is met</li>
+<li>Lock (<code>EXCLUSIVE</code>): waiting to enter monitor</li>
+</ul>
+</li>
+<li>Terminated: Activity finished executing</li>
+</ul>
+<blockquote>
+<p>Java doesn’t make difference between waiting on a condition or a lock.</p>
+</blockquote>
+<p><img alt="A2 Activities States" class="img-fluid" src="/images/syscon_a2_activieties_states.png"/></p>
+<h3 id="run-time-data-structures">Run-Time Data Structures</h3>
+<ul>
+<li>Running Array/List<ul>
+<li>One entry for each processor</li>
+<li>Index: id of processor</li>
+</ul>
+</li>
+<li>Object header (for each object)<ul>
+<li>List of conditions (for each condition)</li>
+<li>List of locks (for each monitor)</li>
+</ul>
+</li>
+<li>Ready Queues/Heap<ul>
+<li>Idle</li>
+<li>Low</li>
+<li>Medium</li>
+<li>High</li>
+<li>Garbage Collector (<span class="caps">GC</span>)</li>
+<li>Real-time (<span class="caps">RT</span>)</li>
+</ul>
+</li>
+<li>Interrupt Array (first level <span class="caps">IRQ</span>’s)<ul>
+<li>Index: <span class="caps">IRQ</span> number</li>
+</ul>
+</li>
+</ul>
+<h3 id="stack-management">Stack Management</h3>
+<ul>
+<li>Virtual addressing</li>
+<li>Allocation in page units</li>
+<li>Page fault for detecting stack overflow</li>
+<li>Deallocate process stack via garbage collector (in process finalizer)</li>
+<li>Life cycle:<ul>
+<li>CreateProcess: Allocate first frame</li>
+<li>Page fault: Allocate another frame</li>
+<li>Finalize: Deallocate all frames</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Active Oberon has one shared memory for all processes!</p>
+</blockquote>
+<ul>
+<li>One Heap for all processes (no heavy-weight processes)</li>
+<li>Each process has own stack</li>
+<li>All processes share same address space</li>
+<li>8‘000 processes can be allocated<ul>
+<li>4 <span class="caps">GB</span> address space</li>
+<li>4 kB pages</li>
+<li>1024 pages per process</li>
+<li>↳ ~ 8‘000 processes</li>
+</ul>
+</li>
+</ul>
+<h3 id="context-switch">Context Switch</h3>
+<ul>
+<li>Synchronous<ul>
+<li>Explicit<ul>
+<li>A process terminates</li>
+<li><code>Yield</code></li>
+</ul>
+</li>
+<li>Implicit<ul>
+<li>Mutual exclusion</li>
+<li><code>AWAIT</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Asynchronous<ul>
+<li>Preemption<ul>
+<li>Priority handling</li>
+<li>Time-slicing</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="coroutines-synchronous">Coroutines (Synchronous)</h4>
+<ul>
+<li>Synchronous context switch</li>
+<li>Context switch:<ul>
+<li>Replace <em><span class="caps">SP</span></em> and <em><span class="caps">FP</span></em> of old process with <em><span class="caps">SP</span></em> and <em><span class="caps">FP</span></em> of new process</li>
+<li><em><span class="caps">PC</span></em> needs also to be adjusted</li>
+</ul>
+</li>
+<li>Stack can be used to identify process</li>
+</ul>
+<h4 id="asynchronous-context-switch">Asynchronous Context Switch</h4>
+<ul>
+<li>Needs to save much more than for a synchronous context switch</li>
+<li>Save <em>all registers</em> (copy state)</li>
+</ul>
+<h3 id="synchronisation">Synchronisation</h3>
+<h4 id="object-locking">Object Locking</h4>
+<ul>
+<li>
+<p>Object descriptors (added by system): Object with mutual exclusion contain additional fields</p>
+<ul>
+<li><code>headerLock: BOOLEAN;</code></li>
+<li><code>lockedBy: Process;</code></li>
+<li><code>awaitingLock: ProcessQueue;</code></li>
+<li><code>awaitingCondition: ProcessQueue;</code></li>
+</ul>
+</li>
+<li>
+<p>Locking (Procedure <code>Lock</code>)</p>
+<ul>
+<li>Try to acquire object<ul>
+<li>when we have it, we can change the data structure</li>
+<li>if we don’t have it (we need to give up control)<ul>
+<li>Synchronous switching to an other process</li>
+<li><code>Select</code> and <code>SwitchTo</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Unlocking (Procedure <code>Unlock</code>)<ul>
+<li>When giving up a lock all conditions need to be evaluated again (signal-and-exit)</li>
+<li>Otherwise the opposite of locking</li>
+</ul>
+</li>
+<li>Wait Conditions (<code>AWAIT</code>)<ul>
+<li>Internally boxed into a procedure (<code>PROCEDURE $Condition(fp: ADDRESS): BOOLEAN;</code>)</li>
+<li>Stack frame is needed in condition: <em><span class="caps">FP</span></em></li>
+<li><code>AWAIT</code> code: put condition on await queue</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Side-effects in <code>AWAIT</code> conditions are dangerous!</p>
+</blockquote>
+<h4 id="priority-inversion">Priority Inversion</h4>
+<p>Example:</p>
+<ul>
+<li>3 processes, 1 shared resource<ul>
+<li>P1: low</li>
+<li>P2: high</li>
+<li>P3: medium</li>
+<li>R: shared resource</li>
+</ul>
+</li>
+<li>P1 locks R</li>
+<li>P2 tries to lock R (needs to wait)</li>
+<li>P3 preempts P1<ul>
+<li>P1 can’t release R</li>
+<li>P2 can’t continue until P1 releases R</li>
+</ul>
+</li>
+</ul>
+<p><img alt="Priority Inversion" class="img-fluid" src="/images/syscon_priority_inversion.png"/></p>
+<p>This image is taken from the lecture slides provided by Felix Friedrich</p>
+<h4 id="priority-inheritance">Priority Inheritance</h4>
+<ul>
+<li>One possibility to cope with priority inversion</li>
+<li>The priority of each process holding a lock to a resource is increased to the highest priority of all waiting processes (for the lock)</li>
+<li>Need to walk the graph of locks and processes</li>
+</ul>
+<!-- End of Notes Week 7 -->
+<!-- Beginning of Notes Week 8 -->
+<h3 id="lock-free-programming">Lock-Free Programming</h3>
+<p>Problems with Locks</p>
+<ul>
+<li>Deadlocks</li>
+<li>Livelocks</li>
+<li>Starvation</li>
+</ul>
+<p>Different Goals</p>
+<ul>
+<li>Parallelism</li>
+<li>Progress Guarantees</li>
+<li>Reentrancy</li>
+<li>Granularity</li>
+<li>Fault Tolerance</li>
+</ul>
+<p>Definition of Lock-Freedom</p>
+<blockquote>
+<p>At least one algorithm (process, thread) makes progress, even if others run concurrently, fail or get suspended.</p>
+</blockquote>
+<ul>
+<li>Starvation can still happen</li>
+</ul>
+<p>Definition of Wait-Freedom</p>
+<blockquote>
+<p>Each algorithm makes eventually progress.</p>
+</blockquote>
+<ul>
+<li>Implies freedom from starvation</li>
+</ul>
+<p>Progress Conditions:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th>Blocking</th>
+<th>Non-Blocking</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Someone make progress</td>
+<td>Deadlock-free</td>
+<td>Lock-free</td>
+</tr>
+<tr>
+<td>Everyone makes progress</td>
+<td>Starvation-free</td>
+<td>Wait-free</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Lock-free programming basically makes loop around <span class="caps">CAS</span></li>
+<li>Overflows (i.e <span class="caps">INTEGER</span>) is critical</li>
+</ul>
+<h4 id="a2">A2</h4>
+<h5 id="goals">Goals</h5>
+<ul>
+<li>Lock Freedom<ul>
+<li>Progress Guarantees</li>
+<li>Reentrant Algorithms</li>
+</ul>
+</li>
+<li>Portability<ul>
+<li>Hardware Independence</li>
+<li>Simplicity, Maintenance</li>
+</ul>
+</li>
+</ul>
+<h5 id="guiding-principles">Guiding Principles</h5>
+<ul>
+<li>Use <em>implicit cooperative multitasking</em></li>
+<li>no virtual memory</li>
+<li>possible optmizations are limited</li>
+<li>Co-design of <span class="caps">OS</span>, Compiler and Programming Language</li>
+</ul>
+<h5 id="lock-free-kernel">Lock-Free Kernel</h5>
+<ul>
+<li>Needs lock-free queue</li>
+<li>Compare-And-Swap (<span class="caps">CAS</span>) is implemented <em>wait-free</em> in hardware</li>
+</ul>
+<h5 id="memory-model-for-lock-free-active-oberon">Memory Model for Lock-Free Active Oberon</h5>
+<ol>
+<li>Data shared between two or more activities at the same time has to be either<ul>
+<li>protected by <code>EXCLUSIVE</code> blocks or</li>
+<li>read or modified using the <em>compare-and-swap</em> operation</li>
+</ul>
+</li>
+<li>Changed shared data is visible to other activities after<ul>
+<li>leaving an <code>EXCLUSIVE</code> block or</li>
+<li>executing a <em>compare-and-swap</em> operation</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li><code>CAS</code> is an operation in the programming language</li>
+</ul>
+<p>Declaration:</p>
+<div class="highlight"><pre><span></span><code><span class="k">PROCEDURE</span> <span class="nf">CAS</span><span class="p">(</span><span class="n">variable</span><span class="o">,</span> <span class="n">old</span><span class="o">,</span> <span class="k">new</span><span class="o">:</span> <span class="n">BaseType</span><span class="p">)</span><span class="o">:</span> <span class="n">BaseType</span>
+</code></pre></div>
+<ul>
+<li>Performance of <code>CAS</code><ul>
+<li>On the <span class="caps">HW</span> level <code>CAS</code> triggers a memory barrier</li>
+<li>Performance suffers with increasing number of contenders (contention)</li>
+</ul>
+</li>
+</ul>
+<h4 id="aba-problem"><span class="caps">ABA</span> Problem</h4>
+<p>The <a href="https://en.wikipedia.org/wiki/ABA_problem"><span class="caps">ABA</span> Problem</a> occurs when one thread
+fails to recognise that a memory location was
+modified temporarily by another thread and therefore erroneously assumes
+that the overall state has not been changed.</p>
+<p><img alt="ABA Problem" class="img-fluid" src="/images/syscon_aba_problem.png"/></p>
+<p>This image is taken from the lecture slides provided by Felix Friedrich</p>
+<ul>
+<li>The <span class="caps">ABA</span> Problem makes it difficult to reuse nodes in a stack structure<ul>
+<li>Possible to allocate always new memory, but it’s expensive</li>
+</ul>
+</li>
+<li>Solution: hazard pointers</li>
+</ul>
+<h5 id="hazard-pointers">Hazard Pointers</h5>
+<ul>
+<li><span class="caps">ABA</span> Problem because of reuse of pointers<ul>
+<li>Pointer <em>P</em> that has been read by one thread <em>X</em> but not yet written by same thread</li>
+<li>Pointer <em>P</em> is written by other thread <em>Y</em> between reading and writing of first thread <em>X</em></li>
+</ul>
+</li>
+<li>[Hazard pointers](https://en.wikipedia.org/wiki/Hazard_pointer:<ul>
+<li>Each lock-free data structure has an array (hazard array) of the size of number of threads (n=number of threads)</li>
+<li>Before <em>X</em> reads <em>P</em>, it marks it hazardous in the hazard array of data structure (e.g. the stack)</li>
+<li>When finished (after the <code>CAS</code>), process <em>X</em> removes <em>P</em> from the hazard array</li>
+<li>Before a process <em>Y</em> tries to reuse <em>P</em>, it checks all entries of the hazard array</li>
+</ul>
+</li>
+<li>Hazard pointers don’t solve problem when several pointers need to be changed at same time<ul>
+<li>i.e Enqueue/Dequeue</li>
+<li>Solution: use <em>sentinel</em><ul>
+<li>Notion of helping other threads</li>
+<li>Employ Hazard pointers</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- See Notes Week 8 p. 3 45:00 -->
+<h3 id="cooperative-multitasking-implicit">Cooperative Multitasking (implicit)</h3>
+<ul>
+<li>Compiler automatically inserts code for cooperative multitasking (implicit)</li>
+<li>Each process has a quantum</li>
+</ul>
+<p>At regular intervals, the compiler inserts code to decrease the quantum and calls the scheduler if necessary</p>
+<div class="highlight"><pre><span></span><code><span class="w">   </span><span class="nf">sub</span><span class="w">    </span><span class="p">[</span><span class="nb">rcx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">88</span><span class="p">],</span><span class="w"> </span><span class="mi">10</span><span class="w">   </span><span class="c1">; decrement quantum by 10</span><span class="w"></span>
+<span class="w">   </span><span class="nf">jge</span><span class="w">    </span><span class="nv">skip</span><span class="w">             </span><span class="c1">; check if it is negative (jump if greater)</span><span class="w"></span>
+<span class="w">   </span><span class="nf">call</span><span class="w">   </span><span class="nv">Switch</span><span class="w">           </span><span class="c1">; perform task switch</span><span class="w"></span>
+<span class="nl">skip:</span><span class="w"></span>
+<span class="w">   </span><span class="c1">; ...</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li>Uncooperative block (<code>UNCOOPERATIVE</code>): Guarantee that no scheduling happens<ul>
+<li>Not like a <em>lock</em> different processors can execute the code in parallel</li>
+<li>like disabling interrupts</li>
+</ul>
+</li>
+<li>Cons<ul>
+<li>Small overhead of inserted code</li>
+<li>Sacrifice register (<code>rcx</code>)</li>
+</ul>
+</li>
+<li>Guarantees<ul>
+<li>Max number of parallel execution of uncooperative code is number of processors</li>
+<li>Hazard pointer can be associated with processor (instead of processes)</li>
+<li>Search time constant: thread-local storage → processor local storage</li>
+</ul>
+</li>
+</ul>
+<h4 id="interrupts">Interrupts</h4>
+<ul>
+<li>Interrupt handlers are modeled as <em>virtual</em> processors</li>
+<li>M = # of physical processors + # of potentially concurrent interrupts</li>
+</ul>
+<!-- End of Week 8 -->
+<!-- Beginning of Week 9 -->
+<h4 id="queue-data-structures">Queue Data Structures</h4>
+<p><img alt="Queue Data Structures" class="img-fluid" src="/images/syscon_queue_data_structure.png"/></p>
+<p>This image is taken from the lecture slides provided by Felix Friedrich</p>
+<ul>
+<li>Hazard Pointers: in use (writing)</li>
+<li>Pool: Reuse nodes that are not used anymore</li>
+<li>Lock-free but not wait-free (starvation possible)</li>
+<li>if not possible to en-/dequeue: help other threads (processors)</li>
+</ul>
+<h5 id="scheduling-activities">Scheduling (Activities)</h5>
+<div class="highlight"><pre><span></span><code><span class="k">TYPE</span> <span class="n">Activity</span><span class="o">*</span> <span class="o">=</span> <span class="k">OBJECT</span> <span class="cm">{DISPOSABLE}</span> <span class="p">(</span><span class="n">Queues</span><span class="o">.</span><span class="n">Item</span><span class="p">)</span> <span class="cm">(* Queues.Item accessed via activity register *)</span>
+<span class="k">VAR</span>
+    <span class="cm">(* access to current processor *)</span>
+    <span class="cm">(* stack management *)</span>
+    <span class="cm">(* quantum and scheduling *)</span>
+    <span class="cm">(* active object *)</span>
+<span class="k">END</span> <span class="n">Activity</span><span class="o">;</span>
+</code></pre></div>
+<h5 id="task-switch-finalizer">Task Switch Finalizer</h5>
+<p>Finest granular protection makes <strong>races</strong> possible that did not occur previously:</p>
+<p>Need to pass information to the new thread.</p>
+<div class="highlight"><pre><span></span><code><span class="n">current</span> <span class="o">:=</span> <span class="n">GetCurrentTask</span><span class="p">()</span>
+<span class="n">next</span> <span class="o">:=</span> <span class="n">Dequeue</span><span class="p">(</span><span class="n">readyqueue</span><span class="p">)</span>
+<span class="n">Enqueue</span><span class="p">(</span><span class="n">current</span><span class="o">,</span> <span class="n">readyqueue</span><span class="p">)</span>
+<span class="cm">(* Here an other thread can dequeue and run (on the stack of)</span>
+<span class="cm">   the currently executing thread! *)</span>
+<span class="n">SwitchTo</span><span class="p">(</span><span class="n">next</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>When switching to new thread<ul>
+<li>Enqueue runs on new thread</li>
+<li>Call finalizer of previous thread</li>
+</ul>
+</li>
+</ul>
+<p>Solution with finalizer:</p>
+<div class="highlight"><pre><span></span><code><span class="n">SwitchTo</span> <span class="p">(</span><span class="n">nextActivity</span><span class="o">,</span> <span class="n">Enqueue</span><span class="o">,</span>  <span class="cm">(* Enqueue runs on new thread *)</span>
+          <span class="n">ADDRESS</span> <span class="k">OF</span> <span class="n">readyQueue</span><span class="p">[</span><span class="n">currentActivity</span><span class="o">.</span><span class="n">priority</span><span class="p">])</span><span class="o">;</span>
+<span class="n">FinalizeSwitch</span><span class="o">;</span> <span class="cm">(* Calls finalizer of previous thread *)</span>
+</code></pre></div>
+<h4 id="stack-management_1">Stack Management</h4>
+<ul>
+<li>Stacks organized as Heap Blocks</li>
+<li>Stack check instrumented at beginning of procedure</li>
+<li>Stack expansion is possible</li>
+<li>Possibilities to expand stack:<ol>
+<li>Allocate more memory for stack, copy old stack to beginning of new (pointers to stack need to be updated <code>VAR</code> parameters)</li>
+<li>Manage stack in a linked list, link to new portion of stack from the old one: <code>ReturnToStackSegment</code> function needed to go back to previous stack segment</li>
+</ol>
+</li>
+</ul>
+<h5 id="interrupts_1">Interrupts</h5>
+<ul>
+<li>First Level <span class="caps">IRQ</span> by non-portable <span class="caps">CPU</span> module</li>
+<li>Second level <span class="caps">IRQ</span> handling with activities</li>
+</ul>
+<p>Wait for interrupt:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Interrupts</span><span class="o">.</span><span class="n">Await</span><span class="p">(</span><span class="n">interrupt</span><span class="p">)</span><span class="o">;</span>
+</code></pre></div>
+<p>First level <span class="caps">IRQ</span> code affecting scheduler queues runs on a virtual processor</p>
+<div class="highlight"><pre><span></span><code><span class="k">PROCEDURE</span> <span class="nf">Handle</span> <span class="p">(</span><span class="kp">index</span><span class="o">:</span> <span class="n">SIZE</span><span class="p">)</span><span class="o">;</span>
+<span class="k">BEGIN</span> <span class="cm">{UNCOOPERATIVE, UNCHECKED}</span>
+    <span class="k">IF</span> <span class="n">previousHandlers</span><span class="p">[</span><span class="kp">index</span><span class="p">]</span> <span class="err">#</span> <span class="k">NIL</span> <span class="k">THEN</span>
+        <span class="n">previousHandlers</span><span class="p">[</span><span class="kp">index</span><span class="p">]</span> <span class="p">(</span><span class="kp">index</span><span class="p">)</span>
+    <span class="k">END</span><span class="o">;</span>
+    <span class="n">Activities</span><span class="o">.</span><span class="n">CallVirtual</span><span class="p">(</span><span class="n">NotifyNext</span><span class="o">,</span>
+                           <span class="n">ADDRESS</span> <span class="k">OF</span> <span class="n">awaitingQueues</span><span class="p">[</span><span class="kp">index</span><span class="p">]</span><span class="o">,</span>
+                           <span class="n">processors</span><span class="p">[</span><span class="kp">index</span><span class="p">])</span><span class="o">;</span>
+<span class="k">END</span> <span class="n">Handle</span><span class="o">;</span>
+</code></pre></div>
+<ul>
+<li>Very powerful to write <span class="caps">IRQ</span> handlers in to levels</li>
+<li>Possible with cooperative multitasking</li>
+</ul>
+<h5 id="lock-free-memory-management">Lock-Free Memory Management</h5>
+<ul>
+<li>Allocation/Deallocation by lock-free algorithms</li>
+<li>Buddy system: old approach but simple when returning blocks and merging them in free memory</li>
+<li>Mark-and-sweep<ol>
+<li>Traverse heap and mark used blocks</li>
+<li>Remove all unmarked blocks</li>
+</ol>
+</li>
+<li>Multiple garbage collectors can run in parallel</li>
+<li>Precise: doesn’t delete used blocks by accident (can happen in <span class="caps">GC</span> with heuristics)</li>
+<li>Optional</li>
+<li>Incremental: Possible to run on a subset all blocks (on different parts of heap)</li>
+<li>Concurrent: <span class="caps">GC</span> can run in concurrency of a mutating thread</li>
+<li>Parallel: Several instances of the <span class="caps">GC</span> can run at once</li>
+</ul>
+<p>Data Structures:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th>Global</th>
+<th>Per Object</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mark Bit</td>
+<td>Cycle Count</td>
+<td>Cycle Count</td>
+</tr>
+<tr>
+<td>Marklist</td>
+<td>Marked First</td>
+<td>Next Marked</td>
+</tr>
+<tr>
+<td>Watchlist</td>
+<td>Watched First</td>
+<td>Next Watched</td>
+</tr>
+<tr>
+<td>Root Set</td>
+<td>Global References</td>
+<td>Local Refcount</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Cycle Count: used to mark visited objects</li>
+<li>Mark List: all objects that were marked previously</li>
+<li>Watch List: all candidates that could be garbage collected</li>
+<li>Root Set: where to start to find all reachable object</li>
+</ul>
+<h3 id="portability">Portability</h3>
+<ul>
+<li>Lock-free A2 kernel written exclusively in a high-level language</li>
+<li>No timer interrupt required (cooperative multitasking): scheduler hardware independent</li>
+<li>No virtual memory<ul>
+<li>no separate address spaces</li>
+<li>everything runs in user mode, all the time</li>
+</ul>
+</li>
+<li>Hardware-dependent functions (<span class="caps">CAS</span>) are pushed into the language</li>
+<li>Almost completely portable:<ul>
+<li>Some minimal stub written in assembly code to initialize memory mappings and initialize all processors</li>
+</ul>
+</li>
+</ul>
+<!-- End of Notes Week 9 -->
+<!-- Beginning of Notes Week 10 -->
+<h1 id="oberon-risc-case-study-3">Oberon <span class="caps">RISC</span> (Case Study 3)</h1>
+<p><a href="http://www.projectoberon.com/">Project Oberon</a></p>
+<ul>
+<li><span class="caps">RISC</span> architecture</li>
+<li>Oberon <span class="caps">OS</span></li>
+<li>Motivation: Build system from scratch</li>
+<li>Understanding a big amount of details</li>
+<li>Commercial systems are far from perfect</li>
+<li>Need good tools for programming</li>
+<li>Competence for building from Scratch: <span class="caps">HW</span>, application, how it really works</li>
+<li><span class="quo">‘</span>lean systems’ approach</li>
+<li>Build from scratch<ul>
+<li>reduce complexity: no ‘baggage’</li>
+<li>choices of different implementation</li>
+<li>design based only on problem domain and experience</li>
+<li>less surprises!</li>
+<li>flexible solutions</li>
+<li>more than customer needs</li>
+<li>competitive advantages</li>
+</ul>
+</li>
+<li>Why not build from scratch<ul>
+<li>re-inventing the wheel</li>
+<li>fundamental knowledge required</li>
+<li>more actual work (the first time)</li>
+<li>restricted component choices</li>
+<li>not for short-term!</li>
+<li>team work: communication!</li>
+</ul>
+</li>
+<li>Configurable Hardware<ul>
+<li><span class="caps">PAL</span>’s / <span class="caps">GAL</span>’s / <span class="caps">CPLD</span>’s</li>
+<li><span class="caps">LUT</span> and interconnect</li>
+<li>Current: <span class="caps">FPGA</span></li>
+<li>loadable configuration (not like <span class="caps">ASIC</span>/<span class="caps">VLSI</span>)</li>
+</ul>
+</li>
+<li>Introduction to <span class="caps">HDL</span>:<ul>
+<li>Simulation / Synthesis</li>
+<li>Verilog / <span class="caps">VHDL</span></li>
+<li>Developed at <span class="caps">ETH</span>: Lola, ActiveCells</li>
+<li>Very different from Programming Languages</li>
+<li>Things happen in parallel (not serial)!</li>
+<li>Very difficult for high frequencies</li>
+</ul>
+</li>
+<li><span class="caps">RISC</span> architecture (overview)<ul>
+<li><a href="https://www.inf.ethz.ch/personal/wirth/FPGA-relatedWork/RISC-Arch.pdf">Documentation</a></li>
+<li>Developed by N. Wirth</li>
+<li>Used for book “Compiler Construction” by N. Wirth</li>
+<li><span class="caps">RISC</span> vs. <span class="caps">CISC</span></li>
+<li>Harward vs. Von Neumann</li>
+<li>Registers vs. Stack Machine</li>
+<li><span class="caps">FPU</span></li>
+<li><span class="caps">ALU</span></li>
+<li>Shifter (Barrel-Shifter)</li>
+<li>Implemented in Verilog</li>
+<li>3 kinds of instructions
+        - arithmetic/logic
+        - load/store
+        - floating-point</li>
+<li><span class="caps">RISC</span> processor executes <span class="caps">SW</span></li>
+<li><span class="caps">RISC0</span>:<ul>
+<li>Memory addressed as words</li>
+</ul>
+</li>
+<li><span class="caps">RISC5</span>:<ul>
+<li>Memory can be addressed as bytes</li>
+<li>Adds external static <span class="caps">RAM</span></li>
+<li><span class="caps">FPU</span></li>
+<li><span class="caps">SPI</span>, <span class="caps">PS</span>/2, <span class="caps">GPIO</span>, <span class="caps">RS</span>-233, 1 ms timer</li>
+</ul>
+</li>
+<li>Top of stack: -64</li>
+<li>Flags:<ul>
+<li>Not equal</li>
+<li>Zero</li>
+<li>Carry/Borrow</li>
+<li>Overflow</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- End of Notes Week 10 -->
+<!-- Beginning of Notes Week 11 -->
+<ul>
+<li>Co-design: <span class="caps">OS</span>/<span class="caps">HW</span>/Compiler</li>
+<li>Minimalistic</li>
+<li>Best practices from <span class="caps">CS</span></li>
+<li>Architecture/Features<ul>
+<li>Fast file system, module loader, garbage collector</li>
+<li>High-level, type-save language</li>
+<li>files</li>
+<li><code>Module.Command[params]</code> execution from any visual text</li>
+<li>self hosted, small (~200kB)</li>
+</ul>
+</li>
+<li>User Interface<ul>
+<li>Mouse oriented, three buttons, “interclicking”</li>
+</ul>
+</li>
+<li>Oberon Core System<ul>
+<li>Inner/Outer core</li>
+<li>File system: FileDir, File</li>
+<li>Networking</li>
+<li>Outer core: input, viewers, fonts, text, …</li>
+<li>Compiler: recursive descent, single pass</li>
+<li><span class="caps">RS</span>-232, <span class="caps">SCC</span>, Net</li>
+<li>no memory protection</li>
+<li>possible to draw over other windows</li>
+<li>no auto save</li>
+</ul>
+</li>
+<li>Boot loader<ul>
+<li>loads boot file (inner core) form <span class="caps">SD</span>-card (or serial port)</li>
+</ul>
+</li>
+<li>Simple to build own tools build on Oberon System</li>
+<li><a href="https://github.com/pdewacht/oberon-risc-emu"><span class="caps">RISC</span> emulator</a> available</li>
+</ul>
+<!-- End of Notes Week 11 -->
+<!-- Beginning of Notes Week 12 -->
+<h1 id="active-cells-case-study-4">Active Cells (Case Study 4)</h1>
+<ul>
+<li>
+<p>Custom design of Multi-Processor System</p>
+<ul>
+<li>Cores</li>
+<li>Caches</li>
+<li>Bus</li>
+<li>Memory</li>
+</ul>
+</li>
+<li>
+<p>Each process owns it’s core</p>
+<ul>
+<li>Scheduling unnecessary</li>
+<li>Caches unnecessary</li>
+<li>some restrictions / some improvements</li>
+</ul>
+</li>
+<li>
+<p>Tiny Register Machines (<span class="caps">TRM</span>)</p>
+<ul>
+<li><span class="caps">TRM</span> interconnects</li>
+<li><span class="caps">SW</span>/<span class="caps">HW</span> Co-design</li>
+<li>Active Cells Tool-chain</li>
+</ul>
+</li>
+<li>Multi-core Systems Challenges<ul>
+<li>Cache coherence</li>
+<li>Shared memory communication bottleneck</li>
+<li>Thread synchronization overhead</li>
+<li>Difficult to predict behaviour and timing</li>
+<li>Hard to scale</li>
+<li><a href="https://de.wikipedia.org/wiki/Partitioned_Global_Address_Space">Partitioned Global Address Space</a></li>
+</ul>
+</li>
+<li>Operating System Challenges<ul>
+<li>Processor Time Sharing<ul>
+<li>Interrupts</li>
+<li>Context Switches</li>
+<li>Thread Synchronisation</li>
+</ul>
+</li>
+<li>Memory Sharing<ul>
+<li>Inter-process: Paging</li>
+<li>Intra-process, Inter-Thread: Monitors</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Project Supercomputer in the Pocket<ul>
+<li>Focus: Streaming Applications (i.e <span class="caps">ECG</span>)</li>
+<li>Stream Parallelism (pipelining)</li>
+<li>Task parallelism / data parallelism</li>
+</ul>
+</li>
+<li>On-chip distributed system<ul>
+<li>Replace shared memory by local memory<ul>
+<li>Message passing for interaction between processes</li>
+</ul>
+</li>
+<li>Separate processor for each process<ul>
+<li>Very simple processors</li>
+<li>No scheduling, no interrupts</li>
+<li>Application-aware processors</li>
+</ul>
+</li>
+<li>Minimal operating system</li>
+<li>Conceptually no memory bottleneck</li>
+<li>Higher reliability and predictability by design</li>
+</ul>
+</li>
+</ul>
+<h2 id="tiny-register-machine-trm">Tiny Register Machine (<span class="caps">TRM</span>)</h2>
+<ul>
+<li>Extremely simple processor on <span class="caps">FPGA</span></li>
+<li>Hardware architecture</li>
+<li>Two-stage pipeline</li>
+<li>Each <span class="caps">TRM</span> contains<ul>
+<li><span class="caps">ALU</span> and shifter</li>
+<li>32-bit operands and results stored in a bank of 2 * 8 registers</li>
+<li>Local data memory: d * 512 words of 32 bits</li>
+<li>Local program memory: i * 1024 instructions with 32 bits</li>
+<li>7 general purpose registers</li>
+<li>Register <em>H</em> for storing the high 32 bits of a product</li>
+<li>4 conditional registers: <em>C</em>, <em>N</em>, <em>V</em>, <em>Z</em></li>
+<li>no chaches
+<span class="caps">TRM</span> Machine Language</li>
+</ul>
+</li>
+<li>Machine language: binary representation of instructions</li>
+<li>18-bit instructions</li>
+<li>Three instruction types:<ol>
+<li>Type a: arithmetical and logical operations</li>
+<li>Type b: load and store instructions</li>
+<li>Type c: branch instructions (for jumping)</li>
+</ol>
+</li>
+<li>Instruction Encoding: Offset and Immediate values have restricted width<ul>
+<li>Long jumps constructed from chains</li>
+<li>Immediate store/load with shifts</li>
+</ul>
+</li>
+<li>Variants of TRMs<ul>
+<li><span class="caps">FTRM</span>: includes <span class="caps">FPU</span></li>
+<li><span class="caps">VTRM</span>: includes vector processing unit<ul>
+<li>8 x 8-words registers</li>
+<li>available with/without <span class="caps">FPU</span></li>
+</ul>
+</li>
+<li><span class="caps">TRM</span> with <span class="caps">SW</span> configurable instruction width</li>
+</ul>
+</li>
+<li>First Experiment: <span class="caps">TRM12</span><ul>
+<li>Message passing architecture</li>
+<li>Bus based on chip interconnect</li>
+<li>Not scalable</li>
+</ul>
+</li>
+<li>Second Experiment: Ring of 12 TRMs<ul>
+<li><span class="caps">TRM</span> ↔ Adapter ↔ Ring</li>
+<li>Not scalable</li>
+<li>Large delays</li>
+</ul>
+</li>
+</ul>
+<h2 id="active-cells">Active Cells</h2>
+<ul>
+<li>Computing model, programming language</li>
+<li>Compiler, synthesizer, hardware library, simulator</li>
+<li>Programmable <span class="caps">HW</span> (<span class="caps">FPGA</span>)</li>
+<li>One tool-chain for <span class="caps">SW</span> and <span class="caps">HW</span></li>
+<li>Consequences<ul>
+<li>No global memory</li>
+<li>No processor sharing</li>
+<li>No peculiarities of specific processor</li>
+<li>No predefined topology (NoC)</li>
+<li>No interrupts</li>
+<li>No operation system</li>
+</ul>
+</li>
+<li>Computation units: <em>Cells</em></li>
+<li>Different parallelism levels:<ul>
+<li>Communication Structure (Pipelining, Parallel Execution)</li>
+<li>Cell Capabilities (Vector Computing, Simultaneous Execution)</li>
+</ul>
+</li>
+<li>Inspired by: Kahn Process Networks, Dataflow Programming, <span class="caps">CSP</span></li>
+<li>Active Cell Component<ul>
+<li>Active Cell<ul>
+<li>Object with private state space</li>
+<li>Integrated control thread(s)</li>
+<li>Connected via channels</li>
+</ul>
+</li>
+<li>Cell Net<ul>
+<li>Network of communication cells</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Active Cells<ul>
+<li>Scope and environment for a running isolated process</li>
+<li>Cells do not share memory</li>
+<li>Defined as types with port parameters</li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">TYPE</span>
+    <span class="n">Adder</span> <span class="o">=</span> <span class="n">cell</span> <span class="p">(</span><span class="n">in1</span><span class="o">,</span> <span class="n">in2</span><span class="o">:</span> <span class="n">port</span> <span class="k">in</span><span class="o">;</span> <span class="bp">result</span><span class="o">:</span> <span class="n">port</span> <span class="n">out</span><span class="p">)</span><span class="o">;</span> <span class="cm">(* communication ports *)</span>
+    <span class="k">VAR</span> <span class="n">summand1</span><span class="o">,</span> <span class="n">summand2</span><span class="o">:</span> <span class="kt">integer</span><span class="o">;</span>
+    <span class="k">BEGIN</span>
+        <span class="n">in1</span> <span class="err">?</span> <span class="n">summand1</span><span class="o">;</span> <span class="cm">(* blocking receive *)</span>
+        <span class="n">in2</span> <span class="err">?</span> <span class="n">summand2</span><span class="o">;</span>
+        <span class="bp">result</span> <span class="err">!</span> <span class="n">summand1</span> <span class="o">+</span> <span class="n">summand2</span><span class="o">;</span> <span class="cm">(* non-blocking send *)</span>
+    <span class="k">END</span> <span class="n">Adder</span><span class="o">;</span>
+</code></pre></div>
+<p>Cell Constructors to parameterize cells during allocation time:</p>
+<div class="highlight"><pre><span></span><code><span class="k">TYPE</span>
+    <span class="n">Filter</span> <span class="o">=</span> <span class="n">cell</span> <span class="p">(</span><span class="k">in</span><span class="o">:</span> <span class="n">port</span> <span class="k">in</span><span class="o">;</span> <span class="bp">result</span><span class="o">:</span> <span class="n">port</span> <span class="n">out</span><span class="p">)</span><span class="o">;</span>
+    <span class="k">VAR</span> <span class="o">...;</span> <span class="n">filterLength</span><span class="o">:</span> <span class="kt">integer</span><span class="o">;</span>
+    <span class="k">PROCEDURE</span> <span class="err">&amp;</span> <span class="nf">Init</span><span class="p">(</span><span class="n">filterLength</span><span class="o">:</span> <span class="kt">integer</span><span class="p">)</span>  <span class="cm">(* constructor *)</span>
+    <span class="k">BEGIN</span> <span class="k">self</span><span class="o">.</span><span class="n">filterLength</span> <span class="o">:=</span> <span class="n">filterLength</span>
+    <span class="k">END</span> <span class="n">Init</span><span class="o">;</span>
+<span class="k">BEGIN</span>
+    <span class="cm">(* ... filter action ... *)</span>
+<span class="k">END</span> <span class="n">Filter</span><span class="o">;</span>
+
+<span class="k">VAR</span> <span class="n">filter</span><span class="o">:</span> <span class="n">Filter</span><span class="o">;</span>
+<span class="k">BEGIN</span>
+    <span class="o">....</span> <span class="k">new</span><span class="p">(</span><span class="n">filter</span><span class="o">,</span> <span class="mi">32</span><span class="p">)</span><span class="o">;</span> <span class="cm">(* initialization parameter filterlength = 32 *)</span>
+</code></pre></div>
+<p>Cells can be parametrized with capabilities or non-default values:</p>
+<div class="highlight"><pre><span></span><code><span class="k">TYPE</span>
+  <span class="cm">(* Cell is a VectorTRM with 2k of Data Memory and has access to DDR2 memory *)</span>
+  <span class="n">Filter</span> <span class="o">=</span> <span class="n">cell</span> <span class="cm">{Vector, DataMemory(2048), DDR2}</span> <span class="p">(</span><span class="k">in</span><span class="o">:</span> <span class="n">port</span> <span class="k">in</span> <span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="o">;</span> <span class="bp">result</span><span class="o">:</span> <span class="n">port</span> <span class="n">out</span><span class="p">)</span><span class="o">;</span>
+                                         <span class="cm">(* in port is implemented with width of 64 bits *)</span>
+  <span class="k">VAR</span> <span class="o">...</span>
+  <span class="k">BEGIN</span>
+      <span class="cm">(* ... filter action ... *)</span>
+  <span class="k">END</span> <span class="n">Filter</span><span class="o">;</span>
+</code></pre></div>
+<ul>
+<li>Hierarchic Composition: Cell Nets<ul>
+<li>Allocation of cells: <code>new</code> statement</li>
+<li>Connection of cells: <code>connect</code> statement</li>
+<li>Ports of cells can be delegated to the ports of the net: <code>delegate</code> statement</li>
+<li>Terminal or closed Cellnets (i.e Cellnets without ports) can be deployed to hardware</li>
+</ul>
+</li>
+</ul>
+<p>Terminal Cellnet Example</p>
+<div class="highlight"><pre><span></span><code><span class="n">cellnet</span> <span class="n">Example</span><span class="o">;</span>
+<span class="n">import</span> <span class="n">RS232</span><span class="o">;</span>
+<span class="k">TYPE</span>
+    <span class="n">UserInterface</span> <span class="o">=</span> <span class="n">cell</span> <span class="cm">{RS232}</span><span class="p">(</span><span class="n">out1</span><span class="o">,</span> <span class="n">out2</span><span class="o">:</span> <span class="n">port</span> <span class="n">out</span><span class="o">;</span> <span class="k">in</span><span class="o">:</span> <span class="n">port</span> <span class="k">in</span><span class="p">)</span>
+    <span class="cm">(* ... *)</span>
+    <span class="k">END</span> <span class="n">UserInterface</span><span class="o">;</span>
+
+    <span class="n">Adder</span> <span class="o">=</span> <span class="n">cell</span><span class="p">(</span><span class="n">in1</span><span class="o">,</span> <span class="n">in2</span><span class="o">:</span> <span class="n">port</span> <span class="k">in</span><span class="o">;</span> <span class="n">out</span><span class="o">:</span> <span class="n">port</span> <span class="n">out</span><span class="p">)</span>
+    <span class="cm">(* ... *)</span>
+    <span class="k">END</span> <span class="n">Adder</span><span class="o">;</span>
+    <span class="k">VAR</span> <span class="k">interface</span><span class="o">:</span> <span class="n">UserInterface</span><span class="o">;</span> <span class="n">adder</span><span class="o">:</span> <span class="n">Adder</span>
+    <span class="k">BEGIN</span>
+        <span class="k">new</span><span class="p">(</span><span class="k">interface</span><span class="p">)</span><span class="o">;</span>
+        <span class="k">new</span><span class="p">(</span><span class="n">adder</span><span class="p">)</span><span class="o">;</span>
+        <span class="n">connect</span><span class="p">(</span><span class="k">interface</span><span class="o">.</span><span class="n">out1</span><span class="o">,</span> <span class="n">adder</span><span class="o">.</span><span class="n">in1</span><span class="p">)</span><span class="o">;</span>
+        <span class="n">connect</span><span class="p">(</span><span class="k">interface</span><span class="o">.</span><span class="n">out2</span><span class="o">,</span> <span class="n">adder</span><span class="o">.</span><span class="n">in2</span><span class="p">)</span><span class="o">;</span>
+        <span class="n">connect</span><span class="p">(</span><span class="n">adder</span><span class="o">.</span><span class="bp">result</span><span class="o">,</span> <span class="k">interface</span><span class="o">.</span><span class="k">in</span><span class="p">)</span><span class="o">;</span>
+<span class="k">END</span> <span class="n">Example</span><span class="o">.</span>
+</code></pre></div>
+<ul>
+<li>Communication between cells (<span class="caps">CSP</span>)<ul>
+<li>Receiving is blocking (<code>?</code>)</li>
+<li>Sending is non-blocking (<code>!</code>)</li>
+</ul>
+</li>
+<li>Engine Cell Made From Hardware (in <span class="caps">HW</span> library for <span class="caps">FPGA</span>)</li>
+</ul>
+<p>-Hardware Library
+    - Computation Components
+        - General purpose minimal machine: <span class="caps">TRM</span>, <span class="caps">FTRM</span>
+        - Vector machine: <span class="caps">VTRM</span>
+        - <span class="caps">MAC</span>, Filters etc.
+    - Communication Components (FIFOs)
+        - 32 * 128
+        - 512 * 128
+        - 32, 64, 128, 1k * 32
+    - Storage Components
+        - <span class="caps">DDR2</span> controller
+        - configurable DRAMs
+        - <span class="caps">CF</span> controller
+    - I/O Components
+        - <span class="caps">UART</span> controller
+        - <span class="caps">LCD</span>, <span class="caps">LED</span> controller
+        - <span class="caps">SPI</span>, <span class="caps">I2C</span> controller
+        - <span class="caps">VGA</span>, <span class="caps">DVI</span> controller</p>
+<!-- End of Notes Week 12 -->
+<!-- Beginning of Notes Week 13 -->
+<h2 id="programming-language-vs-hdl">Programming Language vs. <span class="caps">HDL</span></h2>
+<h3 id="programming-language">Programming Language</h3>
+<ul>
+<li>Sequential execution</li>
+<li>No notion of time</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="k">VAR</span> <span class="n">a</span><span class="o">,</span><span class="n">b</span><span class="o">,</span><span class="n">c</span><span class="o">:</span> <span class="kt">INTEGER</span><span class="o">;</span>
+<span class="n">a</span> <span class="o">:=</span> <span class="mi">1</span><span class="o">;</span>      <span class="cm">(* unknown *)</span>
+<span class="n">b</span> <span class="o">:=</span> <span class="mi">2</span><span class="o">;</span>      <span class="cm">(* mapping to *)</span>
+<span class="n">c</span> <span class="o">:=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">;</span>  <span class="cm">(* machine cycles *)</span>
+</code></pre></div>
+<h3 id="hardware-description-language">Hardware Description Language</h3>
+<p>Continuous execution (combinational logic):</p>
+<div class="highlight"><pre><span></span><code><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">;</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">c</span><span class="o">=</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">;</span><span class="w"> </span><span class="c1">// no</span>
+<span class="k">assign</span><span class="w"> </span><span class="n">a</span><span class="o">=</span><span class="mh">1</span><span class="p">;</span><span class="w">   </span><span class="c1">// memory</span>
+<span class="k">assign</span><span class="w"> </span><span class="n">b</span><span class="o">=</span><span class="mh">2</span><span class="p">;</span><span class="w">   </span><span class="c1">// associated</span>
+</code></pre></div>
+<p>Synchronous execution (register transfer):</p>
+<div class="highlight"><pre><span></span><code><span class="kt">reg</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">always</span><span class="w"> </span><span class="p">@</span><span class="w"> </span><span class="p">(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"></span>
+<span class="k">begin</span><span class="w"></span>
+<span class="w">    </span><span class="n">a</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">1</span><span class="p">;</span><span class="w">    </span><span class="c1">// synchronous at</span>
+<span class="w">    </span><span class="n">b</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">2</span><span class="p">;</span><span class="w">    </span><span class="c1">// rising edge</span>
+<span class="w">    </span><span class="n">c</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">;</span><span class="w">  </span><span class="c1">// of the clock</span>
+<span class="k">end</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<h2 id="singlecycle-datapath-trm">Single/Cycle Datapath (<span class="caps">TRM</span>)</h2>
+<h3 id="instruction-fetch">Instruction Fetch</h3>
+<ul>
+<li>Get value of <em><span class="caps">PC</span></em></li>
+<li>Get data from instruction memory (36-bit)<ul>
+<li>keep only upper or lower part (16-bit)</li>
+<li>depending on value of <em><span class="caps">PC</span></em></li>
+</ul>
+</li>
+<li>On clock<ul>
+<li>if reset: <em><span class="caps">PC</span></em> := 0</li>
+<li>if stall: <em><span class="caps">PC</span></em> := <em><span class="caps">PC</span></em></li>
+<li>else: <em><span class="caps">PC</span></em> := <em>pcmux</em> (set new <em><span class="caps">PC</span></em>)</li>
+</ul>
+</li>
+</ul>
+<h3 id="register-read">Register Read</h3>
+<p>Read source operands from register file</p>
+<div class="highlight"><pre><span></span><code><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">rd</span><span class="p">,</span><span class="w"> </span><span class="n">rs</span><span class="p">;</span><span class="w"></span>
+<span class="kt">wire</span><span class="w"> </span><span class="n">regWr</span><span class="p">;</span><span class="w"></span>
+<span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">rdOut</span><span class="p">,</span><span class="w"> </span><span class="n">rsOut</span><span class="p">;</span><span class="w"></span>
+<span class="n">source</span><span class="w"> </span><span class="n">register</span><span class="w"></span>
+
+<span class="c1">// register file</span>
+<span class="c1">// ...</span>
+
+<span class="k">assign</span><span class="w"> </span><span class="n">irs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">2</span><span class="o">:</span><span class="mh">0</span><span class="p">];</span><span class="w">      </span><span class="c1">// source register</span>
+<span class="k">assign</span><span class="w"> </span><span class="n">ird</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">13</span><span class="o">:</span><span class="mh">11</span><span class="p">];</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">dst</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">BL</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="mh">7</span><span class="o">:</span><span class="w"> </span><span class="n">ird</span><span class="p">;</span><span class="w"> </span><span class="c1">// destination register</span>
+</code></pre></div>
+<ul>
+<li>For <code>BL</code> the destination register is always the link register (7)</li>
+<li>Otherwise the registers are read from the instuction register (<em><span class="caps">IR</span></em>)</li>
+</ul>
+<h3 id="alu"><span class="caps">ALU</span></h3>
+<p>Compute the result via <span class="caps">ALU</span></p>
+<div class="highlight"><pre><span></span><code><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">AA</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">,</span><span class="w"> </span><span class="n">imm</span><span class="p">;</span><span class="w"></span>
+<span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">32</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">aluRes</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">assign</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">IR</span><span class="p">[</span><span class="mh">10</span><span class="p">])</span><span class="o">?</span><span class="w"> </span><span class="nl">AA:</span><span class="w"> </span><span class="p">{</span><span class="mh">22</span><span class="mb">'b0</span><span class="p">,</span><span class="w"> </span><span class="n">imm</span><span class="p">};</span><span class="w"> </span><span class="c1">// bit 10: immediate or register</span>
+
+<span class="k">assign</span><span class="w"> </span><span class="n">minusA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="err">‘</span><span class="n">b0</span><span class="p">,</span><span class="w"> </span><span class="o">~</span><span class="n">A</span><span class="p">}</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">33</span><span class="err">‘</span><span class="n">d1</span><span class="p">;</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">aluRes</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="p">(</span><span class="n">MOV</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="nl">A:</span><span class="w"></span>
+<span class="p">(</span><span class="n">ADD</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="err">‘</span><span class="n">b0</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">}</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="err">‘</span><span class="n">b0</span><span class="p">,</span><span class="w"> </span><span class="n">A</span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="p">(</span><span class="n">SUB</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="p">{</span><span class="mh">1</span><span class="err">‘</span><span class="n">b0</span><span class="p">,</span><span class="w"> </span><span class="n">B</span><span class="p">}</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">minusA</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="p">(</span><span class="n">AND</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="p">(</span><span class="n">BIC</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">A</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="p">(</span><span class="n">OR</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="p">(</span><span class="n">XOR</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="o">~</span><span class="n">A</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<h3 id="control-path">Control Path</h3>
+<div class="highlight"><pre><span></span><code><span class="n">Control</span><span class="w"> </span><span class="n">Path</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">vector</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">10</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">9</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">IR</span><span class="p">[</span><span class="mh">8</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">IR</span><span class="p">[</span><span class="mh">7</span><span class="p">];</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">17</span><span class="o">:</span><span class="mh">14</span><span class="p">];</span><span class="w"></span>
+
+<span class="k">assign</span><span class="w"> </span><span class="n">MOV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">NOT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">1</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">ADD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">2</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">SUB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">3</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">AND</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">4</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">BIC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">5</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">OR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">6</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">XOR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">7</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">MUL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">8</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">(</span><span class="o">~</span><span class="n">IR</span><span class="p">[</span><span class="mh">10</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="o">~</span><span class="n">IR</span><span class="p">[</span><span class="mh">9</span><span class="p">]);</span><span class="w"> </span><span class="k">assign</span><span class="w"> </span><span class="n">ROR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">10</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">BR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">11</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">10</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">IR</span><span class="p">[</span><span class="mh">9</span><span class="p">];</span><span class="w"> </span><span class="k">assign</span><span class="w"> </span><span class="n">LDR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">12</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">ST</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">13</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">Bc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">14</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">BL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">15</span><span class="p">);</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">LDH</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MOV</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">10</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">3</span><span class="p">];</span><span class="w"> </span><span class="k">assign</span><span class="w"> </span><span class="n">BLR</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">op</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">11</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">10</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">9</span><span class="p">];</span><span class="w"></span>
+</code></pre></div>
+<table class="table-striped table">
+<thead>
+<tr>
+<th><span class="caps">IR</span>[17:14]</th>
+<th>Function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0000</td>
+<td>B := A</td>
+</tr>
+<tr>
+<td>0001</td>
+<td>B := ~A</td>
+</tr>
+<tr>
+<td>0010</td>
+<td>B := B + A</td>
+</tr>
+<tr>
+<td>0011</td>
+<td>B := B – A</td>
+</tr>
+<tr>
+<td>0100</td>
+<td>B := B <span class="amp">&amp;</span> A</td>
+</tr>
+<tr>
+<td>0101</td>
+<td>B := B <span class="amp">&amp;</span> ~A</td>
+</tr>
+<tr>
+<td>0110</td>
+<td>B := B</td>
+</tr>
+<tr>
+<td>0111</td>
+<td>B := B ^ A</td>
+</tr>
+</tbody>
+</table>
+<h3 id="write-result-back-to-rd">Write Result Back to <code>Rd</code></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">regmux</span><span class="p">;</span><span class="w"> </span><span class="kt">wire</span><span class="w"> </span><span class="n">regwr</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// ...</span>
+
+<span class="k">assign</span><span class="w"> </span><span class="n">regwr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">BL</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">BLR</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">LDR</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">IR</span><span class="p">[</span><span class="mh">10</span><span class="p">]</span><span class="w"> </span><span class="o">|</span><span class="w"></span>
+<span class="w">    </span><span class="o">~</span><span class="p">(</span><span class="n">IR</span><span class="p">[</span><span class="mh">17</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">16</span><span class="p">])</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">BR</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">vector</span><span class="p">))</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">stall0</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">assign</span><span class="w"> </span><span class="n">regmux</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="p">(</span><span class="n">BL</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">BLR</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{{{</span><span class="mh">32</span><span class="o">-</span><span class="n">PAW</span><span class="p">}{</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">}},</span><span class="w"> </span><span class="n">nxpc</span><span class="p">}</span><span class="o">:</span><span class="w"></span>
+<span class="p">(</span><span class="n">LDR</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">IoenbReg</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nl">dmout:</span><span class="w">  </span><span class="c1">// data memory out</span>
+<span class="p">(</span><span class="n">LDR</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">IoenbReg</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="nl">InbusReg:</span><span class="w"> </span><span class="c1">// from IO</span>
+<span class="p">(</span><span class="n">MUL</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">mulRes</span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="o">:</span><span class="w"></span>
+<span class="p">(</span><span class="n">ROR</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nl">s3:</span><span class="w"></span>
+<span class="p">(</span><span class="n">LDH</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nl">H:</span><span class="w"></span>
+<span class="n">aluRes</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<h3 id="trm-stalling"><span class="caps">TRM</span> Stalling</h3>
+<ul>
+<li>Stop fetching next instruction, <em>pcmux</em> keeps the current value</li>
+<li>Disable register file write enable and memory write enable signals to avoid changing the state of the processor</li>
+<li>Only <code>LD</code> and <code>MUL</code> instructions stall the processor</li>
+<li><em>dmwe</em> signal is not affected</li>
+<li><em>regwr</em> signal is affected</li>
+</ul>
+<h3 id="load-ld">Load (<code>LD</code>)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">dmout</span><span class="p">;</span><span class="w"></span>
+<span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="nl">DAW:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">dmadr</span><span class="p">;</span><span class="w"></span>
+<span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">6</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">offset</span><span class="p">;</span><span class="w"></span>
+<span class="kt">reg</span><span class="w"> </span><span class="n">IoenbReg</span><span class="p">;</span><span class="w"></span>
+
+<span class="c1">// register file</span>
+<span class="c1">// ...</span>
+<span class="c1">// src register = lr (7) ignored: harward architecture</span>
+<span class="n">Assign</span><span class="w"> </span><span class="n">dmadr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">irs</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">7</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{{{</span><span class="n">DAW</span><span class="o">-</span><span class="mh">6</span><span class="p">}{</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">}},</span><span class="w"> </span><span class="n">offset</span><span class="p">}</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="n">AA</span><span class="p">[</span><span class="nl">DAW:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">{{{</span><span class="n">DAW</span><span class="o">-</span><span class="mh">6</span><span class="p">}{</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">}},</span><span class="w"> </span><span class="n">offset</span><span class="p">});</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">ioenb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="p">(</span><span class="n">dmadr</span><span class="p">[</span><span class="nl">DAW:</span><span class="mh">6</span><span class="p">]);</span><span class="w"> </span><span class="c1">// I/O space: uppermost 2^6 bytes in data memory</span>
+<span class="k">assign</span><span class="w"> </span><span class="n">rfWd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="n">LDR</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">IoenbReg</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="nl">dmout:</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="n">LDR</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">IoenbReg</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="nl">InbusReg:</span><span class="w"> </span><span class="c1">//from IO</span>
+<span class="w">    </span><span class="p">...;</span><span class="w"></span>
+
+<span class="k">always</span><span class="w"> </span><span class="p">@(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">IoenbReg</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ioenb</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<h3 id="store-st">Store (<code>ST</code>)</h3>
+<div class="highlight"><pre><span></span><code><span class="kt">wire</span><span class="w"> </span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="n">dmin</span><span class="p">;</span><span class="w"></span>
+<span class="kt">wire</span><span class="w"> </span><span class="n">dmwr</span><span class="p">;</span><span class="w"></span>
+<span class="c1">// register file</span>
+<span class="c1">// ...</span>
+
+<span class="n">DM</span><span class="w"> </span><span class="p">#(.</span><span class="n">BN</span><span class="p">(</span><span class="n">DMB</span><span class="p">))</span><span class="w"> </span><span class="n">dmx</span><span class="w"> </span><span class="p">(.</span><span class="n">clk</span><span class="p">(</span><span class="n">clk</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">wrDat</span><span class="p">(</span><span class="n">dmin</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">wrAdr</span><span class="p">({{{</span><span class="mh">31</span><span class="o">-</span><span class="n">DAW</span><span class="p">}{</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">}},</span><span class="n">dmadr</span><span class="p">}),</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">rdAdr</span><span class="p">({{{</span><span class="mh">31</span><span class="o">-</span><span class="n">DAW</span><span class="p">}{</span><span class="mh">1</span><span class="mb">'b0</span><span class="p">}},</span><span class="n">dmadr</span><span class="p">}),</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">wrEnb</span><span class="p">(</span><span class="n">dmwe</span><span class="p">),</span><span class="w"></span>
+<span class="w">    </span><span class="p">.</span><span class="n">rdDat</span><span class="p">(</span><span class="n">dmout</span><span class="p">));</span><span class="w"></span>
+
+<span class="k">assign</span><span class="w"> </span><span class="n">dmwe</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ST</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">IR</span><span class="p">[</span><span class="mh">10</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">ioenb</span><span class="p">;</span><span class="w"></span>
+<span class="k">assign</span><span class="w"> </span><span class="n">dmin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">B</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<h3 id="set-flag-registers">Set Flag Registers</h3>
+<div class="highlight"><pre><span></span><code><span class="k">always</span><span class="w"> </span><span class="p">@</span><span class="w"> </span><span class="p">(</span><span class="k">posedge</span><span class="w"> </span><span class="n">clk</span><span class="p">,</span><span class="w"> </span><span class="k">negedge</span><span class="w"> </span><span class="n">rst</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="c1">// flags handling</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">~</span><span class="n">rst</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"> </span><span class="n">N</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"> </span><span class="n">Z</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"> </span><span class="n">V</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mh">0</span><span class="p">;</span><span class="w"> </span><span class="k">end</span><span class="w"></span>
+<span class="k">else</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">regwr</span><span class="p">)</span><span class="w"> </span><span class="k">begin</span><span class="w"></span>
+<span class="w">        </span><span class="n">N</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">aluRes</span><span class="p">[</span><span class="mh">31</span><span class="p">];</span><span class="w"></span>
+<span class="w">        </span><span class="n">Z</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">(</span><span class="n">aluRes</span><span class="p">[</span><span class="mh">31</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mh">0</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">C</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="p">(</span><span class="n">ROR</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">s3</span><span class="p">[</span><span class="mh">0</span><span class="p">])</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="o">~</span><span class="n">ROR</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">aluRes</span><span class="p">[</span><span class="mh">32</span><span class="p">]);</span><span class="w"></span>
+<span class="w">        </span><span class="n">V</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">ADD</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">((</span><span class="o">~</span><span class="n">A</span><span class="p">[</span><span class="mh">31</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">B</span><span class="p">[</span><span class="mh">31</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">aluRes</span><span class="p">[</span><span class="mh">31</span><span class="p">])</span><span class="w"></span>
+<span class="w">            </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mh">31</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">B</span><span class="p">[</span><span class="mh">31</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">aluRes</span><span class="p">[</span><span class="mh">31</span><span class="p">]))</span><span class="w"></span>
+<span class="w">            </span><span class="o">|</span><span class="w"> </span><span class="n">SUB</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">((</span><span class="o">~</span><span class="n">B</span><span class="p">[</span><span class="mh">31</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="mh">31</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">aluRes</span><span class="p">[</span><span class="mh">31</span><span class="p">])</span><span class="w"></span>
+<span class="w">            </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">B</span><span class="p">[</span><span class="mh">31</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">A</span><span class="p">[</span><span class="mh">31</span><span class="p">]</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="o">~</span><span class="n">aluRes</span><span class="p">[</span><span class="mh">31</span><span class="p">]));</span><span class="w"></span>
+<span class="w">    </span><span class="k">end</span><span class="w"></span>
+<span class="k">end</span><span class="w"></span>
+<span class="k">end</span><span class="w"></span>
+</code></pre></div>
+<h3 id="branch-instructions">Branch instructions</h3>
+<ul>
+<li><em><span class="caps">PC</span></em> &lt;= <em><span class="caps">PC</span></em> + 1 + off</li>
+<li><em><span class="caps">PC</span></em> &lt;= <em>Rs</em></li>
+<li><em><span class="caps">PC</span></em> &lt;= <em><span class="caps">PC</span></em> + 1 (by default)</li>
+<li><em><span class="caps">PC</span></em> &lt;= <em><span class="caps">PC</span></em> (if stall)</li>
+<li><em><span class="caps">PC</span></em> &lt;= 0 (reset)</li>
+</ul>
+<p>Code:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// pcmux logic</span>
+<span class="k">assign</span><span class="w"> </span><span class="n">pcmux</span><span class="w"> </span><span class="o">=</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="o">~</span><span class="n">rst</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mh">0</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="n">stall0</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nl">PC:</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="n">BL</span><span class="p">)</span><span class="o">?</span><span class="w"> </span><span class="p">{{</span><span class="mh">10</span><span class="p">{</span><span class="n">IR</span><span class="p">[</span><span class="n">BLS</span><span class="o">-</span><span class="mh">1</span><span class="p">]}},</span><span class="n">IR</span><span class="p">[</span><span class="n">BLS</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="w"> </span><span class="mh">0</span><span class="p">]}</span><span class="o">+</span><span class="w"> </span><span class="n">nxpc</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="p">(</span><span class="n">Bc</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">cond</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="p">{{{</span><span class="n">PAW</span><span class="o">-</span><span class="mh">10</span><span class="p">}{</span><span class="n">IR</span><span class="p">[</span><span class="mh">9</span><span class="p">]}},</span><span class="w"> </span><span class="n">IR</span><span class="p">[</span><span class="mh">9</span><span class="o">:</span><span class="mh">0</span><span class="p">]}</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">nxpc</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="n">BLR</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">BR</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">A</span><span class="p">[</span><span class="n">PAW</span><span class="o">-</span><span class="mh">1</span><span class="o">:</span><span class="mh">0</span><span class="p">]</span><span class="w"> </span><span class="o">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">nxpc</span><span class="p">;</span><span class="w"></span>
+</code></pre></div>
+<h3 id="separate-compilation-trm">Separate Compilation (<span class="caps">TRM</span>)</h3>
+<ul>
+<li>Development environment with separate compilation<ul>
+<li>important for commercial products</li>
+<li>state of the art</li>
+</ul>
+</li>
+<li>Very limited architecture<ul>
+<li>18-bit instructions</li>
+<li>10-bit immediates</li>
+<li>7-bit memory offset</li>
+<li>10bit (signed) conditional branch offset</li>
+<li>14-bit (+/- 8k) Branch&amp;Link</li>
+<li>long jumps (chained)</li>
+<li>immediates -&gt; expressed by several instructions or put to memory (fixups)</li>
+<li>fixups, problematic if large global variables are allocated
+-far procedure calls</li>
+</ul>
+</li>
+<li>Solution: Compilation to Intermediate Code, back-end application at link time</li>
+</ul>
+<h4 id="compilation-steps">Compilation Steps</h4>
+<ol>
+<li>Scanner <span class="amp">&amp;</span> Parser</li>
+<li>Checker</li>
+<li>Intermediate Back-end</li>
+<li>Intermediate Object File</li>
+<li>Active Cells Back-end</li>
+<li>Active Cells Specification, Intermediate Assembler</li>
+<li>Target Back-end</li>
+<li>Generic Object File Linker</li>
+</ol>
+<!-- End Notes Week 13 -->
+<!-- Beginning of Notes Week 14 -->
+<h2 id="problems-with-active-cells-1">Problems with Active Cells 1</h2>
+<ul>
+<li>What if several same <span class="caps">HW</span> components available?</li>
+<li>How to extend <span class="caps">HW</span> without rewriting compiler each time?</li>
+</ul>
+<h3 id="generic-communication-interface">Generic Communication Interface</h3>
+<ul>
+<li>Peer-to-Peer</li>
+<li>Use of <em><span class="caps">AXI4</span> Stream</em> interconnect standard from <span class="caps">ARM</span></li>
+<li>Generic, flexible</li>
+<li>Non-redundant</li>
+</ul>
+<h2 id="active-cells-2">Active Cells 2</h2>
+<ul>
+<li>Flexible parameterization of the components using interpreted code in the component specification</li>
+<li><span class="caps">XML</span>-based specification (object persistency)</li>
+</ul>
+<h2 id="active-cells-3">Active Cells 3</h2>
+<ul>
+<li>Parameterization and Description of Hardware completely in one programming language</li>
+</ul>
+<ol>
+<li>Platform specific settings clock sources, pin locations etc</li>
+<li>Component specific settings:<ul>
+<li>dependencies (Verilog-Files) parameters</li>
+<li>port names</li>
+<li>Can be made very generic with plugins</li>
+</ul>
+</li>
+</ol>
+<p><img alt="Active Cells 3 Toolchain" class="img-fluid" src="/images/syscon_active_cells_3_toolchain.png"/></p>
+<p>This image is taken from the lecture slides provided by Felix Friedrich</p>
+<!-- End of Notes Week 14 -->
+<!-- End of Course -->
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./distance_functions_and_metrics.html" title="Previous: Distance Functions and Metrics">Distance Functions and Metrics</a></li>
+                <li class="next-article"><a href="./hardware-software_codesign.html" title="Next: Hardware-Software Codesign">Hardware-Software Codesign</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2015-11-07T22:20:50+01:00">Nov 7, 2015</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-11T21:00:54+02:00">Apr 11, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#assembler-ref">Assembler
+                    <span>8</span>
+</a></li>
+                <li><a href="./tags#eth-ref">ETH
+                    <span>7</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

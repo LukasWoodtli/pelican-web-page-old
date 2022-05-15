@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, Programming, " />
+
+<meta property="og:title" content="Executable Loader "/>
+<meta property="og:url" content="./executable_loader.html" />
+<meta property="og:description" content="Most information of this page is taken from Calling conventions for different C++ compilers and operating systems. Some other good information sources are: Linkers and Loaders Wikipedia:Linker Wikipedia:Loader Wikipedia:Relocation Book: Computer Systems: A Programmer’s Perspective, Randal E. Bryant, David R. O’Hallarom Most explanations on this …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2015-08-11T17:58:45+02:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="Executable Loader ">
+<meta name="twitter:description" content="Most information of this page is taken from Calling conventions for different C++ compilers and operating systems. Some other good information sources are: Linkers and Loaders Wikipedia:Linker Wikipedia:Loader Wikipedia:Relocation Book: Computer Systems: A Programmer’s Perspective, Randal E. Bryant, David R. O’Hallarom Most explanations on this …">
+
+        <title>Executable Loader  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./executable_loader.html"> Executable&nbsp;Loader  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            
+            <p>Most information of this page is taken from
+<a href="http://www.agner.org/optimize/#manuals">Calling conventions for different C++ compilers and operating systems</a>.</p>
+<p>Some other good information sources are:</p>
+<p><a href="http://www.iecc.com/linker/">Linkers and Loaders</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Linker_%28computing%29">Wikipedia:Linker</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Loader_%28computing%29">Wikipedia:Loader</a></p>
+<p><a href="https://en.wikipedia.org/wiki/Relocation_%28computing%29">Wikipedia:Relocation</a></p>
+<p>Book: Computer Systems: A Programmer’s Perspective, Randal E. Bryant, David R. O’Hallarom</p>
+<blockquote>
+<p>Most explanations on this page are for the x86 platform!</p>
+</blockquote>
+<p>Modern <span class="caps">OS</span>’s allow to load executable code at runtime. This can be
+complete programms or (dynamic) libraries.</p>
+<p>On <span class="caps">UNIX</span> a dynamic library is called <em>shared object</em>. On Windows it’s
+called <em>dynamic link library (dll)</em>.</p>
+<p>The <span class="caps">OS</span> needs to load the code to a specific position in memory and 
+it needs to adjust any internal references and addresses.</p>
+<p>This loading is done in a simmilar way in most <span class="caps">OS</span>.</p>
+<p>The relocation of the executable image is done according to the
+image base. </p>
+<p>The image base is the virtal memory address at which the image is loaded.</p>
+<p>The load-time relocation can be avoided if the image base is fixed.</p>
+<p>The most common values for the image base are:</p>
+<ul>
+<li>Windows (32-bit, 64-bit): 0x400000</li>
+<li>Linux (32-bit): 0x8048000</li>
+<li>Linux (64-bit): 0x400000</li>
+<li>Mach-O (32-bit): 0x1000</li>
+<li>Mach-O (64-bit): 0x100000000</li>
+</ul>
+<p>Dynamic libraries can’t be loaded at a fixed image base.</p>
+<p>There are three aproaches for loading executables without fixed image base:</p>
+<ol>
+<li>The executable (or library) contains a relocation table. This contains
+   all cross-references in the file. The loader adjusts all these 
+   cross-references if the executable is loaded at another base address
+   then the the one chosen by the linker.</li>
+</ol>
+<p>This aproach is used by Windows (32-bit, 64-bit)</p>
+<ol start="2">
+<li>The executable is designed position independant. All addresses are
+   calculated at runtime relative to <em><span class="caps">IP</span></em>.</li>
+</ol>
+<p>This aproach is used on <span class="caps">OS</span> X (Intel)</p>
+<ol start="3">
+<li>The shared object contains a Global Offset Table (<span class="caps">GOT</span>). In the <span class="caps">GOT</span>
+   are the addressrs of static objects stored. The addresses in the <span class="caps">GOT</span>
+   are afjusted by the loader according to the base address.
+   Code that accesses static data points to the <span class="caps">GOT</span> and the <span class="caps">GOT</span> 
+   then points to the data.</li>
+</ol>
+<p>This aproach is often used in Linux (32-bit) and <span class="caps">BSD</span></p>
+<h1 id="difference-between-relocation-table-and-global-offset-table-got">Difference between Relocation Table and Global Offset Table (<span class="caps">GOT</span>)</h1>
+<h2 id="relocation-table">Relocation Table</h2>
+<p>Relocation table is not changed when shared object is loaded.
+The relocation table points to data references in the code.
+These references are modified in place.</p>
+<h2 id="global-offset-table-got">Global Offset Table (<span class="caps">GOT</span>)</h2>
+<p>The <span class="caps">GOT</span> is changed by the loader. So the entries in the <span class="caps">GOT</span> point
+to the new (relocated) addresses. Static data references in the
+code still point to the <span class="caps">GOT</span> but the entries in the <span class="caps">GOT</span> were updated.</p>
+<h1 id="function-calls-across-shared-objects-dlls">Function calls across shared objects (DLLs)</h1>
+<p>Shared objects can have references to functions in other shared objects.
+Usually calls to these functions go through an import table in the
+executable (shared object) file.</p>
+<p>Either the loader fills the import table at load time or it is lazy
+initialized for each function when it is called the first time.</p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./preprocessor_defines.html" title="Previous: Preprocessor Defines">Preprocessor Defines</a></li>
+                <li class="next-article"><a href="./undo_committed_changes_with_svn.html" title="Next: Undo Committed Changes with SVN">Undo Committed Changes with SVN</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2015-08-11T17:58:45+02:00">Aug 11, 2015</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

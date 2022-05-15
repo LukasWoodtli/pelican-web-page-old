@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, Design Patterns, Lisp, OOP, OS, Programming, " />
+
+<meta property="og:title" content="Seven Concurrency Models in Seven Weeks "/>
+<meta property="og:url" content="./seven_concurrency_models_in_seven_weeks.html" />
+<meta property="og:description" content="This page collects notes taken from Seven Concurrency Models in Seven Weeks When Threads Unravel by Paul Butcher Some of my examples are here Chapter 1 Introduction Concurrent or Parallel? Related but Different “A concurrent program has multiple logical threads of control. These threads may or may not run in …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2020-05-14T21:36:44+02:00" />
+<meta property="og:article:modified_time" content="2022-04-10T22:01:50+02:00" />
+<meta name="twitter:title" content="Seven Concurrency Models in Seven Weeks ">
+<meta name="twitter:description" content="This page collects notes taken from Seven Concurrency Models in Seven Weeks When Threads Unravel by Paul Butcher Some of my examples are here Chapter 1 Introduction Concurrent or Parallel? Related but Different “A concurrent program has multiple logical threads of control. These threads may or may not run in …">
+
+        <title>Seven Concurrency Models in Seven Weeks  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./seven_concurrency_models_in_seven_weeks.html"> Seven Concurrency Models in Seven&nbsp;Weeks  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#chapter-1-introduction">Chapter 1 Introduction</a><ul>
+<li><a href="#concurrent-or-parallel">Concurrent or Parallel?</a><ul>
+<li><a href="#related-but-different">Related but Different</a></li>
+<li><a href="#beyond-sequencial-programming">Beyond Sequencial Programming</a></li>
+<li><a href="#data-parallelism">Data Parallelism</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#chapter-2-threads-and-locks">Chapter 2 Threads and Locks</a><ul>
+<li><a href="#the-simplest-thing-that-could-possibly-work">The Simplest Thing That Could Possibly Work</a></li>
+<li><a href="#day-1-mutual-exclusion-and-memory-models">Day 1: Mutual Exclusion and Memory Models</a><ul>
+<li><a href="#creating-a-thread">Creating a Thread</a></li>
+<li><a href="#mysterious-memory">Mysterious Memory</a></li>
+<li><a href="#memory-visibility">Memory Visibility</a></li>
+<li><a href="#multiple-locks">Multiple Locks</a></li>
+<li><a href="#the-perils-of-alien-methods">The Perils of Alien Methods</a></li>
+<li><a href="#day-1-wrap-up">Day 1 Wrap Up</a></li>
+</ul>
+</li>
+<li><a href="#day-2-beyond-intrinsic-locks">Day 2: Beyond Intrinsic Locks</a><ul>
+<li><a href="#hand-over-hand-locking">Hand-over-Hand Locking</a></li>
+<li><a href="#condition-variables">Condition Variables</a></li>
+<li><a href="#atomic-variables">Atomic Variables</a><ul>
+<li><a href="#what-about-volatile">What About Volatile?</a></li>
+</ul>
+</li>
+<li><a href="#day-2-wrap-up">Day 2 Wrap-Up</a></li>
+</ul>
+</li>
+<li><a href="#day-3-on-the-shoulders-of-giants">Day 3: On the Shoulders of Giants</a><ul>
+<li><a href="#how-large-should-my-thread-pool-be">How Large Should My Thread Pool Be?</a></li>
+<li><a href="#why-a-blocking-queue">Why a Blocking Queue?</a></li>
+<li><a href="#day-3-wrap-up">Day 3 Wrap-Up</a><ul>
+<li><a href="#what-we-learned-in-day-3">What We Learned in Day 3</a></li>
+</ul>
+</li>
+<li><a href="#wrap-up">Wrap-Up</a><ul>
+<li><a href="#weaknesses">Weaknesses</a></li>
+<li><a href="#the-elephant-in-the-room">The Elephant in the Room</a></li>
+<li><a href="#maintenance">Maintenance</a></li>
+<li><a href="#other-languages">Other Languages</a></li>
+</ul>
+</li>
+<li><a href="#additional-notes">Additional Notes</a><ul>
+<li><a href="#race-condition">Race Condition</a></li>
+<li><a href="#memory-visibility_1">Memory Visibility</a></li>
+<li><a href="#deadlocks-livelocks">Deadlocks <span class="amp">&amp;</span> Livelocks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#chapter-3-functional-programming">Chapter 3 Functional Programming</a><ul>
+<li><a href="#if-it-hurts-stop-doing-it">If It Hurts, Stop Doing It</a></li>
+<li><a href="#day-1-programming-without-mutable-state">Day 1: Programming Without Mutable State</a><ul>
+<li><a href="#its-good-to-be-lazy">It’s Good to Be Lazy</a></li>
+</ul>
+</li>
+<li><a href="#day-2-functional-parallelism">Day 2: Functional Parallelism</a><ul>
+<li><a href="#reducers">Reducers</a></li>
+</ul>
+</li>
+<li><a href="#day-3-functional-concurrency">Day 3: Functional Concurrency</a><ul>
+<li><a href="#same-structure-different-evaluation-order">Same Structure, Different Evaluation Order</a></li>
+<li><a href="#futures">Futures</a></li>
+<li><a href="#promises">Promises</a></li>
+</ul>
+</li>
+<li><a href="#wrap-up_1">Wrap-Up</a><ul>
+<li><a href="#weaknesses_1">Weaknesses</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#chapter-4-the-clojure-way-separating-identity-from-state">Chapter 4 The Clojure Way - Separating Identity from State</a><ul>
+<li><a href="#day-1-atoms-and-persistent-data-structures">Day 1: Atoms and Persistent Data Structures</a><ul>
+<li><a href="#atoms">Atoms</a></li>
+<li><a href="#persistent-data-structures">Persistent Data Structures</a></li>
+<li><a href="#identity-or-state">Identity or State?</a></li>
+<li><a href="#retries">Retries</a></li>
+<li><a href="#day-1-wrap-up_1">Day 1 Wrap-Up</a></li>
+</ul>
+</li>
+<li><a href="#day-2-agents-and-software-transactional-memory">Day 2: Agents and Software Transactional Memory</a><ul>
+<li><a href="#agents">Agents</a><ul>
+<li><a href="#is-an-agent-an-actor">Is an Agent an Actor?</a></li>
+<li><a href="#waiting-for-agent-actions-to-complete">Waiting for Agent Actions to Complete</a></li>
+<li><a href="#error-handling">Error Handling</a></li>
+</ul>
+</li>
+<li><a href="#software-transactional-memory">Software Transactional Memory</a><ul>
+<li><a href="#transactions">Transactions</a></li>
+<li><a href="#multiple-refs">Multiple Refs</a></li>
+<li><a href="#safe-side-effects-in-transactions">Safe Side Effects in Transactions</a></li>
+<li><a href="#whats-with-the-exclamation-marks">What’s with the Exclamation Marks?</a></li>
+</ul>
+</li>
+<li><a href="#shared-mutable-state-in-clojure">Shared Mutable State in Clojure</a></li>
+<li><a href="#day-2-wrap-up_1">Day 2 Wrap-Up</a></li>
+</ul>
+</li>
+<li><a href="#day-3-in-depth">Day 3: In Depth</a><ul>
+<li><a href="#atoms-or-stm">Atoms or <span class="caps">STM</span>?</a><ul>
+<li><a href="#what-is-looprecur">What Is Loop/Recur?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#wrap-up_2">Wrap-Up</a><ul>
+<li><a href="#final-thoughts">Final Thoughts</a></li>
+</ul>
+</li>
+<li><a href="#additional-notes_1">Additional Notes</a><ul>
+<li><a href="#atom">Atom</a></li>
+<li><a href="#agent">Agent</a></li>
+<li><a href="#refs">Refs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#chapter-5-actors">Chapter 5 Actors</a><ul>
+<li><a href="#more-object-oriented-than-objects">More Object-Oriented than Objects</a></li>
+<li><a href="#day-1-messages-and-mailboxes">Day 1: Messages and Mailboxes</a><ul>
+<li><a href="#mailboxes-are-queues">Mailboxes are Queues</a></li>
+</ul>
+</li>
+<li><a href="#day-2-error-handling-and-resilience">Day 2: Error Handling and Resilience</a><ul>
+<li><a href="#supervising-a-process">Supervising a Process</a></li>
+<li><a href="#the-error-kernel-pattern">The Error-Kernel Pattern</a></li>
+<li><a href="#let-it-crash">Let It Crash!</a></li>
+</ul>
+</li>
+<li><a href="#day-3-distribution">Day 3: Distribution</a><ul>
+<li><a href="#what-is-a-restart-strategy">What Is a Restart Strategy?</a></li>
+<li><a href="#day-3-wrap-up_1">Day 3 Wrap-Up</a></li>
+</ul>
+</li>
+<li><a href="#wrap-up_3">Wrap-Up</a><ul>
+<li><a href="#strengths">Strengths</a><ul>
+<li><a href="#messaging-and-encapsulation">Messaging and Encapsulation</a></li>
+<li><a href="#fault-tolerance">Fault Tolerance</a></li>
+<li><a href="#distributed-programming">Distributed Programming</a></li>
+</ul>
+</li>
+<li><a href="#weaknesses_2">Weaknesses</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#cahpter-6-communicating-sequential-processes">Cahpter 6: Communicating Sequential Processes</a><ul>
+<li><a href="#communication-is-everything">Communication Is Everything</a></li>
+<li><a href="#day-1-channels-and-go-blocks">Day 1: Channels and Go Blocks</a><ul>
+<li><a href="#channels">Channels</a></li>
+<li><a href="#buffering">Buffering</a></li>
+<li><a href="#closing-channels">Closing Channels</a></li>
+<li><a href="#what-no-automatically-growing-buffer">What - No Automatically Growing Buffer?</a></li>
+<li><a href="#go-blocks">Go Blocks</a><ul>
+<li><a href="#the-problem-with-blocking">The Problem with Blocking</a></li>
+<li><a href="#inversion-of-control">Inversion of Control</a></li>
+<li><a href="#what-happens-if-i-block-in-a-go-block">What Happens If I Block in a Go Block?</a></li>
+<li><a href="#go-blocks-are-cheap">Go Blocks Are Cheap</a></li>
+</ul>
+</li>
+<li><a href="#day-1-wrap-up_2">Day 1 Wrap-Up</a><ul>
+<li><a href="#what-we-learned-in-day-1">What We Learned in Day 1</a></li>
+</ul>
+</li>
+<li><a href="#wrap-up_4">Wrap-Up</a><ul>
+<li><a href="#strength">Strength</a></li>
+<li><a href="#weaknesses_3">Weaknesses</a></li>
+<li><a href="#final-thoughts_1">Final Thoughts</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#chapter-7-data-parallelism">Chapter 7: Data Parallelism</a><ul>
+<li><a href="#day-1-gpgpu-programming">Day 1: <span class="caps">GPGPU</span> Programming</a><ul>
+<li><a href="#graphics-processing-and-data-parallelism">Graphics Processing and Data Parallelism</a><ul>
+<li><a href="#a-confused-picture">A Confused Picture</a></li>
+<li><a href="#work-items">Work-Items</a></li>
+<li><a href="#kernels">Kernels</a></li>
+</ul>
+</li>
+<li><a href="#day-1-wrap-up_3">Day 1: Wrap-Up</a><ul>
+<li><a href="#what-we-learned-in-day-1_1">What We Learned in Day 1</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#day-2-multiple-dimensions-and-work-groups">Day 2: Multiple Dimensions and Work-Groups</a><ul>
+<li><a href="#platform-model">Platform Model</a></li>
+<li><a href="#memory-model">Memory Model</a></li>
+<li><a href="#wrap-up_5">Wrap-Up</a><ul>
+<li><a href="#strength_1">Strength</a></li>
+<li><a href="#weaknesses_4">Weaknesses</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#chapter-8-the-lambda-architecture">Chapter 8 The Lambda Architecture</a><ul>
+<li><a href="#day-1-mapreduce">Day 1: MapReduce</a><ul>
+<li><a href="#what-we-learned-in-day-1_2">What We Learned in Day 1</a></li>
+</ul>
+</li>
+<li><a href="#day-2-the-batch-layer">Day 2: The Batch Layer</a><ul>
+<li><a href="#data-is-better-raw">Data Is Better Raw</a></li>
+<li><a href="#can-we-generate-batch-views-incrementally">Can We Generate Batch Views Incrementally?</a></li>
+<li><a href="#almost-nirvana">Almost Nirvana</a></li>
+<li><a href="#day-2-wrap-up_2">Day 2 Wrap-Up</a><ul>
+<li><a href="#what-we-learned-in-day-2">What We Learned in Day 2</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#day-3-the-speed-layer">Day 3: The Speed Layer</a><ul>
+<li><a href="#designing-the-speed-layer">Designing the Speed Layer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <p>This page collects notes taken from
+<a href="https://pragprog.com/book/pb7con/seven-concurrency-models-in-seven-weeks">Seven Concurrency Models in Seven Weeks When Threads Unravel by Paul Butcher</a></p>
+<p>Some of my examples are <a href="https://github.com/LukasWoodtli/SevenConcurrencyModelsInSevenWeeks">here</a></p>
+
+<h1 id="chapter-1-introduction">Chapter 1 Introduction</h1>
+<h2 id="concurrent-or-parallel">Concurrent or Parallel?</h2>
+<h3 id="related-but-different">Related but Different</h3>
+<p><em><span class="dquo">“</span>A concurrent program has multiple logical threads of control. These threads may or may not run in parallel.”</em></p>
+<p><em><span class="dquo">“</span>A parallel program potentially runs more quickly than a sequential program by executing different parts of the computation simultaneously (in parallel). It may or may not have more than one logical thread of control.”</em></p>
+<p><em><span class="dquo">“</span>[…] concurrency is an aspect of the problem domain — your program needs to handle multiple simultaneous (or near-simultaneous) events.”</em></p>
+<p><em><span class="dquo">“</span>Parallelism […] is an aspect of the solution domain — you want to make your program faster by processing different portions of the problem in parallel.”</em></p>
+<p><em><span class="dquo">“</span>Concurrency is about dealing with lots of things at once. Parallelism is about doing lots of things at once.”</em></p>
+<h3 id="beyond-sequencial-programming">Beyond Sequencial Programming</h3>
+<p><em><span class="dquo">“</span>[…] traditional threads and locks don’t provide any direct support for parallelism.”</em></p>
+<p><em><span class="dquo">“</span>[…] concurrent programs are often nondetermistic - they will give different results depending on the precise timing of events.”</em></p>
+<p><em><span class="dquo">“</span>Parallelism […] doesn’t necessarily imply nondetermism”</em></p>
+<h3 id="data-parallelism">Data Parallelism</h3>
+<p><em><span class="dquo">“</span>Data-parallel (sometimes called <span class="caps">SIMD</span> […]) architectures are capable of performing the same operations on a large quantity of data in parallel.”</em></p>
+<h1 id="chapter-2-threads-and-locks">Chapter 2 Threads and Locks</h1>
+<h2 id="the-simplest-thing-that-could-possibly-work">The Simplest Thing That Could Possibly Work</h2>
+<p><em><span class="dquo">“</span>[Threads] also provide almost no help to the poor programmer, making programs very difficult to get right in the first place and even more difficult to maintain.”</em></p>
+<h2 id="day-1-mutual-exclusion-and-memory-models">Day 1: Mutual Exclusion and Memory Models</h2>
+<p><em><span class="dquo">“</span>[There is something very] basic you need to worry about when dealing with shared memory - the Memory Model.”</em></p>
+<h3 id="creating-a-thread">Creating a Thread</h3>
+<p><em><span class="dquo">“</span>Threads communicate with each other via shared memory.”</em></p>
+<h3 id="mysterious-memory">Mysterious Memory</h3>
+<ul>
+<li><em><span class="dquo">“</span>The compiler is allowed to statically optimize your code by reordering things.”</em></li>
+<li><em><span class="dquo">“</span>The <span class="caps">JVM</span> is allowed to dynamically optimize your code by reordering things.”</em></li>
+<li><em><span class="dquo">“</span>The hardware you’re running on is allowed to optimize performance by reordering things.”</em></li>
+</ul>
+<p><em><span class="dquo">“</span>Sometimes effects don’t become visible to other threads at all.”</em></p>
+<h3 id="memory-visibility">Memory Visibility</h3>
+<p><em><span class="dquo">“</span>The Java memory model defines when changes to memory made by one thread become visible to another thread.”“</em></p>
+<p><em><span class="dquo">“</span>An important point that’s easily missed is that both threads need to use synchronization. It’s not enough for just the thread making changes to do so.”</em></p>
+<h3 id="multiple-locks">Multiple Locks</h3>
+<p><em><span class="dquo">“</span>Deadlock is a danger whenever a thread tries to hold more than one lock. Happily, there is a simple rule that guarantees you will never deadlock - always acquire locks in a fixed, global order.”</em></p>
+<h3 id="the-perils-of-alien-methods">The Perils of Alien Methods</h3>
+<p><em><span class="dquo">“</span>avoid calling alien methods while holding a lock”</em></p>
+<h3 id="day-1-wrap-up">Day 1 Wrap Up</h3>
+<p><em><span class="dquo">“</span>[…] three primary perils of threads and locks - race conditions, deadlock and memory visibility […]
+rules that help us avoiding them:”</em></p>
+<ul>
+<li><em><span class="dquo">“</span>Synchronize all access to shared variables.”</em></li>
+<li><em>Both the writing and the reading threads need to use synchronization.”</em></li>
+<li><em>Acquire multiple locks in a fixed, global order.”</em></li>
+<li><em>Don’t call alien methods while holding a lock.”</em></li>
+<li><em>Hold locks for the shortest possible amount of time.”</em></li>
+</ul>
+<h2 id="day-2-beyond-intrinsic-locks">Day 2: Beyond Intrinsic Locks</h2>
+<p><em><span class="dquo">“</span>Intrinsic locks are convenient but limited.”</em></p>
+<ul>
+<li><em><span class="dquo">“</span>There is no way to interrupt a thread that’s blocked as a result of trying to acquire an intrinsic lock.”</em></li>
+<li><em><span class="dquo">“</span>There is no way to time out while trying to acquire an intrinsic lock.”</em></li>
+<li><em><span class="dquo">“</span>There’s exactly one way to acquire an intrinsic lock: a synchronized block.”</em></li>
+</ul>
+<p>Synchronized block:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">synchronized</span> <span class="err">​</span><span class="p">(</span><span class="n">object</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// use shared resources</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>This means that lock acquisition and release have to take place in the same method and have to be strictly nested.”</em></p>
+<p><em><span class="dquo">“</span>Note that declaring a method as <code>synchronized</code> is just syntactic sugar for surrounding the method’s body with the following:”</em></p>
+<div class="highlight"><pre><span></span><code><span class="err">​</span><span class="kd">synchronized</span> <span class="err">​</span><span class="p">(</span><span class="k">this</span><span class="p">)</span> <span class="p">{</span><span class="err">​</span>
+    <span class="c1">// method body</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>ReentrantLock allows us to transcend these restrictions by providing explicit lock and unlock methods instead of using synchronized .”</em></p>
+<div class="highlight"><pre><span></span><code><span class="err">​</span><span class="n">Lock</span> <span class="err">​</span><span class="n">lock</span> <span class="o">=</span> <span class="err">​</span><span class="k">new</span> <span class="n">ReentrantLock</span> <span class="err">​</span><span class="p">();</span>
+<span class="n">lock</span><span class="p">.</span><span class="na">lock</span><span class="p">();</span>
+<span class="k">try</span> <span class="err">​</span><span class="p">{</span>
+    <span class="c1">// use shared resources​</span>
+<span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+    <span class="n">lock</span><span class="p">.</span><span class="na">unlock</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="hand-over-hand-locking">Hand-over-Hand Locking</h3>
+<p><em><span class="dquo">“</span>Hand-over-hand locking is an alternative in which we lock only a small portion of the list, allowing other threads unfettered access as long as they’re not looking at the particular nodes we’ve got locked.”</em></p>
+<h3 id="condition-variables">Condition Variables</h3>
+<p><em><span class="dquo">“</span>Concurrent programming often involves waiting for something to happen. […] This type of situation is what condition variables are designed to address.”</em></p>
+<div class="highlight"><pre><span></span><code><span class="err">​</span><span class="n">ReentrantLock</span> <span class="n">lock</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReentrantLock</span> <span class="err">​</span><span class="p">();</span>
+<span class="n">Condition</span> <span class="n">condition</span> <span class="o">=</span> <span class="n">lock</span><span class="p">.</span><span class="na">newCondition</span><span class="p">();</span>
+
+<span class="n">lock</span><span class="p">.</span><span class="na">lock</span><span class="p">();</span>
+<span class="k">try</span> <span class="p">{</span>
+    <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">condition</span> <span class="n">is</span> <span class="kc">true</span><span class="p">)</span>
+        <span class="n">condition</span><span class="p">.</span><span class="na">await</span><span class="p">();</span>
+    <span class="c1">// use shared resources</span>
+<span class="p">}</span> <span class="k">finally</span> <span class="p">{</span>
+    <span class="n">lock</span><span class="p">.</span><span class="na">unlock</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>A condition variable is associated with a lock, and a thread must hold that lock before being able to wait on the condition. Once it holds the lock, it checks to see if the condition that it’s interested in is already true. If it is, then it continues with whatever it wants to do and unlocks the lock. If, however, the condition is not true, it calls <code>await</code>, which </em><em>atomically</em><em> unlocks the lock and blocks on the condition variable.”</em></p>
+<p><em><span class="dquo">“</span>An operation is atomic if, from the point of view of another thread, it appears to be a single operation that has either happened or not - it never appears to be halfway through.”</em></p>
+<p><em><span class="dquo">“</span>When another thread calls <code>signal</code> or <code>signalAll</code> [on the condition variable] to indicate that the condition might now be true, <code>await</code> unblocks and automatically reacquires the lock. An important point is that when <code>await</code> returns, it only indicates that the condition might be true. This is why <code>await</code> is called within a loop - we need to go back, recheck whether the condition is true, and potentially block on <code>await</code> again if necessary.”</em></p>
+<h3 id="atomic-variables">Atomic Variables</h3>
+<p><em><span class="dquo">“</span>Using an atomic variable instead of locks has a number of benefits. First, it’s not possible to forget to acquire the lock when necessary.”</em></p>
+<p><em><span class="dquo">“</span>Second, because no locks are involved, it’s impossible for an operation on an atomic variable to deadlock.”</em></p>
+<p><em><span class="dquo">“</span>atomic variables are the foundation of non-blocking, lock-free algorithms, which achieve synchronization without locks or blocking.”</em></p>
+<blockquote>
+<p><em>If you think that programming with locks is tricky, then just wait until you try writing lock-free code.</em></p>
+</blockquote>
+<h4 id="what-about-volatile">What About Volatile?</h4>
+<p><em><span class="dquo">“</span>Java allows us to mark a variable as <code>volatile</code>. Doing so guarantees that reads and writes to that variable will not be reordered.”</em></p>
+<p><em><span class="dquo">“</span>valid use cases for <code>volatile</code> variables are rare. If you find yourself considering <code>volatile</code>, you should probably use one of the <code>java.util.concurrent.atomic</code> classes instead.”</em></p>
+<p>In C++ <code>volatile</code> has a different meaning. It indicates that the read of a variable is not allowed to be optimized out. This is important for reading memory mapped I/O or memory mapped registers and similar use cases.</p>
+<h3 id="day-2-wrap-up">Day 2 Wrap-Up</h3>
+<p><em><span class="dquo">“</span>[With <code>ReentrantLock</code> and <code>java.util.concurrent.atomic</code>] threads can do the following:</em></p>
+<ul>
+<li><em><span class="dquo">“</span>Be interrupted while trying to acquire a lock”</em></li>
+<li><em><span class="dquo">“</span>Time out while acquiring a lock”</em></li>
+<li><em><span class="dquo">“</span>Acquire and release locks in any order [Danger! Dead locks!]”</em></li>
+<li><em><span class="dquo">“</span>Use condition variables to wait for arbitrary conditions to become true”</em></li>
+<li><em><span class="dquo">“</span>Avoid locks entirely by using atomic variables”</em></li>
+</ul>
+<h2 id="day-3-on-the-shoulders-of-giants">Day 3: On the Shoulders of Giants</h2>
+<h4 id="how-large-should-my-thread-pool-be">How Large Should My Thread Pool Be?</h4>
+<p><em><span class="dquo">“</span>The optimum number of threads will vary according to the hardware […], whether your threads are <span class="caps">IO</span> or <span class="caps">CPU</span> bound, what else the machine is doing at the same time, and a host of other factors. […] a good rule of thumb is that for computation-intensive tasks, [to have] approximately the same number of threads as available cores. Larger numbers are appropriate for <span class="caps">IO</span>-intensive tasks. Beyond this rule of thumb, your best bet is to create a realistic load test and break out the stopwatch.”</em></p>
+<h4 id="why-a-blocking-queue">Why a Blocking Queue?</h4>
+<p><em><span class="dquo">“</span>As well as blocking queues, <code>java.util.concurrent</code> provides <code>ConcurrentLinkedQueue</code>, an unbounded, wait-free, and nonblocking queue. That sounds like a very desirable set of attributes [for the producer-consumer pattern]. The issue is that […] if the producer runs faster than the consumer, the queue will get larger and larger.”</em></p>
+<p><em><span class="dquo">“</span>The beauty of the producer-consumer pattern is that it allows us not only to produce and consume values in parallel, but also to have multiple producers and/or multiple consumers.”</em></p>
+<p><em><span class="dquo">“</span>Unfortunately, synchronized collections don’t provide atomic read-modify-write methods, so this isn’t going to help us. If we want to use a <code>HashMap</code>, we’re going to have to synchronize access to it ourselves.”</em></p>
+<p><em><span class="dquo">“</span>Happily, we’re not beaten yet. <code>ConcurrentHashMap</code> in <code>java.util.concurrent</code> looks like exactly what we need. Not only does it provide atomic read-modify-write methods, but it’s been designed to support high levels of concurrent access (via a technique called lock striping).”</em></p>
+<p><em><span class="dquo">“</span>Instead of put, we’re now using a combination of <code>putIfAbsent</code> and <code>replace</code>.”</em></p>
+<p><em><span class="dquo">“</span>Here’s the documentation for <code>putIfAbsent</code>: If the specified key is not already associated with a value, associate it with the given value. This is equivalent to”</em></p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">map</span><span class="p">.</span><span class="na">containsKey</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">map</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">);</span>
+<span class="k">else</span>
+    <span class="k">return</span> <span class="err">​</span> <span class="n">map</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</code></pre></div>
+<p><em><span class="dquo">“</span>except that the action is performed atomically.”</em></p>
+<p><em><span class="dquo">“</span>And for <code>replace</code>: Replaces the entry for a key only if currently mapped to a given value. This is equivalent to”</em></p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="p">(</span><span class="n">map</span><span class="p">.</span><span class="na">containsKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">map</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">key</span><span class="p">).</span><span class="na">equals</span><span class="p">(</span><span class="n">oldValue</span><span class="p">))</span> <span class="p">{</span>
+    <span class="n">map</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">newValue</span><span class="p">);</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+<span class="p">}</span> <span class="k">else</span>
+    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li><span class="dquo">“</span>except that the action is performed atomically.”*</li>
+</ul>
+<h3 id="day-3-wrap-up">Day 3 Wrap-Up</h3>
+<h4 id="what-we-learned-in-day-3">What We Learned in Day 3</h4>
+<p><em><span class="dquo">“</span>the facilities provided by <code>java.util.concurrent</code> [make] programs safer and more efficient by doing the following:”</em></p>
+<ul>
+<li><em><span class="dquo">“</span>Using thread pools instead of creating threads directly”</em></li>
+<li><em><span class="dquo">“</span>Creating simpler and more efficient listener-management code with <code>CopyOnWriteArrayList</code><span class="dquo">“</span></em></li>
+<li><em><span class="dquo">“</span>Allowing producers and consumers to communicate efficiently with <code>ArrayBlockingQueue</code><span class="dquo">“</span></em></li>
+<li><em><span class="dquo">“</span>Supporting highly concurrent access to a map with <code>ConcurrentHashMap</code><span class="dquo">“</span></em></li>
+</ul>
+<h3 id="wrap-up">Wrap-Up</h3>
+<h4 id="weaknesses">Weaknesses</h4>
+<p><em><span class="dquo">“</span>Threads and locks provide no direct support for parallelism […] they can be used to parallelize a sequential algorithm, but this has to be constructed out of concurrent primitives, which introduces the specter of nondeterminism.”</em></p>
+<p><em><span class="dquo">“</span>threads and locks support only shared-memory architectures. If you need to support distributed memory (and, by extension, either geographical distribution or resilience), you will need to look elsewhere.”</em></p>
+<h4 id="the-elephant-in-the-room">The Elephant in the Room</h4>
+<p><em><span class="dquo">“</span>[…] what makes multithreaded programming difficult is not that writing it is hard, but that </em><em>testing it is hard</em><em>. It’s not the pitfalls that you can fall into; it’s the fact that you don’t necessarily know whether you’ve fallen into one of them.”</em></p>
+<h4 id="maintenance">Maintenance</h4>
+<p><em><span class="dquo">“</span>It’s one thing to make sure that everything’s synchronized correctly, locks are acquired in the right order, and no foreign functions are called with locks held. It’s quite another to guarantee that it will remain that way after twelve months of maintenance by ten different programmers.”</em></p>
+<p><em><span class="dquo">“</span>if you can’t reliably test for threading problems, you can’t reliably refactor multithreaded code.”</em></p>
+<p><em><span class="dquo">“</span>think very carefully about our multithreaded code. And then when we’ve done that, think about it very carefully some more.”</em></p>
+<h4 id="other-languages">Other Languages</h4>
+<p><em><span class="dquo">“</span>the general principles we covered in this chapter are broadly applicable. The rules about using synchronization to access shared variables; acquiring locks in a fixed, global order; and avoiding alien method calls while holding a lock are applicable to any language with threads and locks.”</em></p>
+<p><em><span class="dquo">“</span>a memory model was added to the C11 and C++ 11 standards.”</em></p>
+<h3 id="additional-notes">Additional Notes</h3>
+<h4 id="race-condition">Race Condition</h4>
+<p>A race condition is the behavior of a software system where the output is dependent on the sequence or timing of other uncontrollable events. It becomes a bug when events do not happen in the order the programmer intended.</p>
+<h4 id="memory-visibility_1">Memory Visibility</h4>
+<p>The memory model defines when changes to memory made by one thread become visible to another thread.</p>
+<h4 id="deadlocks-livelocks">Deadlocks <span class="amp">&amp;</span> Livelocks</h4>
+<p>Deadlock is a danger whenever a thread tries to hold more than one lock. 
+Happily, there is a simple rule that guarantees you will never deadlock - always acquire locks in a fixed, global order.</p>
+<h1 id="chapter-3-functional-programming">Chapter 3 Functional Programming</h1>
+<p><em><span class="dquo">“</span>In contrast to an imperative program, which consists of a series of statements that change global state when executed, a </em><em>functional program</em><em> models computation as the evaluation of expressions. Those expressions are built from pure mathematical functions that are both first-class (can be manipulated like any other value) and side effect-free. It’s particularly useful when dealing with concurrency because the lack of side effects makes reasoning about thread safety much easier.”</em></p>
+<h2 id="if-it-hurts-stop-doing-it">If It Hurts, Stop Doing It</h2>
+<p><em><span class="dquo">“</span>Functional programs have no mutable state, so they cannot suffer from any of the problems associated with shared mutable state.”</em></p>
+<h2 id="day-1-programming-without-mutable-state">Day 1: Programming Without Mutable State</h2>
+<h3 id="its-good-to-be-lazy">It’s Good to Be Lazy</h3>
+<p><em><span class="dquo">“</span>Sequences in Clojure are lazy - elements of a lazy sequence are generated only when they’re needed.”</em></p>
+<p><em>Realizing</em> a (lazy) sequence means to fully evaluate it.</p>
+<p><em><span class="dquo">“</span>One final aspect of lazy sequences is that not only do we not need to generate the elements at the end of a sequence until we need them (which might be never), but we can discard the elements at the front if we’ve finished with them (if we don’t “hold on to our head”).”</em></p>
+<h2 id="day-2-functional-parallelism">Day 2: Functional Parallelism</h2>
+<h3 id="reducers">Reducers</h3>
+<p><em><span class="dquo">“</span>A reducer is a recipe that describes how to reduce a collection. The normal version of <code>map</code> takes a function and a (possibly lazy) sequence and returns another (possibly lazy) sequence”</em></p>
+<p><em><span class="dquo">“</span>A reducible isn’t a directly usable value - it’s just something that can subsequently be passed to <code>reduce</code> [or <code>into</code>, which uses <code>reduce</code> internally]”</em></p>
+<p><em><span class="dquo">“</span>A reducer […], returns a recipe for creating a result - a recipe that isn’t executed until it’s passed to either <code>reduce</code> or <code>fold</code>. This has two primary benefits:</em></p>
+<ul>
+<li><em>It’s more efficient than a chain of functions returning lazy sequences, because no intermediate sequences need to be created.</em></li>
+<li><em>It allows fold to parallelize the entire chain of operations on the underlying collection.”</em></li>
+</ul>
+<h2 id="day-3-functional-concurrency">Day 3: Functional Concurrency</h2>
+<h3 id="same-structure-different-evaluation-order">Same Structure, Different Evaluation Order</h3>
+<p><em><span class="dquo">“</span>Functional languages have a much more declarative feel [than <span class="caps">OOP</span> or procedual languages (imperative)].”</em></p>
+<h3 id="futures">Futures</h3>
+<p><em><span class="dquo">“</span>A future takes a body of code and executes it in another thread. Its return value is a future object.”</em></p>
+<p><em><span class="dquo">“</span>We can retrieve the value of a future by dereferencing it with either <code>deref</code> or the shorthand <code>@</code><span class="dquo">“</span></em></p>
+<p><em><span class="dquo">“</span>Dereferencing a future will block until the value is available (or realized).”</em></p>
+<h3 id="promises">Promises</h3>
+<p><em><span class="dquo">“</span>A promise is very similar to a future in that it’s a value that’s realized asynhronously and accessed with <code>deref</code> or <code>@</code>, which will block until it’s realized. The difference is that creating a promise does not cause any code to run - instead its value is set with deliver.”</em></p>
+<p>A promse can be used to pass a result from one thread to another one.</p>
+<h2 id="wrap-up_1">Wrap-Up</h2>
+<h3 id="weaknesses_1">Weaknesses</h3>
+<p><em><span class="dquo">“</span>Many people expect that functional code will be less efficient than its impertive equivalent. Although there are performance implications for some types of problem, the penalty is likely to be less than you fear. And any small performance hit is likely to be more than worth it for the payoff of increased robustness and scalability.”</em></p>
+<h1 id="chapter-4-the-clojure-way-separating-identity-from-state">Chapter 4 The Clojure Way - Separating Identity from State</h1>
+<h2 id="day-1-atoms-and-persistent-data-structures">Day 1: Atoms and Persistent Data Structures</h2>
+<h3 id="atoms">Atoms</h3>
+<p><em><span class="dquo">“</span>An atom is an atomic variable […]  (in fact, Clojure’s atoms are built on top of <code>java.util.concurrent.atomic</code>).”</em></p>
+<h3 id="persistent-data-structures">Persistent Data Structures</h3>
+<p><em><span class="dquo">“</span>Persistence in this case doesn’t have anything to do with persistence on disk or within a database. Instead it refers to a data structure that always preserves its previous version when it’s modified, which allows code to have a consistent view of the data in the face of modifications.”</em></p>
+<p><em><span class="dquo">“</span>Persistent data structures behave </em><em>as though</em><em> a complete copy is made each time they’re modified.”</em></p>
+<p><em><span class="dquo">“</span>The implementation is much more clever than that and makes use of structure sharing.”</em></p>
+<h3 id="identity-or-state">Identity or State?</h3>
+<p><em><span class="dquo">“</span>Persistent data structures are invaluable for concurrent programming because once a thread has a reference to a data structure, it will see no changes made by any other thread. Persistent data structures separate identity from state.”</em></p>
+<p><em><span class="dquo">“</span>A variable in an imperative language complects (interweaves, interconnects) identity and state - a single identity can only ever have a single value, making it easy to lose sight of the fact that </em><em>the state is really a sequence of values over time</em><em>. Persistent data structures separate identity from state - if we retrieve the current state associated with an identity, that state is immutable and unchanging, no matter what happens to the identity from which we retrieved it in the future.”</em></p>
+<h3 id="retries">Retries</h3>
+<p><em><span class="dquo">“</span>Atoms can be lockless - internally they make use of the <code>compareAndSet</code> method in <code>java.util.concurrent.AtomicReference</code>.
+That means that they’re very fast and don’t block. […] But it also means that <code>swap!</code> needs to handle the case where the value of the atom has been changed by another thread in between it calling the function to generate a new value and it trying to change that value.”</em></p>
+<p><em><span class="dquo">“</span>If that happens, <code>swap!</code> will retry. It will discard the value returned by the function and call it again with the atom’s new value. […] This means that it’s essential that the function passed to <code>swap!</code> has no side effects”</em></p>
+<h3 id="day-1-wrap-up_1">Day 1 Wrap-Up</h3>
+<p><em><span class="dquo">“</span>Because functional data structures are persistent, changes made by one thread will not affect a second thread that already has a reference to that data structure.”</em></p>
+<p><em><span class="dquo">“</span>This allows us to separate identity from state, recognizing the fact that the state associated with an identity is really a sequence of values over time.”</em></p>
+<h2 id="day-2-agents-and-software-transactional-memory">Day 2: Agents and Software Transactional Memory</h2>
+<h3 id="agents">Agents</h3>
+<p><em><span class="dquo">“</span>An </em><em>agent</em><em> is similar to an atom in that it encapsulates a reference to a single value”</em></p>
+<p><em><span class="dquo">“</span>If multiple threads call send concurrently, execution of the functions passed to send is serialized: only one will execute at a time. This means that they will not be retried and can therefore contain side effects.”</em></p>
+<h4 id="is-an-agent-an-actor">Is an Agent an Actor?</h4>
+<p><em><span class="dquo">“</span>An agent has a value that can be retrieved directly with <code>deref</code>. An actor encapsulates state but provides no direct means to access it.”</em></p>
+<p><em><span class="dquo">“</span>An actor encapsulates behavior; an agent does not”</em></p>
+<p><em><span class="dquo">“</span>Actors provide sophisticated support for error detection and recovery.”</em></p>
+<p><em><span class="dquo">“</span>Actors can be remote [distributed].”</em></p>
+<p><em><span class="dquo">“</span>Composing actors can deadlock”</em></p>
+<h4 id="waiting-for-agent-actions-to-complete">Waiting for Agent Actions to Complete</h4>
+<p><em><span class="dquo">“</span>Clojure provides the <code>await</code> function, which blocks until all actions dispatched from the current thread to the given agent(s) have completed.”</em></p>
+<h4 id="error-handling">Error Handling</h4>
+<p><em><span class="dquo">“</span>Like atoms, agents also support both validators and watchers.”</em></p>
+<p><em><span class="dquo">“</span>Once an agent experiences an error, it enters a </em><em>failed</em><em> state by default, and attempts to dispatch new actions fail. We can find out if an agent is failed (and if it is, why) with <code>agent-error</code>, and we can restart it with <code>restart-agent</code><span class="dquo">“</span></em></p>
+<h3 id="software-transactional-memory">Software Transactional Memory</h3>
+<p><em><span class="dquo">“</span></em><em>Refs</em><em> are more sophisticated than atoms and agents, providing software transactional memory (</em><em><span class="caps">STM</span></em><em>)”</em></p>
+<h4 id="transactions">Transactions</h4>
+<p><em><span class="dquo">“</span><span class="caps">STM</span> transactions are atomic, consistent, and isolated [but not durable]”</em></p>
+<p><em><span class="dquo">“</span>Everything within the body of <code>dosync</code> constitutes a single transaction.”</em></p>
+<h4 id="multiple-refs">Multiple Refs</h4>
+<p><em>” If the <span class="caps">STM</span> runtime detects that concurrent transactions are trying to make conflicting changes, one or more of the transactions will be retried. This means that, as when modifying an atom, </em><em>transactions should not have side effects</em><em>.”</em></p>
+<h4 id="safe-side-effects-in-transactions">Safe Side Effects in Transactions</h4>
+<p><em><span class="dquo">“</span>Agents are transaction aware”</em></p>
+<p><em><span class="dquo">“</span>If you use <code>send</code> to modify an agent within a transaction, that send will take place only if the transaction succeeds. Therefore, if you want to achieve some side effect when a transaction succeeds, using <code>send</code> is an excellent way to do so.”</em></p>
+<h4 id="whats-with-the-exclamation-marks">What’s with the Exclamation Marks?</h4>
+<p><em><span class="dquo">“</span>Clojure uses an exclamation mark to indicate that functions […] are </em><em>not transaction-safe</em><em>.”</em></p>
+<h3 id="shared-mutable-state-in-clojure">Shared Mutable State in Clojure</h3>
+<p><em><span class="dquo">“</span>An </em><em>atom</em><em> allows you to make synchronous changes to a single value - synchronous because when <code>swap!</code> returns, the update has taken place. Updates to one atom are not coordinated with other updates.”</em></p>
+<p><em><span class="dquo">“</span>An </em><em>agent</em><em> allows you to make asynchronous changes to a single value - asynchronous because the update takes place after <code>send</code> returns. Updates to one agent are not coordinated with other updates.”</em></p>
+<p><em><span class="dquo">“</span></em><em>Refs</em><em> allow you to make synchronous, coordinated changes to multiple values.”</em></p>
+<h3 id="day-2-wrap-up_1">Day 2 Wrap-Up</h3>
+<ul>
+<li><em><span class="dquo">“</span>Atoms enable independent, synchronous changes to single values.</em></li>
+<li><em>Agents enable independent, asynchronous changes to single values.</em></li>
+<li><em>Refs enable coordinated, synchronous changes to multiple values.”</em></li>
+</ul>
+<h2 id="day-3-in-depth">Day 3: In Depth</h2>
+<h3 id="atoms-or-stm">Atoms or <span class="caps">STM</span>?</h3>
+<p><em><span class="dquo">“</span>Atoms enable independent changes to single values, whereas refs enable coordinated changes to multiple values.”</em></p>
+<p><em><span class="dquo">“</span>whenever we need to coordinate modifications of multiple values we can either use multiple refs and coordinate access to them with transactions or collect those values together into a compound data structure stored in a single atom”</em></p>
+<p><em><span class="dquo">“</span>Experienced Clojure programmers tend to find that atoms suffice for most problems, as the language’s functional nature leads to minimal use of mutable data”</em></p>
+<h4 id="what-is-looprecur">What Is Loop/Recur?</h4>
+<p><em><span class="dquo">“</span>The <code>loop</code> macro defines a target that recur can <code>jump</code> to”</em></p>
+<h2 id="wrap-up_2">Wrap-Up</h2>
+<h3 id="final-thoughts">Final Thoughts</h3>
+<p><em><span class="dquo">“</span>Clojure has found a good balance between functional programming and mutable state, allowing programmers with experience in imperative languages to get started more easily than they might in a pure functional language. And yet it does so while retaining most of functional programming’s benefits, in particular its excellent support for concurrency.”</em></p>
+<h2 id="additional-notes_1">Additional Notes</h2>
+<h3 id="atom">Atom</h3>
+<ul>
+<li>Create: <code>(atom &lt;initial-val&gt;)</code></li>
+<li>Read: <code>(defef &lt;agent&gt;)</code> (or <code>@</code>)</li>
+<li>Update (with function): <code>(swap! &lt;atom&gt; &lt;fn&gt; &lt;args&gt;)</code></li>
+<li>Set value: <code>(reset! &lt;atom&gt; &lt;value&gt;</code></li>
+</ul>
+<h3 id="agent">Agent</h3>
+<ul>
+<li>Writes are serialized, no retries occur</li>
+<li>Create: <code>(agent &lt;initial-val&gt;)</code></li>
+<li>Read: <code>(defef &lt;agent&gt;)</code> (or <code>@</code>) </li>
+<li>Update (with function): <code>(send &lt;agent&gt; &lt;update-fn&gt; &lt;args&gt;)</code></li>
+<li>Wait for completion: <code>(await &lt;agent&gt;)</code></li>
+</ul>
+<h3 id="refs">Refs</h3>
+<ul>
+<li>Software Transactional Memory</li>
+<li>Modification only possible in transaction: <code>(dosync &lt;...&gt;)</code></li>
+<li>Create: <code>(ref &lt;initial-val&gt;)</code></li>
+<li>Read:<code>(defef &lt;ref&gt;)</code> (or <code>@</code>)</li>
+<li>Update (with function): <code>(alter &lt;ref&gt; &lt;update-fn&gt; &lt;args&gt;)</code></li>
+<li>Set value: <code>(ref-set &lt;ref&gt; &lt;val&gt;)</code></li>
+<li>Protect ref from modification by other transaction: <code>(ensure &lt;ref&gt;)</code></li>
+</ul>
+<h1 id="chapter-5-actors">Chapter 5 Actors</h1>
+<p><em><span class="dquo">“</span>The actor model […] targets both shared- and distributed-memory architectures, facilitates geographical distribution, and provides especially strong support for fault tolerance and resilience.”</em> </p>
+<h2 id="more-object-oriented-than-objects">More Object-Oriented than Objects</h2>
+<p><em><span class="dquo">“</span>Actor programming […] retains mutable state but avoids sharing it.”</em></p>
+<h2 id="day-1-messages-and-mailboxes">Day 1: Messages and Mailboxes</h2>
+<h3 id="mailboxes-are-queues">Mailboxes are Queues</h3>
+<p><em><span class="dquo">“</span>Messages are sent </em><em>asynchronously</em><em>. Instead of being sent directly to an actor, they are placed in a mailbox”</em></p>
+<p><em><span class="dquo">“</span>Actors are </em><em>decoupled</em><em> - actors run at their own speed and don’t block when sending messages.”</em></p>
+<p><em><span class="dquo">“</span>An actor runs concurrently with other actors but handles messages sequentially, in the order they were added to the mailbox”</em></p>
+<p><em><span class="dquo">“</span>We only have to worry about concurrency when sending messages. “</em></p>
+<h2 id="day-2-error-handling-and-resilience">Day 2: Error Handling and Resilience</h2>
+<h3 id="supervising-a-process">Supervising a Process</h3>
+<p><em><span class="dquo">“</span>A supervisor, a system process that monitors one or more worker processes and takes appropriate action if they fail.”</em></p>
+<h3 id="the-error-kernel-pattern">The Error-Kernel Pattern</h3>
+<p><em><span class="dquo">“</span>A software system’s error kernel is the part that must be correct if the system is to function correctly. Well-written programs make this error kernel as small and as simple as possible”</em></p>
+<p><em><span class="dquo">“</span>This leads to a hierarchy of error kernels in which risky operations are pushed down toward the lower-level actors”</em></p>
+<h3 id="let-it-crash">Let It Crash!</h3>
+<p><em><span class="dquo">“</span>Actor programs tend to avoid defensive programming and subscribe to the “let it crash” philosophy”</em></p>
+<p><em><span class="dquo">“</span>This has multiple benefits, including these:</em></p>
+<ul>
+<li><em>Our code is simpler and easier to understand, with a clear separation between ‘happy path’ and fault-tolerant code.</em></li>
+<li><em>Actors are separate from one another and don’t share state, so there’s little danger that a failure in one actor will adversely affect another. In particular, a failed actor’s supervisor cannot crash because the actor it’s supervising crashes.</em></li>
+<li><em>As well as fixing the error, a supervisor can log it so that instead of sweeping problems under the carpet, we become aware of them and can take remedial action.”</em></li>
+</ul>
+<h2 id="day-3-distribution">Day 3: Distribution</h2>
+<p><em><span class="dquo">“</span>Sending a message to an actor on another machine is just as easy as sending it to one running locally.”</em></p>
+<h3 id="what-is-a-restart-strategy">What Is a Restart Strategy?</h3>
+<p><em><span class="dquo">“</span>If a single worker fails, a supervisor using the one-for-all strategy will stop and restart all its workers (even those that didn’t fail). A supervisor using a one-for-one strategy, by contrast, will only restart the failed worker.”</em></p>
+<h3 id="day-3-wrap-up_1">Day 3 Wrap-Up</h3>
+<p><em><span class="dquo">“</span>Elixir allows us to create clusters of nodes. An actor on one node can send messages to an actor running on another in exactly the same way as it can to one running locally. As well as allowing us to create systems that leverage multiple distributed computers, it allows us to recover from the failure of one of those computers. “</em></p>
+<h2 id="wrap-up_3">Wrap-Up</h2>
+<p><em><span class="dquo">“</span>We can think of actors as the logical extension of object-oriented programming to the concurrent world. Indeed, you can think of actors as more object-oriented than objects, with stricter message passing and encapsulation.”</em></p>
+<h3 id="strengths">Strengths</h3>
+<h4 id="messaging-and-encapsulation">Messaging and Encapsulation</h4>
+<p><em><span class="dquo">“</span>Actors do not share state”</em></p>
+<p><em><span class="dquo">“</span>We need only worry about concurrency when considering message flows between actors.”</em></p>
+<p><em><span class="dquo">“</span>An actor can be tested in isolation and, as long as our tests accurately represent the types of messages that might be delivered and in what order, we can have high confidence that it behaves as it should. And if we do find ourselves faced with a concurrency-related bug, we know where to look - the message flows between actors.”</em></p>
+<h4 id="fault-tolerance">Fault Tolerance</h4>
+<p><em><span class="dquo">“</span>Fault tolerance is built into actor programs from the outset. This enables not only more resilient programs but also simpler and clearer code (through the “let it crash” philosophy).”</em></p>
+<h4 id="distributed-programming">Distributed Programming</h4>
+<p><em><span class="dquo">“</span>It allows an actor program to scale to solve problems of almost any size.”</em></p>
+<p><em><span class="dquo">“</span>It allows us to address problems [with] geographical distribution”</em></p>
+<p><em><span class="dquo">“</span>Distribution is a key enabler for resilient and fault-tolerant systems. “</em></p>
+<h3 id="weaknesses_2">Weaknesses</h3>
+<p><em><span class="dquo">“</span>Actors are still susceptible to problems like deadlock plus a few failure modes unique to actors (such as overflowing an actor’s mailbox).”</em></p>
+<p><em><span class="dquo">“</span>Actors provide no direct support for parallelism. Parallel solutions need to be built from concurrent building blocks, raising the specter of nondeterminism. “</em></p>
+<h1 id="cahpter-6-communicating-sequential-processes">Cahpter 6: Communicating Sequential Processes</h1>
+<h2 id="communication-is-everything">Communication Is Everything</h2>
+<p><em><span class="dquo">“</span><span class="caps">CSP</span> focuses on the channels over which they are sent. Channels are first class […] can be independently created, written to, read from, and passed between processes.”</em></p>
+<h2 id="day-1-channels-and-go-blocks">Day 1: Channels and Go Blocks</h2>
+<h3 id="channels">Channels</h3>
+<p><em><span class="dquo">“</span>A channel is a thread-safe queue - any task with a reference to a channel can add messages to one end, and any task with a reference to it can remove messages from the other.”</em></p>
+<h3 id="buffering">Buffering</h3>
+<p><em><span class="dquo">“</span>By default, channels are synchronous (or unbuffered) - writing to a channel blocks until something reads from it”</em></p>
+<h3 id="closing-channels">Closing Channels</h3>
+<p><em><span class="dquo">“</span>[Channels] can be closed with <code>close!</code>. Reading from an empty closed channel returns <code>nil</code>, and writing to a closed channel silently discards the message. […] writing <code>nil</code> to a channel is an error.”</em></p>
+<h3 id="what-no-automatically-growing-buffer">What - No Automatically Growing Buffer?</h3>
+<p><em><span class="dquo">“</span>[There ]three types of buffer provided by <code>core.async</code> as standard - blocking, dropping, and sliding. It would be quite possible to create one that simply grows as it needs to accommodate more messages. So why isn’t this provided as standard?”</em></p>
+<p><em><span class="dquo">“</span>The reason is the age - old lesson that, whenever you have an “inexhaustible” resource, sooner or later you will exhaust it.”</em></p>
+<p><em><span class="dquo">“</span>Better to think about how you want to handle a full buffer today and nip the problem in the bud.”</em></p>
+<h3 id="go-blocks">Go Blocks</h3>
+<h4 id="the-problem-with-blocking">The Problem with Blocking</h4>
+<p><em><span class="dquo">“</span>State and concurrency really don’t mix.”</em></p>
+<p><em><span class="dquo">“</span>Go blocks provide an alternative that gives us the best of both worlds—the efficiency of event-driven code without having to compromise its structure or readability. They achieve this by transparently rewriting sequential code into event-driven code under the hood.”</em></p>
+<h4 id="inversion-of-control">Inversion of Control</h4>
+<p><em>” Code within a <code>go</code> block is transformed into a state machine. Instead of blocking when it reads from or writes to a channel, the state machine </em>parks<em>, relinquishing control of the thread it’s executing on. When it’s next able to run, it performs a state transition and continues execution, potentially on another thread. “</em></p>
+<p><em><span class="dquo">“</span>This represents an inversion of control, allowing the <code>core.async</code> runtime to efficiently multiplex many <code>go</code> blocks over a limited thread pool.”</em></p>
+<h4 id="what-happens-if-i-block-in-a-go-block">What Happens If I Block in a Go Block?</h4>
+<p><em><span class="dquo">“</span>If you call a blocking function, such as <code>&lt;!!</code>, in a go block, you will simply block the thread it happens to be running on.”</em></p>
+<h4 id="go-blocks-are-cheap">Go Blocks Are Cheap</h4>
+<p><em><span class="dquo">“</span>Because (unlike threads) go blocks are cheap, we can create many of them without running out of resources.”</em></p>
+<h3 id="day-1-wrap-up_2">Day 1 Wrap-Up</h3>
+<h4 id="what-we-learned-in-day-1">What We Learned in Day 1</h4>
+<p><em><span class="dquo">“</span>The twin pillars of <code>core.async</code> are channels and go blocks:</em></p>
+<ul>
+<li><em>By default, channels are synchronous (unbuffered)—writing to a channel blocks until something reads from it.</em></li>
+<li><em>Alternatively, channels can be buffered. [Full buffers can] block, discard the oldest value (sliding buffer), or discard the most recently written value (dropping buffer).</em></li>
+<li><em>Go blocks utilize inversion of control to rewrite sequential code as a state machine.”</em></li>
+</ul>
+<h3 id="wrap-up_4">Wrap-Up</h3>
+<h4 id="strength">Strength</h4>
+<p><em><span class="dquo">“</span>In an actor program, the medium of communication is tightly coupled to the unit of execution - each actor has precisely one mailbox. In a <span class="caps">CSP</span> program, by contrast, channels are first class and can be independently created, written to, read from, and passed between tasks.”</em></p>
+<h4 id="weaknesses_3">Weaknesses</h4>
+<p><em><span class="dquo">“</span>[Compared to actors two topics are missing:] distribution and fault tolerance. Although there’s nothing whatsoever to stop <span class="caps">CSP</span>-based languages from supporting both, historically neither has had the same level of focus and support as either has had within actor-based languages”</em></p>
+<p><em><span class="dquo">“</span><span class="caps">CSP</span> programs are susceptible to deadlock and have no direct support for parallelism. Parallel solutions need to be built from concurrent building blocks, raising the specter of nondeterminism.”</em></p>
+<h4 id="final-thoughts_1">Final Thoughts</h4>
+<p><em><span class="dquo">“</span>The actor community has concentrated on fault tolerance and distribution, and the <span class="caps">CSP</span> community on efficiency and expressiveness.”</em></p>
+<h1 id="chapter-7-data-parallelism">Chapter 7: Data Parallelism</h1>
+<h2 id="day-1-gpgpu-programming">Day 1: <span class="caps">GPGPU</span> Programming</h2>
+<h3 id="graphics-processing-and-data-parallelism">Graphics Processing and Data Parallelism</h3>
+<p><em><span class="dquo">“</span>Data parallelism can be implemented in many different ways. We’ll look briefly at a couple of them: pipelining and multiple ALUs.”</em></p>
+<h4 id="a-confused-picture">A Confused Picture</h4>
+<p><em><span class="dquo">“</span>To achieve their performance, real-world GPUs combine pipelining and multiple ALUs with a wide range of other techniques.”</em></p>
+<p><em><span class="dquo">“</span>OpenCL targets multiple architectures by defining a C-like language that allows us to express a parallel algorithm abstractly. Each different <span class="caps">GPU</span> manufacturer then provides its own compilers and drivers that allow that program to be compiled and run on its hardware.”</em></p>
+<h4 id="work-items">Work-Items</h4>
+<p><em><span class="dquo">“</span>Typically, if each task performs too little work, your code performs badly because thread creation and communication overheads dominate.”</em></p>
+<p><em><span class="dquo">“</span>OpenCL work-items, by contrast, are typically very small.”</em></p>
+<p><em><span class="dquo">“</span>Your task as a programmer is to divide your problem into the smallest work-items you can. The OpenCL compiler and runtime then worry about how best to schedule those work-items on the available hardware so that that hardware is utilized as efficiently as possible.”</em></p>
+<h4 id="kernels">Kernels</h4>
+<p><em><span class="dquo">“</span>We specify how each work-item should be processed by writing an OpenCL kernel.”</em></p>
+<p><em><span class="dquo">“</span>To create a complete program, we need to embed our kernel in a host program that performs the following steps:</em></p>
+<ul>
+<li><em>Create a context within which the kernel will run together with a command queue.</em></li>
+<li><em>Compile the kernel.</em></li>
+<li><em>Create buffers for input and output data.</em></li>
+<li><em>Enqueue a command that executes the kernel once for each work-item.</em></li>
+<li><em>Retrieve the results.”</em></li>
+</ul>
+<h3 id="day-1-wrap-up_3">Day 1: Wrap-Up</h3>
+<h4 id="what-we-learned-in-day-1_1">What We Learned in Day 1</h4>
+<p><em><span class="dquo">“</span>OpenCL parallelizes a task by dividing it up into work-items.”</em></p>
+<p><em><span class="dquo">“</span>We specify how each work-item should be processed by writing a kernel. “</em></p>
+<p><em><span class="dquo">“</span>To execute a kernel, a host program [is needed].”</em></p>
+<h2 id="day-2-multiple-dimensions-and-work-groups">Day 2: Multiple Dimensions and Work-Groups</h2>
+<h3 id="platform-model">Platform Model</h3>
+<p><em><span class="dquo">“</span>An OpenCL platform consists of a host that’s connected to one or more devices. Each device has one or more compute units, each of which provides a number of processing elements”</em></p>
+<p><em><span class="dquo">“</span>Work.items execute on processing elements. A collection of work-items executing on a single compute unit is a work-group. The work-items in a work-group share local memory”</em></p>
+<h3 id="memory-model">Memory Model</h3>
+<p><em><span class="dquo">“</span>A work-item executing a kernel has access to four different memory regions:</em></p>
+<ul>
+<li>Global memory</li>
+<li>Constant memory (global)</li>
+<li>Local memory: local to work-groop used for communication between work-items</li>
+<li>Private memory: private to a work-item</li>
+</ul>
+<h3 id="wrap-up_5">Wrap-Up</h3>
+<h4 id="strength_1">Strength</h4>
+<p><em><span class="dquo">“</span>Data parallelism is ideal whenever you’re faced with a problem where large amounts of numerical data needs to be processed.”</em></p>
+<h4 id="weaknesses_4">Weaknesses</h4>
+<p><em><span class="dquo">“</span>Optimizing an OpenCL kernel can be tricky, and effective optimization often depends on understanding underlying architectural details”</em></p>
+<p><em><span class="dquo">“</span>For some problems, the need to copy data from the host to the device can dominate execution time, negating or reducing the benefit to be gained from parallelizing the computation.”</em></p>
+<h1 id="chapter-8-the-lambda-architecture">Chapter 8 The Lambda Architecture</h1>
+<h2 id="day-1-mapreduce">Day 1: MapReduce</h2>
+<h3 id="what-we-learned-in-day-1_2">What We Learned in Day 1</h3>
+<p>*”Hadoop is a MapReduce system that does the following:”</p>
+<ul>
+<li><em>It splits input between a number of mappers, each of which generates key/value pairs.</em></li>
+<li><em>These are then sent to reducers, which generate the final output (typically also a set of key/value pairs).</em></li>
+<li><em>Keys are partitioned between reducers such that all pairs with the same key are handled by the same reducer.”</em></li>
+</ul>
+<h2 id="day-2-the-batch-layer">Day 2: The Batch Layer</h2>
+<h3 id="data-is-better-raw">Data Is Better Raw</h3>
+<p><em><span class="dquo">“</span>Immutability and parallelism are a marriage made in heaven.”</em></p>
+<h3 id="can-we-generate-batch-views-incrementally">Can We Generate Batch Views Incrementally?</h3>
+<p><em><span class="dquo">“</span>Much of the power of the Lambda Architecture derives from the fact that we can always rebuild from scratch if we need to.”</em></p>
+<h3 id="almost-nirvana">Almost Nirvana</h3>
+<p><em><span class="dquo">“</span>Because it only ever operates on immutable raw data, the batch layer can easily exploit parallelism. Raw data can be distributed across a cluster of machines, enabling batch views to be recomputed in an acceptable period of time even when dealing with terabytes of input.”</em></p>
+<p><em><span class="dquo">“</span>The immutability of raw data also means that the system is intrinsically hardened against both technical failure and human error. Not only is it much easier to back up raw data, but if there’s a bug, the worst that can happen is that batch views are temporarily incorrect-we can always correct them by fixing the bug and recomputing them.”</em></p>
+<h3 id="day-2-wrap-up_2">Day 2 Wrap-Up</h3>
+<h4 id="what-we-learned-in-day-2">What We Learned in Day 2</h4>
+<p><em><span class="dquo">“</span>Information can be divided into raw data and derived information. Raw data is eternally true and therefore immutable. The batch layer of the Lambda Architecture leverages this to allow us to create systems that are</em></p>
+<ul>
+<li><em>highly parallel, enabling terabytes of data to be processed;</em></li>
+<li><em>simple, making them both easier to create and less error prone;</em></li>
+<li><em>tolerant of both technical failure and human error; and</em></li>
+<li><em>capable of supporting both day-to-day operations and historical reporting and analysis.”</em></li>
+</ul>
+<p><em><span class="dquo">“</span>The primary drawback of the batch layer is latency, which the Lambda Architecture addresses by running the speed layer alongside.”</em></p>
+<h2 id="day-3-the-speed-layer">Day 3: The Speed Layer</h2>
+<p><em><span class="dquo">“</span>The batch layer of the Lambda Architecture solves all the problems we identified with traditional data systems, but it does so at the expense of latency.”</em></p>
+<p><em><span class="dquo">“</span>As new data arrives, we both append it to the raw data that the batch layer works on and send it to the speed layer. The speed layer generates real-time views, which are combined with batch views to create fully up-to-date answers to queries.”</em></p>
+<h3 id="designing-the-speed-layer">Designing the Speed Layer</h3>
+<p><em><span class="dquo">“</span>The speed layer only needs to handle that portion of our data that hasn’t already been handled by the batch layer.”</em></p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./domain_driven_design.html" title="Previous: Domain Driven Design">Domain Driven Design</a></li>
+                <li class="next-article"><a href="./homogeneous_transformation_matrices.html" title="Next: Homogeneous Transformation Matrices">Homogeneous Transformation Matrices</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2020-05-14T21:36:44+02:00">Mai 14, 2020</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-10T22:01:50+02:00">Apr 10, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+                <li><a href="./tags#design_patterns-ref">Design Patterns
+                    <span>2</span>
+</a></li>
+                <li><a href="./tags#lisp-ref">Lisp
+                    <span>5</span>
+</a></li>
+                <li><a href="./tags#oop-ref">OOP
+                    <span>7</span>
+</a></li>
+                <li><a href="./tags#os-ref">OS
+                    <span>13</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

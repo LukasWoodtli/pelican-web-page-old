@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="C, C++, OS, Linux, Programming, " />
+
+<meta property="og:title" content="GCC, binutils and other developer tools "/>
+<meta property="og:url" content="./gcc,_binutils_and_other_developer_tools.html" />
+<meta property="og:description" content="Work in Progress! ld Flags If the linker is called through the compler the linker flags need to be added with -Wl,&lt;linker-flag&gt;. -z now: Symbols are resolved at program initialization time (instead of lazy, dynamic binding through PLT) -O1 (linker!) --no-undefined: gives an error if some symbols are not …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2018-02-22T22:03:50+01:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="GCC, binutils and other developer tools ">
+<meta name="twitter:description" content="Work in Progress! ld Flags If the linker is called through the compler the linker flags need to be added with -Wl,&lt;linker-flag&gt;. -z now: Symbols are resolved at program initialization time (instead of lazy, dynamic binding through PLT) -O1 (linker!) --no-undefined: gives an error if some symbols are not …">
+
+        <title>GCC, binutils and other developer tools  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./gcc,_binutils_and_other_developer_tools.html"> <span class="caps">GCC</span>, binutils and other developer&nbsp;tools  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#ld">ld</a><ul>
+<li><a href="#flags">Flags</a></li>
+<li><a href="#environment-variables">Environment Variables</a></li>
+</ul>
+</li>
+<li><a href="#readelf">readelf</a><ul>
+<li><a href="#show-which-libraries-have-been-linked">Show which libraries have been linked</a></li>
+<li><a href="#show-the-run-time-linker">Show the run-time linker</a></li>
+</ul>
+</li>
+<li><a href="#objdump">objdump</a><ul>
+<li><a href="#flags_1">Flags</a></li>
+</ul>
+</li>
+<li><a href="#link-time-optimization">Link Time Optimization</a></li>
+<li><a href="#find-unused-code">Find Unused Code</a></li>
+<li><a href="#output-link-map">Output Link Map</a></li>
+<li><a href="#dump-default-linker-script">Dump Default Linker Script</a></li>
+<li><a href="#library-directories">Library Directories</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <blockquote>
+<p>Work in Progress!</p>
+</blockquote>
+
+<h1 id="ld">ld</h1>
+<h2 id="flags">Flags</h2>
+<p>If the linker is called through the compler the linker flags need to be added with <code>-Wl,&lt;linker-flag&gt;</code>.</p>
+<ul>
+<li><code>-z now</code>: Symbols are resolved at program initialization time (instead of lazy, dynamic binding through <span class="caps">PLT</span>)</li>
+<li><code>-O1</code> (linker!)</li>
+<li><code>--no-undefined</code>: gives an error if some symbols are not available in the object files at linking stage</li>
+<li><code>--no-allow-shlib-undefined</code>: Similar to <code>--no-undefined</code>, but gives an error if symbols are not available in other shared libraries we link against</li>
+<li><code>--as-needed</code>: Link only libraries that are needed</li>
+</ul>
+<p>See also: <a href="http://www.bnikolic.co.uk/blog/gnu-ld-as-needed.html">The new “—as-needed” option to the <span class="caps">GNU</span> linker</a></p>
+<h2 id="environment-variables">Environment Variables</h2>
+<ul>
+<li><code>LD_BIND_NOW</code>: same as linker flag <code>-z now</code></li>
+<li><code>LD_PRELOAD</code>: Add libraries that are loaded first (can be used to override functionality)</li>
+<li><code>LD_DEBUG</code>: Trace functionality of the linker/loader</li>
+<li><code>LD_DEBUG_OUTPUT</code></li>
+</ul>
+<h1 id="readelf">readelf</h1>
+<h2 id="show-which-libraries-have-been-linked">Show which libraries have been linked</h2>
+<p><code>readelf -a &lt;prog&gt; | grep "Shared library"</code></p>
+<h2 id="show-the-run-time-linker">Show the run-time linker</h2>
+<p><code>readelf -a &lt;prog&gt; | grep "program interpreter"</code></p>
+<h1 id="objdump">objdump</h1>
+<h2 id="flags_1">Flags</h2>
+<ul>
+<li><code>-d</code>: disassemble</li>
+<li><code>-C</code>: demangle C++ symbols</li>
+<li><code>--no-show-raw-insn</code>: Do not print the instruction bytes in disassembled code</li>
+</ul>
+<h1 id="link-time-optimization">Link Time Optimization</h1>
+<p>Add <code>-flto</code> flag to compile and link commands.</p>
+<h1 id="find-unused-code">Find Unused Code</h1>
+<p>Add flags <code>-ffunction-sections</code> and <code>-fdata-sections</code> to the compiler invocation. For the linker use the flags <code>--gc-sections</code> and <code>--print-gc-sections</code>.</p>
+<p>These flags can prevent some optimizations.</p>
+<h1 id="output-link-map">Output Link Map</h1>
+<p>The link map contains information about object files, symbols, addresses…</p>
+<p>Add these flags to the linker invocation: <code>--cref -Map name.map</code></p>
+<h1 id="dump-default-linker-script">Dump Default Linker Script</h1>
+<p><code>gcc -o /dev/null -xc /dev/null -Wl,--verbose</code></p>
+<h1 id="library-directories">Library Directories</h1>
+<p><a href="https://stackoverflow.com/questions/9922949/how-to-print-the-ldlinker-search-path">Print <code>ld</code> search pathes</a></p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./language_implementation_patterns.html" title="Previous: Language Implementation Patterns">Language Implementation Patterns</a></li>
+                <li class="next-article"><a href="./finance_and_capital_markets.html" title="Next: Finance and Capital Markets">Finance and Capital Markets</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2018-02-22T22:03:50+01:00">Feb 22, 2018</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#c-ref">C
+                    <span>9</span>
+</a></li>
+                <li><a href="./tags#cpp-ref">C++
+                    <span>19</span>
+</a></li>
+                <li><a href="./tags#linux-ref">Linux
+                    <span>13</span>
+</a></li>
+                <li><a href="./tags#os-ref">OS
+                    <span>13</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

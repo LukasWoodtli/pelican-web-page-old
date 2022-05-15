@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="C++, Python, OOP, ETH, Programming, " />
+
+<meta property="og:title" content="Concepts of Object Oriented Programming "/>
+<meta property="og:url" content="./concepts_of_object_oriented_programming.html" />
+<meta property="og:description" content="Core Requirements to OOP Languages Highly dynamic execution model Cooperating program parts with well defined interfaces Classification (hierarchy) and specialisation (reuse) Quality/Correctness The Object Model A software system is a set of cooperating objects Objects have state (fields) and processing ability (methods) Objects exchange messages (methods) Objects have: State …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2015-07-28T21:23:58+02:00" />
+<meta property="og:article:modified_time" content="2022-04-10T19:21:45+02:00" />
+<meta name="twitter:title" content="Concepts of Object Oriented Programming ">
+<meta name="twitter:description" content="Core Requirements to OOP Languages Highly dynamic execution model Cooperating program parts with well defined interfaces Classification (hierarchy) and specialisation (reuse) Quality/Correctness The Object Model A software system is a set of cooperating objects Objects have state (fields) and processing ability (methods) Objects exchange messages (methods) Objects have: State …">
+
+        <title>Concepts of Object Oriented Programming  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./concepts_of_object_oriented_programming.html"> Concepts of Object Oriented&nbsp;Programming  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#core-requirements-to-oop-languages">Core Requirements to <span class="caps">OOP</span> Languages</a></li>
+<li><a href="#the-object-model">The Object Model</a><ul>
+<li><a href="#interfaces-and-encapsulation">Interfaces and Encapsulation</a></li>
+<li><a href="#classification-and-polymorphism">Classification and Polymorphism</a><ul>
+<li><a href="#classification">Classification</a></li>
+<li><a href="#polymorphism">Polymorphism</a><ul>
+<li><a href="#subtype-polymorphism">Subtype Polymorphism</a></li>
+<li><a href="#parametric-polymorphism">Parametric Polymorphism</a></li>
+<li><a href="#method-overloading">Method Overloading</a></li>
+</ul>
+</li>
+<li><a href="#spezialization">Spezialization</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#types-and-subtyping">Types and Subtyping</a><ul>
+<li><a href="#types">Types</a><ul>
+<li><a href="#weak-and-strong-type-systems">Weak and Strong Type Systems</a><ul>
+<li><a href="#untyped-languages">Untyped Languages</a></li>
+<li><a href="#weakly-typed-languages">Weakly Typed Languages</a></li>
+<li><a href="#strongly-typed-languages">Strongly Typed Languages</a></li>
+</ul>
+</li>
+<li><a href="#nominal-and-structural-types">Nominal and Structural Types</a><ul>
+<li><a href="#nominal-types">Nominal Types</a></li>
+<li><a href="#structural-types">Structural Types</a></li>
+</ul>
+</li>
+<li><a href="#type-checking">Type Checking</a><ul>
+<li><a href="#static-type-checking">Static Type Checking</a></li>
+<li><a href="#dynamic-type-checking">Dynamic Type Checking</a></li>
+</ul>
+</li>
+<li><a href="#overview-of-type-systems-in-oo-languages">Overview of Type Systems in <span class="caps">OO</span>-Languages</a></li>
+</ul>
+</li>
+<li><a href="#subtyping">Subtyping</a><ul>
+<li><a href="#variance-covariance-contravariance-and-invariance">Variance (Covariance, Contravariance and Invariance)</a><ul>
+<li><a href="#covariance">Covariance</a></li>
+<li><a href="#contravariance">Contravariance</a></li>
+<li><a href="#variance-for-oop">Variance for <span class="caps">OOP</span></a></li>
+</ul>
+</li>
+<li><a href="#behavioral-subtyping-contracts">Behavioral Subtyping (Contracts)</a><ul>
+<li><a href="#subtyping-and-contracs">Subtyping and Contracs</a></li>
+<li><a href="#specification-inheritance-inherit-contracts-from-subtypes">Specification Inheritance (Inherit Contracts from Subtypes)</a></li>
+</ul>
+</li>
+<li><a href="#types-as-contracts">Types as Contracts</a></li>
+</ul>
+</li>
+<li><a href="#inheritance">Inheritance</a><ul>
+<li><a href="#difference-between-inheritance-and-subtyping">Difference between inheritance and subtyping</a></li>
+</ul>
+</li>
+<li><a href="#aggregation-vs-private-inheritance-c">Aggregation vs. Private Inheritance (C++)</a></li>
+<li><a href="#static-and-dynamic-method-binding">Static and Dynamic Method Binding</a><ul>
+<li><a href="#static-method-binding-in-java">Static Method binding in Java</a></li>
+</ul>
+</li>
+<li><a href="#rules-for-proper-subclassing">Rules for proper Subclassing</a></li>
+</ul>
+</li>
+<li><a href="#binary-methods">Binary Methods</a></li>
+<li><a href="#multiple-inheritance">Multiple Inheritance</a><ul>
+<li><a href="#problems-with-multiple-inheritance">Problems with multiple inheritance</a></li>
+</ul>
+</li>
+<li><a href="#mixins-and-traits">Mixins and Traits</a></li>
+<li><a href="#parametric-polymorphism_1">Parametric Polymorphism</a><ul>
+<li><a href="#java-c">Java, C#, …</a><ul>
+<li><a href="#wildcards">Wildcards</a></li>
+</ul>
+</li>
+<li><a href="#c-templates">C++ Templates</a></li>
+</ul>
+</li>
+<li><a href="#information-hiding-and-encapsulation">Information Hiding and Encapsulation</a><ul>
+<li><a href="#information-hiding">Information Hiding</a><ul>
+<li><a href="#client-interface-of-a-class">Client Interface of a Class</a></li>
+<li><a href="#other-interfaces">Other Interfaces</a></li>
+<li><a href="#java-access-modifiers">Java Access Modifiers</a></li>
+<li><a href="#safe-changes">Safe Changes</a></li>
+<li><a href="#exchanging-implementation">Exchanging Implementation</a></li>
+<li><a href="#bug-method-selection-in-java">Bug: Method Selection in Java</a></li>
+</ul>
+</li>
+<li><a href="#encapsulation">Encapsulation</a><ul>
+<li><a href="#levels-of-encapsulation">Levels of Encapsulation</a></li>
+<li><a href="#achieving-consistency-of-objects">Achieving Consistency of Objects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#object-structures">Object Structures</a><ul>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#aliasing">Aliasing</a><ul>
+<li><a href="#intended-aliasing">Intended Aliasing</a></li>
+<li><a href="#unintended-aliasing">Unintended Aliasing</a><ul>
+<li><a href="#capturing">Capturing</a></li>
+<li><a href="#leaking">Leaking</a></li>
+<li><a href="#problems-with-aliasing">Problems with Aliasing</a></li>
+<li><a href="#consistency-of-object-structures">Consistency of Object Structures</a></li>
+<li><a href="#other-problems-with-aliasing">Other Problems with Aliasing</a></li>
+</ul>
+</li>
+<li><a href="#alias-control-in-java">Alias Control in Java</a><ul>
+<li><a href="#linkedlist">LinkedList:</a></li>
+<li><a href="#string">String</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#readonly-types">Readonly Types</a><ul>
+<li><a href="#requirements-for-readonly-access">Requirements for Readonly Access</a></li>
+<li><a href="#pure-methods">Pure Methods</a></li>
+<li><a href="#readwrite-and-readonly-types">Readwrite and Readonly Types</a></li>
+<li><a href="#transitivity-of-readonly-types">Transitivity of Readonly Types</a><ul>
+<li><a href="#type-rules-readonly-access">Type Rules: Readonly Access</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#ownership-types">Ownership Types</a><ul>
+<li><a href="#object-topologies">Object Topologies</a><ul>
+<li><a href="#roles-in-object-structures">Roles in Object Structures</a></li>
+<li><a href="#ownership-model">Ownership Model</a></li>
+<li><a href="#ownership-types_1">Ownership Types</a></li>
+<li><a href="#type-safety">Type Safety</a></li>
+<li><a href="#subtyp-relation-between-ownership-types">Subtyp Relation between Ownership Types</a></li>
+<li><a href="#viewpoint-adaption">Viewpoint Adaption</a></li>
+<li><a href="#field-access-and-method-invocation-type-rules">Field Access and Method Invocation (Type Rules)</a></li>
+<li><a href="#aliasing_1">Aliasing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#owner-as-modifier">Owner-as-Modifier</a><ul>
+<li><a href="#achievements">Achievements</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#initialization-and-null-references">Initialization and Null-References</a><ul>
+<li><a href="#object-initialization">Object Initialization</a></li>
+<li><a href="#type-rules">Type Rules</a></li>
+<li><a href="#local-initialization">Local Initialization</a></li>
+<li><a href="#transitive-initialization">Transitive Initialization</a></li>
+<li><a href="#cyclic-structures">Cyclic Structures</a></li>
+<li><a href="#type-rules_1">Type Rules</a><ul>
+<li><a href="#field-write">Field Write</a></li>
+<li><a href="#field-read">Field Read</a></li>
+<li><a href="#consturctors">Consturctors</a></li>
+<li><a href="#method-calls">Method Calls</a></li>
+<li><a href="#object-construction">Object Construction</a><ul>
+<li><a href="#new-expression">new Expression</a></li>
+</ul>
+</li>
+<li><a href="#lazy-initialization">Lazy Initialization</a></li>
+</ul>
+</li>
+<li><a href="#arrays">Arrays</a></li>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#initialization-of-global-data">Initialization of Global Data</a><ul>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#c">C++</a></li>
+<li><a href="#java-similar-in-c">Java (similar in C#)</a></li>
+<li><a href="#scala">Scala</a></li>
+<li><a href="#summary_1">Summary</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#reflections">Reflections</a><ul>
+<li><a href="#introspection">Introspection</a></li>
+<li><a href="#reflective-code-generation">Reflective Code Generation</a></li>
+<li><a href="#dynamic-code-manipulation">Dynamic Code Manipulation</a></li>
+<li><a href="#summary_2">Summary</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            
+<h1 id="core-requirements-to-oop-languages">Core Requirements to <span class="caps">OOP</span> Languages</h1>
+<ul>
+<li>Highly dynamic execution model</li>
+<li>Cooperating program parts with well defined interfaces</li>
+<li>Classification (hierarchy) and specialisation (reuse)</li>
+<li>Quality/Correctness</li>
+</ul>
+<h1 id="the-object-model">The Object Model</h1>
+<ul>
+<li>A software system is a set of cooperating objects</li>
+<li>Objects have state (fields) and processing ability (methods)</li>
+<li>Objects exchange messages (methods)</li>
+</ul>
+<p>Objects have:</p>
+<ul>
+<li>State</li>
+<li>Identity</li>
+<li>Lifecycle</li>
+<li>Location</li>
+<li>Behavior</li>
+</ul>
+<blockquote>
+<p>Objects are different form values!</p>
+</blockquote>
+<p>Values don’t have the above properties.</p>
+<h2 id="interfaces-and-encapsulation">Interfaces and Encapsulation</h2>
+<ul>
+<li>Objects have well-defined interfaces<ul>
+<li>Publicly accessible fields</li>
+<li>Publicly accessible methods</li>
+</ul>
+</li>
+<li>Implementation is hidden behind interface<ul>
+<li>Encapsulation</li>
+<li>Information hiding</li>
+</ul>
+</li>
+<li>Interfaces are the basis for describing behavior</li>
+</ul>
+<h2 id="classification-and-polymorphism">Classification and Polymorphism</h2>
+<ul>
+<li>Classification: Hierarchical structuring of objects (‘is-a’-Relation)</li>
+<li>Objects belong to different classes simultaneously</li>
+<li><em>Substitution principle</em>: Subtype objects can be used wherever supertype objects are expected</li>
+</ul>
+<blockquote>
+<p>Child &lt;: Parent</p>
+</blockquote>
+<h3 id="classification">Classification</h3>
+<ul>
+<li>We can classify objects or fields (?)</li>
+<li>Classifications can be <em>trees</em> or <em>DAGs</em></li>
+<li>Classifications of objects form “is-a” relation</li>
+<li>Classes can be abstract or concrete</li>
+</ul>
+<blockquote>
+<p>Substitution Principle: Objects of subtypes can be used wherever
+objects of supertypes are expected</p>
+</blockquote>
+<h3 id="polymorphism">Polymorphism</h3>
+<h4 id="subtype-polymorphism">Subtype Polymorphism</h4>
+<ul>
+<li>Direct consequence of substitution principle</li>
+<li>Run-time (dynamic) Polymorphism</li>
+<li>Dynamic (late) binding</li>
+</ul>
+<h4 id="parametric-polymorphism">Parametric Polymorphism</h4>
+<ul>
+<li>Generic types</li>
+<li>Uses <em>type parameters</em></li>
+<li>One implementation can be used for different types</li>
+<li>Type missmatch detected at compile time</li>
+<li>C++ Templates, Generics (Java, C#)</li>
+</ul>
+<h4 id="method-overloading">Method Overloading</h4>
+<ul>
+<li>Ad-Hoc Polymorphism</li>
+<li>Overloading: Methods with same name but different arguments </li>
+</ul>
+<h3 id="spezialization">Spezialization</h3>
+<ul>
+<li>Start from general objects/types</li>
+<li>Extend these objecs (fields and methods)</li>
+<li>Behaviour of specialized objects need to be compliant to more general objects! (Substitution Principle)</li>
+<li>Progam parts that work for the genral objects work also for specialized objects</li>
+<li>Methods can be <em>overridden</em></li>
+</ul>
+<h1 id="types-and-subtyping">Types and Subtyping</h1>
+<h2 id="types">Types</h2>
+<p>Type systems can be analyzed in three dimensions:</p>
+<ol>
+<li>Weak and Strong Type Systems</li>
+<li>Nominal and Structural Types</li>
+<li>Static and Dynamic Type Checking</li>
+</ol>
+<p>Definition:</p>
+<blockquote>
+<p>A type is a set of values sharing some properties. A value <em>v</em> has type <em>T</em> if <em>v</em> is an element of <em>T</em>.</p>
+</blockquote>
+<p><em>T</em> is a set that contains all possible values <em>v</em>.</p>
+<h3 id="weak-and-strong-type-systems">Weak and Strong Type Systems</h3>
+<p>How strongly or weakly typed a language is concerns casting (implicit and explicit).
+It’s mainly used to compare languages to each other about the possible castings, type safety and information loss.</p>
+<h4 id="untyped-languages">Untyped Languages</h4>
+<ul>
+<li>Not classifying values into types, just bit patterns</li>
+<li>i.e. Assembler</li>
+</ul>
+<h4 id="weakly-typed-languages">Weakly Typed Languages</h4>
+<ul>
+<li>Classifying values into types</li>
+<li>No strict enforcement of restrictions, i.e Multiplying two pointers is possible</li>
+<li>i.e. C, C++</li>
+</ul>
+<h4 id="strongly-typed-languages">Strongly Typed Languages</h4>
+<ul>
+<li>Classify values into types</li>
+<li>Enforcing that all operations are applied to values of appropriate type</li>
+<li>Strongly-typed languages prevent certain erroneous or undesirable program behavior</li>
+<li>i.e. Java, Python, Scala, Smalltalk, Eiffel, C#</li>
+<li>Most Dynamic Languages (i.e Python, JavaScript) are Strongly Typed</li>
+</ul>
+<h3 id="nominal-and-structural-types">Nominal and Structural Types</h3>
+<h4 id="nominal-types">Nominal Types</h4>
+<ul>
+<li>Based on type names</li>
+<li>i.e. C++, Java, Eiffel, Scala</li>
+</ul>
+<h4 id="structural-types">Structural Types</h4>
+<ul>
+<li>Based on available methods and fields</li>
+<li>i.e. Python, Ruby, Smalltals</li>
+</ul>
+<h3 id="type-checking">Type Checking</h3>
+<p>Type checking prevents certain errors in programm.</p>
+<p>When happens the type checking?</p>
+<ul>
+<li>Static: Compile time</li>
+<li>Dynamic: Run time</li>
+</ul>
+<h4 id="static-type-checking">Static Type Checking</h4>
+<ul>
+<li>Types of variables and methods are declared explicitly or inferred</li>
+<li>Types of expressions can be derived from the types of their constituents</li>
+<li>Type rules are used at <em>compile time</em> to check whether a program is correctly typed</li>
+</ul>
+<blockquote>
+<p>A programming language is called type-safe if its design prevents type errors</p>
+</blockquote>
+<p>Pros:</p>
+<ul>
+<li>Static safety</li>
+<li>Readability (type annotations are a good documentation)</li>
+<li>Efficiency</li>
+</ul>
+<h4 id="dynamic-type-checking">Dynamic Type Checking</h4>
+<ul>
+<li>Variables, methods, and expressions of a program are typically not typed (types not declared)</li>
+<li>Every object and value has a type</li>
+<li><em>Run-time system checks</em> that operations are applied to expected arguments</li>
+<li>Also static languages need to performe some checks dynamically at run-time (i.e type-casting)</li>
+<li>Dynamic languages are usually more expressive (no type annotations)</li>
+</ul>
+<p>Pros:</p>
+<ul>
+<li>Expressiveness</li>
+<li>Low overhead (no type annotations)</li>
+<li>Much simpler</li>
+</ul>
+<h3 id="overview-of-type-systems-in-oo-languages">Overview of Type Systems in <span class="caps">OO</span>-Languages</h3>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th>Static</th>
+<th>Dynamic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nominal</td>
+<td>C++, Java, Eiffel, Scala, C#</td>
+<td>certain features of statically-typed languages</td>
+</tr>
+<tr>
+<td>Structural</td>
+<td>Research languages: O’Caml, Moby…</td>
+<td>Python, JavaScript, Ruby, Smalltalk</td>
+</tr>
+</tbody>
+</table>
+<p>Dynamic and Structural is often called “duck typing”.</p>
+<h2 id="subtyping">Subtyping</h2>
+<blockquote>
+<p>Substitution principle Objects of subtypes can be used wherever objects of supertypes are expected</p>
+</blockquote>
+<ul>
+<li>Syntactic classification: Subtypes understand <em>at least the messages</em> of their supertypes.<ul>
+<li>Nominal languages: Subtype has a <em>wider</em> (or same) interface as supertype</li>
+<li>Overriding methods must not be less accessible</li>
+</ul>
+</li>
+<li>Semantic classification: Subtypes provide <em>at least the behaviour</em> of their supertypes.</li>
+</ul>
+<p>A type is a <em>set</em> of values. <em>Subtype relation</em> corresponds to <em>subset relation</em>.</p>
+<p><img alt="Subtyping and Sets" class="img-fluid" src="/images/coop_subtyping_and_sets.svg"/></p>
+<ul>
+<li>In <em>nominal</em> programming languages the <em>programmer</em> decides about subtype relation</li>
+<li>In <em>structural</em> programming languages the <em>type checker</em> decides about subtype relation</li>
+</ul>
+<h3 id="variance-covariance-contravariance-and-invariance">Variance (Covariance, Contravariance and Invariance)</h3>
+<p>Based on substitution principle.</p>
+<h4 id="covariance">Covariance</h4>
+<p>Ordering of types from more specific to more generic (in direction of inheritance hierarchy)</p>
+<p><img alt="Covariance" class="img-fluid" src="/images/covariance.svg"/></p>
+<h4 id="contravariance">Contravariance</h4>
+<p>Ordering of types from more generic to more specific (in oposite direction of inheritance hierarchy)</p>
+<p><img alt="Contravariance" class="img-fluid" src="/images/contravariance.svg"/></p>
+<h4 id="variance-for-oop">Variance for <span class="caps">OOP</span></h4>
+<p><a href="https://class.coursera.org/progfun-005/lecture/83">Coursera:Scala</a></p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th>Variance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Input Arguments</td>
+<td>Contravariant</td>
+</tr>
+<tr>
+<td>Return Values and Exceptions</td>
+<td>Covariant</td>
+</tr>
+<tr>
+<td>In- and Output Arguments (Mutable Reference Arguments)</td>
+<td>Nonvariant</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="n">SuperReturnType</span><span class="w"> </span><span class="nf">Super::foo</span><span class="p">(</span><span class="n">SubParamType</span><span class="w"> </span><span class="n">p</span><span class="p">);</span><span class="w"> </span><span class="c1">// |         ^ contra-</span>
+<span class="c1">//  ..                        ^             // |         | variant</span>
+<span class="c1">//   v                        ..            // | co-     |</span>
+<span class="n">SubReturnType</span><span class="w">   </span><span class="nf">Sub::foo</span><span class="p">(</span><span class="n">SuperParamType</span><span class="w"> </span><span class="n">p</span><span class="p">);</span><span class="w"> </span><span class="c1">// v variant |</span>
+</code></pre></div>
+<p><em>Super</em> is more <strong>general</strong> than <em>Sub</em>.</p>
+<p><em>Sub</em> is more <strong>specific</strong> than <em>Super</em>.</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Programming Language</th>
+<th>Return Type</th>
+<th>Argument Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C++, Java, Scala, D…</td>
+<td>Covariant</td>
+<td>Nonvariant</td>
+</tr>
+<tr>
+<td>Eiffel</td>
+<td>Covariant</td>
+<td>Covariant</td>
+</tr>
+<tr>
+<td>C#</td>
+<td>Nonvariant</td>
+<td>Nonvariant</td>
+</tr>
+</tbody>
+</table>
+<!-- End of Notes Week 2 -->
+<p>In Java and C# arrays are covariant!</p>
+<h3 id="behavioral-subtyping-contracts">Behavioral Subtyping (Contracts)</h3>
+<p>What are the <em>properties</em> shared by the values of a type?</p>
+<p><em>Properties</em> should also include the behavior of the object.
+This is expressed as interface specifications (contracts)</p>
+<ul>
+<li>Precondition: Have to hold before the method is executed</li>
+<li>Postcondition: Have to hold after the method has terminated</li>
+<li>Old-expressons: Can be used to refer to prestate values from the postcondition</li>
+<li>Invariant: Have to hold in all states in which an object can be accessed by other objects</li>
+</ul>
+<h4 id="subtyping-and-contracs">Subtyping and Contracs</h4>
+<ul>
+<li>Subtypes must fulfill contracts of supertypes</li>
+<li>Overriding method of subtypes may have <em>weaker preconditions</em> than the supertype method</li>
+<li>Overriding method of subtypes may have <em>stronger postconditions</em> than the supertype method</li>
+<li>Subtypes may have <em>stronger invariants</em> than supertypes</li>
+<li>Subtypes may have <em>stronger history constrains</em> than supertype</li>
+</ul>
+<!-- Beginning of Notes Week 4 -->
+<h4 id="specification-inheritance-inherit-contracts-from-subtypes">Specification Inheritance (Inherit Contracts from Subtypes)</h4>
+<ul>
+<li>Subtype needs to satisfy the contract of the supertype (inheriting contracts)</li>
+<li><em>Invariant</em> inheritance: Conjunction (<span class="caps">AND</span>) of own contract and contracts of all supertypes</li>
+<li><em>History</em> inheritance: same as for <em>invariants</em></li>
+<li><em>Precondition</em> inheritance: Disjunctions (<span class="caps">OR</span>) of own contract and contracts of all supertypes</li>
+</ul>
+<div class="math">$$
+PreEff_{S.m} = Pre_{S.m} || Pre_{T.m} || Pre_{T'.m} || ...
+$$</div>
+<ul>
+<li><em>Postcondition</em> inheritance: Satisfy <em>each</em> postcondition for which the corresponding precondition holds<ul>
+<li>Precondition needs to be evaluated with <em>old</em> state</li>
+</ul>
+</li>
+</ul>
+<div class="math">$$
+PostEff_{S.m} = (old(Pre_{S.m}) =&gt; Post_{S.m}) \&amp;\&amp; (old(Pre_{T.m}) =&gt; Post_{T.m}) \&amp;\&amp; ...
+$$</div>
+<h3 id="types-as-contracts">Types as Contracts</h3>
+<p>Types can be seen as a kind of contracts.</p>
+<p>Overriding Methods must:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Behavioral Subtyping (contracts)</th>
+<th>Nominal/Structural Subtyping (variance)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Weaker Preconditions</td>
+<td>Covariant Parameters</td>
+</tr>
+<tr>
+<td>Stronger Postconditions</td>
+<td>Covariant Results</td>
+</tr>
+<tr>
+<td>Stronger Invariants</td>
+<td>Invariant fields</td>
+</tr>
+</tbody>
+</table>
+<p>This doesn’t apply exactly to:</p>
+<ul>
+<li>Invariants/Fields</li>
+<li>History constraints</li>
+</ul>
+<!-- End of Slides 2 -->
+<h2 id="inheritance">Inheritance</h2>
+<!-- Notes Week 4 01:18:05  p. 4 -->
+<h3 id="difference-between-inheritance-and-subtyping">Difference between inheritance and subtyping</h3>
+<p>Inheritance allows to reuse the code (specialization) inside a class
+(member variables and method definitions).</p>
+<p>Subtyping supports reuse externally. It’s used for polymorphism
+in form of the substitution principle.</p>
+<p>Subtyping expresses classification.</p>
+<p>Subtypeing depends only on the interface of objects and not on their implementations.</p>
+<p>In most existing <span class="caps">OOP</span> languages inheritance also is subtyping.
+C++ allows private (or protected) inheritance which does not result
+in subtyping.
+With interfaces (Java, C++…) it’s possible to create subtypes
+without inheritance (no reuse of code from parent class).
+Usually the term “inherit from an interface” is used even if it’s
+not correct.</p>
+<blockquote>
+<p>Subclassing = Subtyping + Inheritance</p>
+</blockquote>
+<p>Inheritance is <em>not</em> a core concept of <span class="caps">OOP</span>.</p>
+<p><span class="caps">OOP</span> can do without inheritance, but not without subtyping!</p>
+<h2 id="aggregation-vs-private-inheritance-c">Aggregation vs. Private Inheritance (C++)</h2>
+<ul>
+<li>Both solutions allow code reuse without establishing a subtype relation</li>
+<li>No subtype polymorphism</li>
+<li>No behavioral subtyping equirements</li>
+</ul>
+<p>Aggregation causes more overhead</p>
+<ul>
+<li>Two objects at run-time</li>
+<li>Boilerplate code for delegation</li>
+<li>Access methods for protected fields</li>
+</ul>
+<p>Private inheritance may lead to unnecessary multiple inheritance</p>
+<h2 id="static-and-dynamic-method-binding">Static and Dynamic Method Binding</h2>
+<ul>
+<li>Static binding: Methods are selected based on the <em>static type</em> of the
+receiver <em>at compile time</em></li>
+<li>Dynamic binding: Methods are selected based on the <em>dynamic type</em> of the
+receiver object <em>at run time</em></li>
+</ul>
+<p>Dynamic method binding enables specialization and subtype polymorphism</p>
+<p>Drawbacks</p>
+<ul>
+<li>Performance: Overhead of method look-up at run-time</li>
+<li>Versioning: Dynamic binding makes it harder to evolve code
+ without breaking subclasses</li>
+</ul>
+<p>Defaults</p>
+<ul>
+<li>Dynamic binding: Eiffel, Java, Scala, dynamically-typed languages</li>
+<li>Static  binding: C++, C#</li>
+</ul>
+<h3 id="static-method-binding-in-java">Static Method binding in Java</h3>
+<p>Java binds methods statically in 3 cases:</p>
+<ol>
+<li>Static Methods</li>
+<li>Private Methods</li>
+<li>Method calls on <code>super</code></li>
+</ol>
+<h2 id="rules-for-proper-subclassing">Rules for proper Subclassing</h2>
+<ul>
+<li>Use subclassing only if there is an <em>‘is-a’</em> relation<ul>
+<li>Syntactic and behavioral subtypes</li>
+</ul>
+</li>
+<li>Do not rely on implementation details</li>
+<li>Use precise documentation (<em>contracts</em> where possible)</li>
+<li>When evolving superclasses, <em>do not mess around with dynamically-bound methods</em></li>
+<li>Do not add or remove calls, or change order of calls</li>
+<li>Do not specialize superclasses that are expected to change often</li>
+</ul>
+<h1 id="binary-methods">Binary Methods</h1>
+<p>Binary methods take one explicit argument and receiver (this)</p>
+<p>Often behavior should be specialized depending on the dynamic types
+of <em>both</em> arguments.</p>
+<p>Recall that covariant parameter types are not statically type-safe! (?)</p>
+<ul>
+<li>Dynamic binding for specialization based on dynamic type of <em>receiver</em></li>
+<li>How to specialize on the dynamic type of the <em>explicit argument</em>?</li>
+<li>Visitor Pattern: tedious to write, requires modification of superclass</li>
+</ul>
+<p>Some Languages Support Multiple Dispatch:</p>
+<p>Method calls are bound on dynamic types of several arguments.</p>
+<ul>
+<li>Performance overhead</li>
+<li>Extra requirements are needed to ensure there is a “unique best method” for every call</li>
+</ul>
+<h1 id="multiple-inheritance">Multiple Inheritance</h1>
+<p>All <span class="caps">OOP</span> languages support multiple subtyping:</p>
+<ul>
+<li>One type can have several supertypes</li>
+<li>Subtype relation forms a <span class="caps">DAG</span></li>
+</ul>
+<p>Some languages support multiple inheritance.</p>
+<h2 id="problems-with-multiple-inheritance">Problems with multiple inheritance</h2>
+<p>Ambiguities:</p>
+<ul>
+<li>Superclasses may contain fields and methods with identical names and signatures</li>
+<li>Which version should be available in the subclass?</li>
+</ul>
+<p>Repeated inheritance (diamonds):</p>
+<ul>
+<li>A class may inherit from a superclass more than once</li>
+<li>How many copies of the superclass members are there?</li>
+<li>How are the superclass fields initialized?</li>
+</ul>
+<h1 id="mixins-and-traits">Mixins and Traits</h1>
+<p><span class="caps">TODO</span></p>
+<p>…</p>
+<!-- Beginning of Slides 4.2 Parametric Polymorphism p. 61 (29) -->
+<!-- Beginning of Notes Week 7 p. 8 -->
+<h1 id="parametric-polymorphism_1">Parametric Polymorphism</h1>
+<h2 id="java-c">Java, C#, …</h2>
+<ul>
+<li>Subtype relation not always desiderable</li>
+<li>Generics (Java, Scala, C#)</li>
+<li>Upper bounds (<code>extends</code>): Subtype of upper bound required<ul>
+<li>Guarantees that a specific method can be called</li>
+<li>Modular check of implementation of Generic code</li>
+</ul>
+</li>
+<li>Generics (in Java, C#) are non-variant<ul>
+<li>Covariance is unsafe when client <strong>writes</strong> to generic type argument (‘input’)<ul>
+<li>Mutable fields</li>
+<li>Method arguments</li>
+</ul>
+</li>
+<li>Contravariance is unsafe when client <strong>reads</strong> from generic type argument (‘output’)<ul>
+<li>Fields</li>
+<li>Method results</li>
+</ul>
+</li>
+<li>Non-variance is sometimes too restrictive</li>
+</ul>
+</li>
+<li>Scala allows variance-annotation<ul>
+<li>Positive positions (‘output’, <em>covariant</em>): <code>+</code><ul>
+<li>Result type</li>
+<li>Type of immutable fields</li>
+</ul>
+</li>
+<li>Negative positions (‘input’, <em>contravariant</em>): <code>-</code><ul>
+<li>Parameter type</li>
+</ul>
+</li>
+<li>C# uses keywords <code>in</code> and <code>out</code></li>
+</ul>
+</li>
+</ul>
+<!-- End of Notes Week 7 -->
+<!-- Beginning of Notes Week 8 -->
+<ul>
+<li>Methods can also have type arguments (i.e <code>static &lt;T&gt; void printAll(Collection&lt;T&gt; c) {...}</code>)</li>
+</ul>
+<h3 id="wildcards">Wildcards</h3>
+<p>Wildcards can be seen as an <a href="https://en.wikipedia.org/wiki/Type_system#Existential_types">Existential Type</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">static</span> <span class="kt">void</span> <span class="nf">printAll</span><span class="p">(</span><span class="n">Collection</span><span class="o">&lt;?&gt;</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">Object</span> <span class="n">e</span> <span class="p">:</span> <span class="n">c</span><span class="p">)</span> <span class="p">{</span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">e</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>There exits a type argument <code>T</code> such that <code>c</code> has type <code>collection&lt;T&gt;</code></p>
+</blockquote>
+<ul>
+<li>
+<p>Wildcards can have a <em>upper bounds</em> and <em>lower bounds</em> (correspond to <em>co- and contravariance</em>)</p>
+<ul>
+<li>upper bound for <em>reading</em> and method invocation: <code>extends</code></li>
+<li>lower bound <em>writing</em>: <code>super</code></li>
+</ul>
+</li>
+<li>
+<p>lower bounds are not supported on type parameters (only on wildcards) in Java</p>
+</li>
+</ul>
+<p>Instantiation of wildcards can change over time:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">class</span> <span class="nc">Wrapper</span> <span class="p">{</span>
+    <span class="n">Cell</span><span class="o">&lt;?&gt;</span> <span class="n">data</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1">// client code:</span>
+<span class="n">Wrapper</span> <span class="n">w</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Wrapper</span><span class="p">();</span>
+<span class="n">w</span><span class="p">.</span><span class="na">data</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Cell</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="p">();</span> <span class="c1">// w.data has type Cell&lt;String&gt;</span>
+<span class="n">w</span><span class="p">.</span><span class="na">data</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Call</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span><span class="p">();</span> <span class="c1">// now w.data has type Cell&lt;Object&gt;!</span>
+</code></pre></div>
+<ul>
+<li>
+<p>Generics with wildcards (and possibly with bounds) have a subtype relation if the type parameters have a relation</p>
+<ul>
+<li>See <a href="https://docs.oracle.com/javase/tutorial/java/generics/subtyping.html">Java documentation</a></li>
+</ul>
+</li>
+<li>
+<p>Type Erasure (Java, Scala)</p>
+<ul>
+<li>For backwards compatibility (in <span class="caps">JVM</span>)</li>
+<li>Generic type information is erased in compiler (not available in bytecode anymore)<ul>
+<li><code>C&lt;T&gt;</code> is translated to <code>C</code></li>
+<li><code>T</code> is translated to its <em>upper bound</em></li>
+<li>Casts are added wher nessecary (i.e reading values from generic type)</li>
+<li>Only one classfile and one class object for all instantiations of a generic class</li>
+<li>Run-time type information (<code>instanceof</code>, <code>List&lt;String&gt;.class</code>) is <em>missing</em></li>
+<li>Arrays of generic types are <em>not possible</em> (<code>new List&lt;String&gt;[10]</code>)</li>
+<li>Static fields are shared by all instantiations of a generic class</li>
+<li>Lower bounds for type parameters would require support in <span class="caps">JVM</span> (bytecode verification)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>No Type Erasure in C#<ul>
+<li>Run-type type information is available</li>
+<li>Arrays of generic types are possible</li>
+</ul>
+</li>
+</ul>
+<h2 id="c-templates">C++ Templates</h2>
+<ul>
+<li>Classes and Methods (Functions) can be parametrized</li>
+<li>Also value types can be used as templates paramters</li>
+<li>Instantiation generates (internally) a new class</li>
+<li>Type checking is done on of the generated class, not on the template (different to Java, C#, …)<ul>
+<li>Type check only of the parts of code that are used</li>
+<li>Type errors are not detectes before instantination</li>
+<li>No bounds needed</li>
+</ul>
+</li>
+<li>No subtype releation between instantiations of a template</li>
+<li>No run-time support needed (templates are a compilation concept)</li>
+<li>Templates can be specialized</li>
+<li>Improvement for feature C++ standard (C++17): <a href="https://en.wikipedia.org/wiki/Concepts_%28C%2B%2B%29">Concepts Lite</a><ul>
+<li><em>Structural</em> upper bounds (C++ type system is nominal)</li>
+</ul>
+</li>
+<li><a href="https://en.wikipedia.org/wiki/Template_metaprogramming">Template Meta Programming</a><ul>
+<li>Is touring-complete!</li>
+</ul>
+</li>
+</ul>
+<!-- End of Slides 4.2 -->
+<!-- End of Notes Week 8 -->
+<h1 id="information-hiding-and-encapsulation">Information Hiding and Encapsulation</h1>
+<!-- Beginning of Slides 5 -->
+<!-- Beginning of Notes Week 9 -->
+<p>In the literature Information Hiding and Encapsulation are often used synonymously.
+But they are distinct but related.</p>
+<h2 id="information-hiding">Information Hiding</h2>
+<blockquote>
+<p>Information hiding is used to reduce dependencies between modules. The client is
+provided only the information needed.</p>
+</blockquote>
+<ul>
+<li>Concerns static parts of program (code)</li>
+<li>Syntactic and semantic: Contracts are part of the exported interfaces</li>
+<li>Reduce dependencies<ul>
+<li>Classes can be studied in isolation</li>
+<li>Classes only interact in well-defined ways</li>
+</ul>
+</li>
+</ul>
+<h3 id="client-interface-of-a-class">Client Interface of a Class</h3>
+<ul>
+<li>Class Name</li>
+<li>Type parameters (Generics) and their bounds</li>
+<li>Super-interfaces</li>
+<li>Signatures of exported methonds and fields</li>
+<li>Client interface of <em>direct</em> superclass</li>
+</ul>
+<h3 id="other-interfaces">Other Interfaces</h3>
+<ul>
+<li>Subclass interface (i.e <code>protected</code>)</li>
+<li>Friend interface (<code>friend</code> in C++, default access in Java)</li>
+<li>Inner classes</li>
+<li>…</li>
+</ul>
+<h3 id="java-access-modifiers">Java Access Modifiers</h3>
+<ul>
+<li><code>public</code>: client interface</li>
+<li><code>protected</code>: subclass and <em>friend</em> interface</li>
+<li>default access: friend interface</li>
+<li><code>private</code>: implementation</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Modifier</th>
+<th>Class</th>
+<th>Package</th>
+<th>Subclass</th>
+<th>World</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>public</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>protected</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>‘<em>default</em>’</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>private</code></td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3 id="safe-changes">Safe Changes</h3>
+<ul>
+<li>Renaming of hidden elements</li>
+<li>Modification of hidden implementation (functionally needs to be preserved)</li>
+<li>Access modifiers specify what classes might be affected by a change</li>
+</ul>
+<h3 id="exchanging-implementation">Exchanging Implementation</h3>
+<ul>
+<li>Behaviour needs to be preserved</li>
+<li>Exported fields limit modification<ul>
+<li>Use getters and setters</li>
+<li>Uniform access (Eiffel, Scala)</li>
+</ul>
+</li>
+<li>Modification is critical: Fragile baseclass problem!</li>
+<li>Object structures</li>
+</ul>
+<h3 id="bug-method-selection-in-java">Bug: Method Selection in Java</h3>
+<ul>
+<li>
+<p>Bug was present in <span class="caps">JSL1</span>. It’s fixed now!</p>
+</li>
+<li>
+<p>Compile time:</p>
+<ol>
+<li>Determin static declaration (find the method in the receiver class, method can be inherited)</li>
+<li>Check accessibility</li>
+<li>Determine invocation mode (virtual / non-virtual)</li>
+</ol>
+</li>
+<li>
+<p>At run-time:</p>
+<ol start="4">
+<li>Compute receiver reference</li>
+<li>Locate method to invoke (based on dynamic type of receiver object) that overwrites</li>
+</ol>
+</li>
+<li>
+<p>Rules for overriding</p>
+<ul>
+<li>Access modifier of overriding method must provide at least as much access as the overridden method</li>
+<li>default access → <code>protected</code> → <code>public</code></li>
+<li><code>private</code> methods can’t be overridden: Hiding</li>
+</ul>
+</li>
+</ul>
+<h2 id="encapsulation">Encapsulation</h2>
+<blockquote>
+<p>Encapsulation is used to guarantee that data and structural consistency by capsules with well defined interfaces.</p>
+</blockquote>
+<ul>
+<li>Data consistency: i.e value is not negatice, …</li>
+<li>
+<p>Structural consistency: i.e tree is balanced, list is doubly linked, …</p>
+</li>
+<li>
+<p>Concerns dynamic parts of code (execution)</p>
+</li>
+<li>Context of a module can be changed but module behaves same</li>
+</ul>
+<h3 id="levels-of-encapsulation">Levels of Encapsulation</h3>
+<p>Capsules can be:</p>
+<ul>
+<li>Individual objects</li>
+<li>Object structures: i.e doubly-linked list</li>
+<li>A class (with all its objects): i.e all threads in Java</li>
+<li>All classes of a subtype hierarchy</li>
+<li>A package with all of its classes and their objects)</li>
+<li>Several packages</li>
+</ul>
+<p>Internal representation of capsule that needs to be proteced:</p>
+<ul>
+<li>invariant</li>
+<li>or history constraint</li>
+</ul>
+<p>Hiding fields are useful for:</p>
+<ul>
+<li>Information Hiding</li>
+<li>Encapsulation</li>
+</ul>
+<h3 id="achieving-consistency-of-objects">Achieving Consistency of Objects</h3>
+<ol>
+<li>Apply information hiding wherever possible</li>
+<li>Make consistency criteria explicit<ul>
+<li>Contracts</li>
+<li>Informal documentation</li>
+</ul>
+</li>
+<li>Check interfaces (also subclass methods, i.e <code>protected</code>)<ul>
+<li>Make sure they preserve documented consistency criteria</li>
+</ul>
+</li>
+</ol>
+<!-- End of Slides 5 -->
+<h1 id="object-structures">Object Structures</h1>
+<!-- Beginnning of Slides 6 -->
+<blockquote>
+<p>An object structure is a set of objects that are connected via references.</p>
+</blockquote>
+<h2 id="examples">Examples</h2>
+<ul>
+<li>Array-Based Lists</li>
+<li>Doubly-Linked Lists (<code>java.util</code>)</li>
+</ul>
+<h2 id="aliasing">Aliasing</h2>
+<ul>
+<li>
+<p>A reference to memory location</p>
+<ul>
+<li>Aliasing occures if more than one variable allows access to the same memory location</li>
+</ul>
+</li>
+<li>
+<p>Static/Dynamic Aliases</p>
+<ul>
+<li>Static alias: all involved variables are in the heap</li>
+<li>Dynamic aliasing: some involved variables are stack-allocated (others can be in the heap)</li>
+</ul>
+</li>
+</ul>
+<h3 id="intended-aliasing">Intended Aliasing</h3>
+<ul>
+<li>Efficiency<ul>
+<li>Objects need not to be copied, when passed or modified</li>
+</ul>
+</li>
+<li>Sharing<ul>
+<li>Share the same object between different places</li>
+<li>Consequence of objects identity</li>
+</ul>
+</li>
+</ul>
+<h3 id="unintended-aliasing">Unintended Aliasing</h3>
+<h4 id="capturing">Capturing</h4>
+<ul>
+<li>Get a reference from outside and store it<ul>
+<li>Often in constructors that take reference arguments</li>
+</ul>
+</li>
+</ul>
+<h4 id="leaking">Leaking</h4>
+<ul>
+<li>
+<p>Passing a reference to an (internal) data structure to the outside</p>
+</li>
+<li>
+<p>More frequent then capturing</p>
+</li>
+</ul>
+<h4 id="problems-with-aliasing">Problems with Aliasing</h4>
+<ul>
+<li>Aliases can be used to by-pass interface</li>
+<li>Interfaces and contracts remains unchanged but observable behaviour can change!</li>
+</ul>
+<h4 id="consistency-of-object-structures">Consistency of Object Structures</h4>
+<ul>
+<li>Consistency of object structures debend on several fields (not only one)</li>
+<li>Checking invariance on beginning and end of method is not enough<ul>
+<li>State can be changed in between by an alias</li>
+</ul>
+</li>
+</ul>
+<h4 id="other-problems-with-aliasing">Other Problems with Aliasing</h4>
+<ul>
+<li>Synchronization in concurrent programs<ul>
+<li>Lock protects data structure</li>
+<li>Locking a reference dosen’t lock aliases</li>
+</ul>
+</li>
+<li>Distributed programming<ul>
+<li>i.e Remote Method Invocation</li>
+<li>References (intended aliases) are lost</li>
+</ul>
+</li>
+<li>Optimizations<ul>
+<li>i.e Inlining is not possible for aliased objects</li>
+</ul>
+</li>
+</ul>
+<h3 id="alias-control-in-java">Alias Control in Java</h3>
+<h4 id="linkedlist"><code>LinkedList</code>:</h4>
+<ul>
+<li>All fields are <code>private</code></li>
+<li><code>Entry</code> is <em>private inner class</em> of <code>LinkedList</code><ul>
+<li>References are not passed out</li>
+<li>Subclasses cannot manipulate or leak <code>Entry</code> objects</li>
+</ul>
+</li>
+<li><code>ListItr</code> is <em>private inner class</em> of <code>LinkedList</code><ul>
+<li>Interface <code>ListIterator</code> provides controlled access to <code>ListItr</code> objects</li>
+<li><code>ListItr</code>objects are passed out in a controlled way</li>
+<li>Subclasses cannot manipulate or lead <code>ListItr</code> objects</li>
+</ul>
+</li>
+<li>Subclassing is restricted!</li>
+</ul>
+<h4 id="string"><code>String</code></h4>
+<ul>
+<li>All fields are <code>private</code></li>
+<li>References to internal char-array are not passed out</li>
+<li>Subclassing is prohibited (<code>final</code>)</li>
+</ul>
+<!-- End Notes Week 9 -->
+<h2 id="readonly-types">Readonly Types</h2>
+<!-- Beginning of Notes Week 10 -->
+<ul>
+<li>Restrict access to shared objects</li>
+<li>Common: grant read-only access</li>
+<li>Cloning can prevent aliasing in some cases (but is inefficient)</li>
+<li>The reference can be marked as readonly<ul>
+<li>The object itself is not readonly</li>
+</ul>
+</li>
+</ul>
+<h3 id="requirements-for-readonly-access">Requirements for Readonly Access</h3>
+<ul>
+<li>Mutable objects<ul>
+<li>Only some clients can mutate object</li>
+<li>Access restrictions apply to references (not whole objects)</li>
+</ul>
+</li>
+<li>Prevent field updates, calls of mutating objects</li>
+<li>
+<p>Transitivity</p>
+</li>
+<li>
+<p>Possible solution: wrap objects in readonly objects or use a readonly interface</p>
+<ul>
+<li>Not practical</li>
+<li>Not safe: no compiler checks, readwrite alias can still occur, …</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>Readonly access in C++ (<code>const</code>) is not transitive</p>
+</blockquote>
+<h3 id="pure-methods">Pure Methods</h3>
+<p>Pure methods are side-effect free.</p>
+<ul>
+<li>Must not contain field updates</li>
+<li>Must not invoke non-pure methods</li>
+<li>Must not create objects (on heap)</li>
+<li>Can be only overridden by pure methods</li>
+<li>Stronger constraints than const methods in C++</li>
+</ul>
+<p>Pure methods are very restrictive:</p>
+<ol>
+<li>Not possible to get an iterator (which is created on heap) to iterate over collection</li>
+<li>Caches can’t be implemented</li>
+<li>Lazy initialization is not possible</li>
+</ol>
+<h3 id="readwrite-and-readonly-types">Readwrite and Readonly Types</h3>
+<ul>
+<li>Concerns only reference type (object type is always mutable)</li>
+<li>Readwrite type: <code>T</code></li>
+<li>Readonly type: <code>readonly T</code></li>
+<li>Subtype relation: <code>T</code> &lt;: <code>readonly T</code></li>
+<li>Not same as relation between mutable and non-mutable types (which have no relation)</li>
+<li>Readonly is transitive</li>
+</ul>
+<h3 id="transitivity-of-readonly-types">Transitivity of Readonly Types</h3>
+<p>The type of</p>
+<ul>
+<li>Field access</li>
+<li>Array access</li>
+<li>Method invocation</li>
+</ul>
+<p>is determined by type combinator: ►</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>►</th>
+<th>rw T</th>
+<th>ro T</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rw S</td>
+<td>rw T</td>
+<td>ro T</td>
+</tr>
+<tr>
+<td>ro S</td>
+<td>ro T</td>
+<td>ro T</td>
+</tr>
+</tbody>
+</table>
+<h4 id="type-rules-readonly-access">Type Rules: Readonly Access</h4>
+<p>Readonly types can’t be receiver of:</p>
+<ul>
+<li>Field update</li>
+<li>Array update</li>
+<li>Invocation of pure method</li>
+</ul>
+<p>Readonly types must not be cast to readwrite types.</p>
+<ul>
+<li>Leaking can be prevented</li>
+<li>Capturing can still occure</li>
+</ul>
+<h2 id="ownership-types">Ownership Types</h2>
+<p>Prevents capturing.</p>
+<h3 id="object-topologies">Object Topologies</h3>
+<p>Distinguish <em>internal</em> references from other references.</p>
+<h4 id="roles-in-object-structures">Roles in Object Structures</h4>
+<ul>
+<li>Interface objects: used to access the structure</li>
+<li>Internal representation: must not be exposed to outside (clients)</li>
+<li><em>Arguments</em> of the object structure: must not be modified by the structure (i.e entries in a list)</li>
+</ul>
+<h4 id="ownership-model">Ownership Model</h4>
+<ul>
+<li>Each object has one (or zero) owner</li>
+<li>An object belongs to the internal representation of the owner</li>
+<li>Ownership relation is acyclic (forrest of ownership trees)</li>
+<li>Context: all objects that have the same owner</li>
+<li>Ownership relation is <em>not</em> transitive</li>
+</ul>
+<p>Type Invariant:</p>
+<blockquote>
+<p>The <em>static</em> ownership information (declared in code) reflects the <em>run-time</em> ownership of the referenced object</p>
+</blockquote>
+<h4 id="ownership-types_1">Ownership Types</h4>
+<ul>
+<li><strong>peer</strong>: in the same context, same owner as owner of <em>this</em></li>
+<li><strong>rep</strong>: references to objects owned by <em>this</em> (in the context of <em>this</em>)</li>
+<li><strong>any</strong>: in any context (I don’t care)</li>
+<li><strong>lost</strong>: specific owner but not known (I care but don’t know)</li>
+<li><strong>self</strong>: only for the <code>this</code> literal (special because ownership relative to <code>this</code>)</li>
+</ul>
+<p><strong>lost</strong> and <strong>self</strong> are internal (hidden) type modifiers. No keywords.</p>
+<p>Traversing hierarchy:</p>
+<ul>
+<li><strong>rep</strong>: go down in herarchy</li>
+<li><strong>peer</strong>: go across on same level in hierarchy</li>
+<li><strong>any</strong>: jump somewhere, could even be outside of hierarchy</li>
+</ul>
+<h4 id="type-safety">Type Safety</h4>
+<ul>
+<li><span class="caps">RTTI</span> contains:<ul>
+<li>The class of each object</li>
+<li>The <em>owner</em> of <em>each object</em></li>
+</ul>
+</li>
+<li>Type invariant:<ul>
+<li>static ownership reflects run-time owner</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><em>any</em> and <em>lost</em> are extistential types.</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><span class="n">any</span> <span class="n">T</span> <span class="n">o</span><span class="p">;</span>
+</code></pre></div>
+<p>There exitst an owner such that o ist an istance of T and has that owner.</p>
+<h4 id="subtyp-relation-between-ownership-types">Subtyp Relation between Ownership Types</h4>
+<p><strong>rep</strong> types and <strong>peer</strong> types are subtypes of corresponsing <strong>any</strong> types.</p>
+<ul>
+<li><strong>rep</strong> T &lt;: <strong>any</strong> T</li>
+<li><strong>peer</strong> T &lt;: <strong>any</strong> T</li>
+</ul>
+<p>Casts:</p>
+<ul>
+<li><strong>any</strong> can be cast to <strong>rep</strong> or <strong>peer</strong> (with runtime checks)</li>
+</ul>
+<h4 id="viewpoint-adaption">Viewpoint Adaption</h4>
+<ul>
+<li>Ownership relation is expressed relative to <em>this</em>.</li>
+<li>If <em>this</em> object (viewpoint) changes, the ownership changes.</li>
+<li>When creating an object the ownership has to be set<ul>
+<li><code>new rep Entry()</code></li>
+<li><code>new peer Entry()</code></li>
+<li><strong>any</strong> is not allowed for <code>new</code></li>
+<li>Ownership can’t be changed later</li>
+</ul>
+</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>►</th>
+<th>peer T</th>
+<th>rep T</th>
+<th>any T</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>peer S</td>
+<td>peer T</td>
+<td>lost T</td>
+<td>any T</td>
+</tr>
+<tr>
+<td>rep S</td>
+<td>rep T</td>
+<td>lost T</td>
+<td>any T</td>
+</tr>
+<tr>
+<td>any S</td>
+<td>lost T</td>
+<td>lost T</td>
+<td>any T</td>
+</tr>
+<tr>
+<td>lost S</td>
+<td>lost T</td>
+<td>lost T</td>
+<td>any T</td>
+</tr>
+<tr>
+<td>self S</td>
+<td>peer T</td>
+<td>rep T</td>
+<td>any T</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Ownership Types Hierarchy" class="img-fluid" src="/images/coop_ownership_types_hierarchy.svg"/></p>
+<h4 id="field-access-and-method-invocation-type-rules">Field Access and Method Invocation (Type Rules)</h4>
+<p><span class="math">\(\tau(a)\)</span>: Type of a</p>
+<p>Field <strong>Read</strong> or Method <strong>Parameters</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">v</span> <span class="o">=</span> <span class="n">e</span><span class="p">.</span><span class="na">f</span><span class="p">;</span>
+</code></pre></div>
+<p>Is correctly typed if:</p>
+<div class="math">$$
+\tau(v) :&gt; \tau(e) \blacktriangleright \tau(f)
+$$</div>
+<p>Field <strong>Write</strong> or Method <strong>Result</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">e</span><span class="p">.</span><span class="na">f</span> <span class="o">=</span> <span class="n">v</span><span class="p">;</span>
+</code></pre></div>
+<div class="math">$$
+\tau(e) \blacktriangleright \tau(f) :&gt; \tau(v)
+$$</div>
+<p>And</p>
+<div class="math">$$
+\tau(e) \blacktriangleright \tau(f)
+$$</div>
+<p>is <strong>not lost</strong>.</p>
+<h4 id="aliasing_1">Aliasing</h4>
+<ul>
+<li><strong>rep</strong>: internal representation<ul>
+<li>no unwanted sharing</li>
+<li>leaking as <strong>rep</strong>: viewpoint-adaptation in client gets <strong>lost</strong></li>
+<li>method argument <strong>rep</strong></li>
+<li>capturing as <strong>rep</strong>: gets <strong>lost</strong>, can’t assign to <strong>lost</strong></li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">class</span> <span class="nc">Person</span> <span class="p">{</span>
+  <span class="kd">private</span> <span class="n">rep</span> <span class="n">Address</span> <span class="n">addr</span><span class="p">;</span> <span class="c1">// part of internal representation</span>
+  <span class="kd">public</span> <span class="n">rep</span> <span class="n">Address</span> <span class="nf">getAddr</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">addr</span><span class="p">;</span> <span class="c1">// clients get lost-reference</span>
+  <span class="p">}</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setAddr</span><span class="p">(</span><span class="n">rep</span> <span class="n">Address</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">addr</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span> <span class="c1">// cannot be called by clients (lost) only by this bject</span>
+  <span class="p">}</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setAddr</span><span class="p">(</span><span class="n">any</span> <span class="n">Address</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">addr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">rep</span> <span class="nf">Address</span><span class="p">(</span><span class="n">a</span><span class="p">);</span> <span class="c1">// cloning necessary, can't assign any to rep</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<!-- End of Notes Week 10 -->
+<!-- Beginning of Notes Week 11 -->
+<h2 id="owner-as-modifier">Owner-as-Modifier</h2>
+<ul>
+<li>Readonly Typesystem: leaking is safe (only readonly leaking)</li>
+<li>Ownership Typesystem: capturing is safe (declaring internal references as <strong>rep</strong>)<ul>
+<li>leaking can happen only as <strong>any</strong> or <strong>lost</strong></li>
+</ul>
+</li>
+<li>
+<p>Combining both Typesystem</p>
+</li>
+<li>
+<p><strong>any</strong> and <strong>lost</strong>: Readonly</p>
+</li>
+</ul>
+<p>Additional enforced rules:</p>
+<ul>
+<li>Field write <code>e.f = v;</code> is valid <em>only</em> if <span class="math">\(\tau(e)\)</span> is <strong>self</strong>, <strong>peer</strong> or <strong>rep</strong></li>
+<li>Method call <code>e.m(...);</code> is valid <em>only</em> if <span class="math">\(\tau(e)\)</span> is <strong>self</strong>, <strong>peer</strong> or <strong>rep</strong>, or called method is <strong>pure</strong></li>
+</ul>
+<blockquote>
+<p>A method can modify directly at most all the objects that have the same owner as <code>this</code>. Everything further down in the hierarchy can only be changed indirectly (via method calls).</p>
+</blockquote>
+<ul>
+<li>
+<p>When debugging: if an object changes the changing method is going to be on the call stack</p>
+<ul>
+<li>Changing methods need to go through all the owners transitively</li>
+<li>Owner is like a <em>gate keeper</em> (interface object)</li>
+</ul>
+</li>
+<li>
+<p>Stronger concept for encapsulation than private-protected-public</p>
+</li>
+<li>
+<p>leaking only happens as readonly (‘something’ ► <strong>rep</strong>: <strong>lost</strong>)</p>
+</li>
+<li>Standard (Java): default modifier would be <strong>peer</strong>, flat datastructures</li>
+<li><span class="quo">‘</span>shared ownership’ is not possible. i.e List owns nodes and modifying Iterator would need readwrite access to nodes.<ul>
+<li>List would need</li>
+</ul>
+</li>
+<li>The system can be combined with Generics: <code>rep List&lt;peer Address&gt;</code></li>
+<li>Also possible: merge <em>entire contexts</em> to new owner. i.e concat two lists.</li>
+</ul>
+<h3 id="achievements">Achievements</h3>
+<ul>
+<li>Encapsulate whole object structures</li>
+<li>Can not be violated</li>
+<li>Subclassing is no restriction</li>
+<li>Invariants of object <em>o</em> can depend on:<ul>
+<li>Encapsulated fields of <em>o</em> (as usual)</li>
+<li>Fields of objects transitively owned by <em>o</em></li>
+</ul>
+</li>
+</ul>
+<!-- End of Slides 6 -->
+<!-- Beginning of Slides 7 -->
+<h1 id="initialization-and-null-references">Initialization and Null-References</h1>
+<ul>
+<li>Main Usages of Null-References<ul>
+<li>Terminate recursion, list, …</li>
+<li>Initialization (i.e lazy initialization)</li>
+<li><span class="quo">‘</span>Result not found’ as a return value of a function (absence of an object)</li>
+</ul>
+</li>
+<li>Most (80%) of all variables in an <span class="caps">OOP</span> programm are <em>non-null</em> after initalization</li>
+<li>Real need for null value is rare</li>
+<li>Theoretical type system:<ul>
+<li>Non-null tye: <code>T!</code> (references to <code>T</code>-Object)</li>
+<li>Possibly-null type: <code>T?</code> (references to <code>T</code>-Object plus <strong>null</strong>)</li>
+<li>Subtype relations (S &lt;: T)<ul>
+<li>S! &lt;: T!</li>
+<li>S? &lt;: T?</li>
+<li>T! &lt;: T?</li>
+<li>Dereferencing only possible with non-null type (<code>T!</code>)</li>
+<li>Possible casts:<ul>
+<li>Implicit: From non-null to possibly-null (<code>T! nn = ...; T? pn = nn;</code>)</li>
+<li>Downcasts (explicit) are possible but need <em>run-time</em> checks (<code>T? pn = ...; T! nn = (T!)pn;</code> Shortcut for <code>(T!)</code>: <code>(!)</code>)</li>
+<li>Additional type rules (compared to Java): Expressions whose value gets dereferenced need <em>non-null</em> type<ul>
+<li>Receiver of: field access, array access, method call</li>
+<li>Expressions of a <code>throw</code> statement</li>
+</ul>
+</li>
+<li>Dataflow Analysis<ul>
+<li>Check if a value at a given position in code can or can’t be <em>null</em></li>
+<li>Tracks values of local variables but not of objects on the <em>heap</em><ul>
+<li>Tracking heap locations is non-moduler</li>
+<li>Other threads could modify heap locations</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="object-initialization">Object Initialization</h2>
+<ul>
+<li>All fields are initialized to null (Java, C#, …)</li>
+<li>Invariant of non-null types is violated at beginning of constructor (it’s initialized to <code>null</code> by default)<ul>
+<li>Make sure that all non-null fields are initialized when constructor terminates<ul>
+<li>Similar to <em>Definite Assignment Rule</em> that check that local variables are assigned before first use (Java, C#)</li>
+<li>Needes checks:<ul>
+<li>Dereferces</li>
+<li>non-null fields have non-null types</li>
+<li>non-null arguments are passed non-null method parameters</li>
+</ul>
+</li>
+<li>Not possible to check for all cases: <em>escaping the constructor</em><ul>
+<li>The simple <em>Definite Assignement Rule</em> is only sound if <em>partly-initialized object do not escape</em> from constructor</li>
+<li>Overly restrictive: on <em>partly-initialzed objects</em><ul>
+<li>Dont call methods</li>
+<li>Don’t pass as argument to methods</li>
+<li>Dont’s store in fields or an array</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Better type-system: track initialization (construction types)<ul>
+<li>Initialization Phases (3 types per class/interface)<ul>
+<li><em>free type</em>: objects under construction (free to violate invariants, free to have null in non-null variables)</li>
+<li><em>committed type</em>: object construction is completed (type of object is chaged at run-time when object is fully constructed)</li>
+<li><em>unclassified type</em>: super-type of <em>free type</em> and <em>committed type</em></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Type Invariant:</p>
+<blockquote>
+<p>An object is initialized if all fields have non-null values (transitively).</p>
+</blockquote>
+<p>There could also be other invariants that have to hold after object is initialized, but can be broken before the object is fully initialized.</p>
+<!-- End Notes Week 11 -->
+<!-- Beginning Notes Week 12 -->
+<h2 id="type-rules">Type Rules</h2>
+<ul>
+<li>Most type rules of Java remain unchanged</li>
+<li>Additional requirement: dereferencing needs a non-null type<ul>
+<li>Receiver of field access</li>
+<li>Receiver of array access</li>
+<li>Receiver of method call</li>
+<li>Expression of a <code>throw</code> statement</li>
+</ul>
+</li>
+<li>Dereferencing of a non-null type can be checked statically (compile time)</li>
+<li>Escaping constructor is an issue</li>
+<li>Combining non-null type system with construction types<ul>
+<li>6 types</li>
+</ul>
+</li>
+</ul>
+<table class="table-striped table">
+<thead>
+<tr>
+<th></th>
+<th>non-null</th>
+<th>possibly-null</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>comitted</td>
+<td><code>T!</code></td>
+<td><code>T?</code></td>
+</tr>
+<tr>
+<td>free</td>
+<td><code>free T!</code></td>
+<td><code>free T?</code></td>
+</tr>
+<tr>
+<td>unclassified</td>
+<td><code>unc T!</code></td>
+<td><code>unc T?</code></td>
+</tr>
+</tbody>
+</table>
+<p>No downcasts from unclassified to free or committed (no reasonable run-time checks).</p>
+<p><img alt="Construction types hierarchy" class="img-fluid" src="/images/coop_non-null_and_construction_types.png"/></p>
+<h2 id="local-initialization">Local Initialization</h2>
+<ul>
+<li>An object is locally initialized: all non-null fields have non-null values</li>
+<li>Static type <em>committed</em>: locally initialized at run-time</li>
+</ul>
+<p>Field access:</p>
+<div class="highlight"><pre><span></span><code><span class="n">e</span><span class="p">.</span><span class="na">f</span>
+</code></pre></div>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Field access</th>
+<th>f: <code>!</code></th>
+<th>f: <code>?</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>e: <code>commited</code></td>
+<td><code>!</code></td>
+<td><code>?</code></td>
+</tr>
+<tr>
+<td>e: <code>free</code></td>
+<td><code>?</code></td>
+<td><code>?</code></td>
+</tr>
+<tr>
+<td>e: <code>unc</code></td>
+<td><code>?</code></td>
+<td><code>?</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="transitive-initialization">Transitive Initialization</h2>
+<ul>
+<li><em>Committed</em> has to be transitive</li>
+<li>An object is <em>transitively initialized</em> if all reachable objecs are <em>localy initialized</em></li>
+<li>static type <em>committed</em>: transitively initialized at run-time</li>
+</ul>
+<h2 id="cyclic-structures">Cyclic Structures</h2>
+<ul>
+<li>In initialization code (i.e constructor) it’s allowed to assign <em>committed</em> types to <strong>fields</strong> of  <em>free</em> types</li>
+</ul>
+<h2 id="type-rules_1">Type Rules</h2>
+<ul>
+<li>Field declaration has no consturction-type modifier<ul>
+<li>non-null (<code>!</code>) or possibly-null (<code>?</code>) modifiers are possible</li>
+<li>It’s determined if it’s <em>free</em> or <em>committed</em> when dereferencing (<code>e.f</code>)</li>
+<li>Field declaration is the only place in a programm that has not construction-type modifier</li>
+</ul>
+</li>
+<li><em>committed</em> is transitive!</li>
+<li>It’s not allowed to have a <em>committed</em> and a <em>free</em> reference to the same object (no cross-type aliases)<ul>
+<li>The <em>free</em> reference could assign a pointer in the object to an uninitialized field</li>
+</ul>
+</li>
+<li>It’s critical when an reference changes from <em>free</em> to <em>committed</em></li>
+</ul>
+<h3 id="field-write">Field Write</h3>
+<p>A field write</p>
+<div class="highlight"><pre><span></span><code><span class="n">a</span><span class="p">.</span><span class="na">f</span> <span class="o">=</span> <span class="n">b</span>
+</code></pre></div>
+<p>is well-typed if
+- <code>a</code> and <code>b</code> are well-typed
+- <code>a</code><span class="quo">‘</span>s type is a non-null type (<code>!</code>)
+- <code>b</code><span class="quo">‘</span>s class and non-null type conforms to <code>a.f</code>
+- <strong><code>a</code><span class="quo">‘</span>s type is <em>free</em> or <code>b</code><span class="quo">‘</span>s type is <em>committed</em> </strong></p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>type of <code>a</code> \ type of <code>b</code></th>
+<th>committed</th>
+<th>free</th>
+<th>unc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>committed</td>
+<td>✓</td>
+<td>✘</td>
+<td>✘</td>
+</tr>
+<tr>
+<td>free</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>unc</td>
+<td>✓</td>
+<td>✘</td>
+<td>✘</td>
+</tr>
+</tbody>
+</table>
+<h3 id="field-read">Field Read</h3>
+<ul>
+<li>A field read <code>e.f</code>is well-typed if:<ul>
+<li><code>e</code> is well-typed</li>
+<li><code>e</code><span class="quo">‘</span>s type is a non-null type (<code>!</code>)</li>
+<li>Field (<code>f</code>) has no construction-type modifier</li>
+</ul>
+</li>
+</ul>
+<p>The type of <code>e.f</code> is:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>type of e \ type of f</th>
+<th><code>T!</code></th>
+<th><code>T?</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>S!</code></td>
+<td><code>T!</code></td>
+<td><code>T?</code></td>
+</tr>
+<tr>
+<td><code>free S!</code></td>
+<td><code>unc T?</code></td>
+<td><code>unc T?</code></td>
+</tr>
+<tr>
+<td><code>unc S!</code></td>
+<td><code>unc T?</code></td>
+<td><code>unc T?</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="consturctors">Consturctors</h3>
+<ul>
+<li>Constructor signatures: each parameter has declared construction-type (default: <em>committed</em>) and null-ness type</li>
+<li><code>this</code> in cunstruction has implicitly: <em>free non-null</em></li>
+<li>Definite assignment check for complete constructor</li>
+<li>Constructors are <em>free</em> by default</li>
+<li>The most permessive type for <em>arguments in a constructor</em> declaration is <em>unc</em><ul>
+<li>This should be chosen if possible</li>
+</ul>
+</li>
+</ul>
+<h3 id="method-calls">Method Calls</h3>
+<ul>
+<li>Method signatures: each parameter has declared construction-type (and null-ness type)</li>
+<li>Method signatures can contain construction-type for <code>this</code></li>
+</ul>
+<p>Construction-type for <code>this</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">String</span><span class="o">!</span> <span class="n">free</span> <span class="nf">getId</span><span class="p">(</span><span class="n">String</span><span class="o">!</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">...;</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>Overriding requires usual co- and contravariant rules<ul>
+<li>The receiver (<code>this</code>) counts as parameter</li>
+<li>Method arguments should not be declared as <em>unclassified</em> if possible<ul>
+<li>otherwise overriding methods need to cope with <em>unclassified</em> too</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="object-construction">Object Construction</h3>
+<ul>
+<li>At the end of a constructor the object is not nessecary fully initialized (i.e constructors of deriving classes are not run yet)</li>
+<li>End of a <code>new</code> expression: constructed object might not yet be fully constructed</li>
+<li><code>new</code> expressions can have only references to committed objects outside of the <code>new</code> expression<ul>
+<li>committed reference to the <code>new</code> expression is not possible<ul>
+<li><code>new</code> not yet finished (not <em>committed</em>, <em>free</em>)</li>
+<li>But committed objects can’t have pointers to <em>free</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Nested <code>new</code> expression:</li>
+<li>if the ‘inner’ <code>new</code> expression is fully (transitively) initialized reference <em>to</em> and <em>from</em> the outside</li>
+<li>the ‘outer’ <code>new</code> expression can point to the ‘inner’ <code>new</code> expression</li>
+</ul>
+<h4 id="new-expression"><code>new</code> Expression</h4>
+<blockquote>
+<p>After ‘outer’ <code>new</code> expression (only committed arguments) finishes all ‘inner’ <code>new</code> expressions have references to locally initialized objects.
+All references inside the ‘outer’ <code>new</code> expression point to transitively initialized objects.</p>
+</blockquote>
+<ul>
+<li>The type of a <code>new</code> expression is <em>committed</em> if the static types of all arguments of the constuctor are <em>committed</em><ul>
+<li>Otherwise it’s <em>free</em></li>
+<li>It’s not relevant what the declared types of the constructor arguments are! It depends on the <code>new</code> expression</li>
+</ul>
+</li>
+<li>It’s almost not possible to create uninitialized objects</li>
+</ul>
+<h3 id="lazy-initialization">Lazy Initialization</h3>
+<ul>
+<li>Access lazy initialized field always through getter method</li>
+</ul>
+<p>i.e</p>
+<div class="highlight"><pre><span></span><code><span class="kd">class</span> <span class="nc">Demo</span> <span class="p">{</span>
+  <span class="kd">private</span> <span class="n">Vector</span><span class="o">?</span> <span class="n">data</span><span class="p">;</span> <span class="c1">// possibly-null</span>
+  <span class="kd">public</span> <span class="n">Vector</span><span class="o">!</span> <span class="n">getData</span><span class="p">()</span> <span class="p">{</span> <span class="c1">// getter guarantees for non-null</span>
+    <span class="n">Vectror</span><span class="o">?</span> <span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="p">;</span> <span class="c1">// needed for data flow analysis</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">d</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">d</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Vector</span><span class="p">();</span> <span class="n">data</span> <span class="o">=</span> <span class="n">d</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">d</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="arrays">Arrays</h2>
+<div class="highlight"><pre><span></span><code><span class="c1">// Elements</span>
+<span class="c1">//    |</span>
+<span class="c1">//    v</span>
+<span class="n">Person</span><span class="o">!</span> <span class="o">[]!</span> <span class="n">a</span><span class="p">;</span> <span class="c1">// Non-null array with non-null elements</span>
+<span class="n">Person</span><span class="o">?</span> <span class="o">[]!</span> <span class="n">b</span><span class="p">;</span> <span class="c1">// Non-null array with possibly-null elements</span>
+<span class="n">Person</span><span class="o">!</span> <span class="o">[]?</span> <span class="n">c</span><span class="p">;</span> <span class="c1">// Possibly-null array with non-null elements</span>
+<span class="n">Person</span><span class="o">?</span> <span class="o">[]?</span> <span class="n">d</span><span class="p">;</span> <span class="c1">// Possibly-null array with possibly-null elements (default in Java)</span>
+<span class="c1">//        ^</span>
+<span class="c1">//        |</span>
+<span class="c1">//      Array</span>
+</code></pre></div>
+<ul>
+<li>Arrays have no constructors</li>
+<li>Problem: Array initialization is often done with loops<ul>
+<li>Definite assignment cannot be checked by compiler</li>
+</ul>
+</li>
+<li>Possible solutions:<ul>
+<li>Array initializers (<code>String! []! s = {"Array", "of", "non-null", "Strings"};</code>)</li>
+<li>Eiffel: pre-filling array (default objects not better than <code>null</code>)</li>
+<li>Run time assert provided by programmer (Spec#)<ul>
+<li><code>NonNullType.AssertInitialized(arr);</code> (run time assert function)</li>
+<li>Only committed elements can be stored in array</li>
+<li>Data flow analysis knows semantic of run time assert function</li>
+<li>Run time assert function changes type from <strong>free</strong> to <strong>committed</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="summary">Summary</h2>
+<ul>
+<li>Can be combined with Generics</li>
+<li>Invariant: non-nullness</li>
+<li>Avoid calling virtual methods on this in uninitialized objects (constructors, init methods)</li>
+<li>Don’t let escape uninitialized objects</li>
+<li>At end of constructor: object might not yet be constructed (i.e subclass constructors)</li>
+</ul>
+<!-- End of Notes Week 12 -->
+<!-- Beginning of Notes Week 13 -->
+<h2 id="initialization-of-global-data">Initialization of Global Data</h2>
+<ul>
+<li><span class="caps">OO</span>-Programs have also global data</li>
+<li>i.e Flightweight-Pattern, Singleton, Caches…</li>
+</ul>
+<h3 id="requirements">Requirements</h3>
+<ul>
+<li>Must be initialized before first use (non-nullness)</li>
+<li>Handle mutual dependencies</li>
+<li>Lazy initialization</li>
+</ul>
+<h3 id="c">C++</h3>
+<ul>
+<li>Global vars can have initializers</li>
+<li>Initializers are executed before <code>main</code> function<ul>
+<li>Implicitely called by run-time system</li>
+<li>No support for lazy initialization</li>
+</ul>
+</li>
+<li>Order of execution as in apearance in code</li>
+<li>No mechanism for dependancies (has to be donne by programmer)</li>
+</ul>
+<h3 id="java-similar-in-c">Java (similar in C#)</h3>
+<ul>
+<li>Static initializer for static fields</li>
+<li>Lazy initialized</li>
+<li>No mechanism for mutual dependencies (call to not initialized reference possible)</li>
+<li>Static initializer can have side effects (no modular reasoning about initialization)</li>
+</ul>
+<h3 id="scala">Scala</h3>
+<ul>
+<li>Language support for singletons</li>
+<li>Singletons can extend classes and traits but <em>can’t be specialized</em></li>
+<li>Internally translated to Java initialization</li>
+</ul>
+<h3 id="summary_1">Summary</h3>
+<ul>
+<li>No solution really guarantees that global data is initialized before use</li>
+<li>No solution handles dependancies</li>
+<li>Carefull with global data (as programmer)!</li>
+</ul>
+<!-- End of Slides 7 -->
+<!-- Beginning of Slides 8 -->
+<h1 id="reflections">Reflections</h1>
+<ul>
+<li>Program can observe and modify its structure and behavioral at run-time</li>
+<li>Simples form: <span class="caps">RTTI</span> (i.e for casting)</li>
+</ul>
+<h2 id="introspection">Introspection</h2>
+<ul>
+<li>Get methods, fields… from classes (or individual objects)</li>
+<li>Checks are done at run-time instead of compile-time (exceptions)<ul>
+<li>Type checking</li>
+<li>Accessibility checks</li>
+</ul>
+</li>
+<li>Accessibity / information hiding can be weakend (security issue)</li>
+<li>Helpful for debugging</li>
+<li>JUnit’s test driver works with introspection</li>
+<li>Visitor pattern is much simpler with introspection</li>
+<li>Reflection <span class="caps">API</span> defines (and throws) <em>checked exceptions</em><ul>
+<li>If underlying code (i.e throws an exception it is transformed into a <em>unchecked exception</em></li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span> <span class="n">T</span> <span class="nf">newInstance</span><span class="p">(</span> <span class="p">)</span> <span class="kd">throws</span> <span class="n">InstantiationException</span><span class="p">,</span> <span class="n">IllegalAccessException</span><span class="p">;</span>
+</code></pre></div>
+<p>If the constructor called internally by <code>newInstance</code> throws an exception (even a checked exception)
+it gets swalowed and rethrown as an unchecked exception.</p>
+<ul>
+<li>Visitor Pattern (Double Invocation) can be implemented much simpler with reflections<ul>
+<li>Second dynamic dispatch is implemented via reflection</li>
+<li><code>accept</code> methods in element classes</li>
+<li>Flexible</li>
+<li>Not statically safe: error handling code needed</li>
+<li>Slower than ‘traditional’ implementation</li>
+</ul>
+</li>
+</ul>
+<h2 id="reflective-code-generation">Reflective Code Generation</h2>
+<p>Examples:</p>
+<ul>
+<li>Java class loading</li>
+<li>Expression tree in C#<ul>
+<li>Represents Abstract Syntax Tree of C#</li>
+<li><span class="caps">AST</span> can be created like any other data structure at run-time</li>
+<li>Can be compiled at run-time with <code>Compile</code> method</li>
+<li>Generation and compilation of code at run-time is expensive but pays if generated code is called often</li>
+</ul>
+</li>
+</ul>
+<h2 id="dynamic-code-manipulation">Dynamic Code Manipulation</h2>
+<ul>
+<li>Usually only available in dynamically typed languages (Python, Lisp…)</li>
+<li>Makes code difficult to understand</li>
+</ul>
+<h2 id="summary_2">Summary</h2>
+<ul>
+<li>Very flexible (plug-ins)</li>
+<li>Serialization / persistance</li>
+<li>Design Patterns</li>
+<li>Dynamic code generation</li>
+<li>Not staticially safe!</li>
+<li>Information hiding can be compromized</li>
+<li>Hard to understand and debug</li>
+<li>Performance can be wery bad</li>
+</ul>
+<p>Reflection and Typechecking:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Degree of Reflection</th>
+<th>Type Checking</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Introspection</td>
+<td>Code can be checked once, when compiled</td>
+</tr>
+<tr>
+<td>Reflective Code Generation</td>
+<td>Code can be checked once, when generated</td>
+</tr>
+<tr>
+<td>Dynamic Code Manipulation</td>
+<td>Requires typically dynamic type checking</td>
+</tr>
+</tbody>
+</table>
+<!-- End of Slides 8 -->
+<!-- End of Notes Week 13 -->
+<!-- End of Course! -->
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./arrays_in_c_and_cpp.html" title="Previous: Arrays in C and C++">Arrays in C and C++</a></li>
+                <li class="next-article"><a href="./object_file_formats.html" title="Next: Object File Formats">Object File Formats</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2015-07-28T21:23:58+02:00">Jul 28, 2015</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-10T19:21:45+02:00">Apr 10, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#cpp-ref">C++
+                    <span>19</span>
+</a></li>
+                <li><a href="./tags#eth-ref">ETH
+                    <span>7</span>
+</a></li>
+                <li><a href="./tags#oop-ref">OOP
+                    <span>7</span>
+</a></li>
+                <li><a href="./tags#python-ref">Python
+                    <span>4</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

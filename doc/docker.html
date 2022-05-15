@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Linux, OS, Programming, " />
+
+<meta property="og:title" content="Docker "/>
+<meta property="og:url" content="./docker.html" />
+<meta property="og:description" content="See also: Docker Documentation. Setup Start the daemon (on Fedora): sudo systemctl start docker Start the daemon on boot (on Fedora): sudo systemctl enable docker Run as user: First create a docker group: sudo groupadd docker Then add the actual user to that group: sudo usermod -aG docker $USER After …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2018-03-19T12:12:35+01:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="Docker ">
+<meta name="twitter:description" content="See also: Docker Documentation. Setup Start the daemon (on Fedora): sudo systemctl start docker Start the daemon on boot (on Fedora): sudo systemctl enable docker Run as user: First create a docker group: sudo groupadd docker Then add the actual user to that group: sudo usermod -aG docker $USER After …">
+
+        <title>Docker  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./docker.html"> Docker  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#setup">Setup</a></li>
+<li><a href="#images-and-containers">Images and Containers</a><ul>
+<li><a href="#list-images">List Images</a></li>
+<li><a href="#search-images">Search Images</a></li>
+<li><a href="#pull-images">Pull Images</a></li>
+<li><a href="#remove-images">Remove Images</a></li>
+<li><a href="#run-image">Run Image</a></li>
+<li><a href="#execute-command-in-running-container">Execute Command in running Container</a></li>
+<li><a href="#detach-from-running-container">Detach from running Container</a></li>
+<li><a href="#show-running-images">Show Running Images</a></li>
+<li><a href="#logs">Logs</a></li>
+<li><a href="#stopping-containers">Stopping Containers</a></li>
+<li><a href="#renaming-containers">Renaming Containers</a></li>
+<li><a href="#getting-information-from-containers">Getting Information from Containers</a></li>
+<li><a href="#removing-containers">Removing Containers</a></li>
+</ul>
+</li>
+<li><a href="#registries">Registries</a></li>
+<li><a href="#docker-machine">Docker Machine</a><ul>
+<li><a href="#create-machines">Create Machines</a></li>
+<li><a href="#list-machines">List Machines</a></li>
+<li><a href="#restart-a-node">Restart a Node</a></li>
+</ul>
+</li>
+<li><a href="#dockerfile">Dockerfile</a><ul>
+<li><a href="#instructions">Instructions</a></li>
+<li><a href="#label-informations">Label Informations</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+</ul>
+</li>
+<li><a href="#docker-build">Docker build</a><ul>
+<li><a href="#the-dockerignore-file">The .dockerignore file</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <p>See also: <a href="https://docs.docker.com/reference/">Docker Documentation</a>.</p>
+
+<h1 id="setup">Setup</h1>
+<p>Start the daemon (on Fedora): <code>sudo systemctl start docker</code></p>
+<p>Start the daemon on boot (on Fedora): <code>sudo systemctl enable docker</code></p>
+<p>Run as user:</p>
+<p>First create a docker group:</p>
+<p><code>sudo groupadd docker</code></p>
+<p>Then add the actual user to that group:</p>
+<p><code>sudo usermod -aG docker $USER</code></p>
+<p>After that log out and log in again.</p>
+<h1 id="images-and-containers">Images and Containers</h1>
+<h2 id="list-images">List Images</h2>
+<p>Command: <code>docker images</code></p>
+<p>Columns:</p>
+<ul>
+<li><code>REPOSITORY</code>: name of the repository on the Docker Hub</li>
+<li><code>TAG</code>: the tag (version) of the image</li>
+<li><code>IMAGE ID</code>: first 12 digits of the unique (64 bit) image <span class="caps">ID</span></li>
+<li><code>CREATED</code>: the creation date</li>
+<li><code>SIZE</code>: size of the image</li>
+</ul>
+<h2 id="search-images">Search Images</h2>
+<p>Command: <code>docker search &lt;image-name&gt;</code></p>
+<p>Columns:</p>
+<ul>
+<li><code>NAME</code>: name of the repository</li>
+<li><code>DESCRIPTION</code>: Small description</li>
+<li><code>STARS</code>: Showing how many people like the repository</li>
+<li><code>OFFICIAL</code>: If it has been approved by the Docker team</li>
+<li><code>AUTOMATED</code>: If the build is automanted (on Docker Hub)</li>
+</ul>
+<h2 id="pull-images">Pull Images</h2>
+<p>Command: <code>docker pull &lt;image-name&gt;</code></p>
+<h2 id="remove-images">Remove Images</h2>
+<p>Command: <code>docker rmi &lt;image-id&gt;</code></p>
+<p>or: <code>docker rmi &lt;image-name&gt;:&lt;tag&gt;</code></p>
+<h2 id="run-image">Run Image</h2>
+<p>Command: <code>docker run [flags] &lt;image-name&gt;:&lt;tag&gt; [command]</code></p>
+<p>Flags:</p>
+<ul>
+<li><code>-i</code>: interactive shell</li>
+<li><code>-t</code>: pseudo tty</li>
+<li><code>-d</code>: run as daemon</li>
+<li><code>-p &lt;host_port&gt;:&lt;container_port&gt;</code>: map ports</li>
+</ul>
+<p>If the interactive (<code>-i</code>) flag is provided a command sould be executed.
+This will override the default command that is run when the container is started.</p>
+<p>A random name is assigned to the image.</p>
+<p>Example: <code>docker run -i -t fedora:latest /bin/bash</code></p>
+<h2 id="execute-command-in-running-container">Execute Command in running Container</h2>
+<p>Command <code>docker exec [flags] &lt;image-name&gt;:tag [command]</code></p>
+<ul>
+<li><code>-i</code>: interactive shell</li>
+<li><code>-t</code>: pseudo tty</li>
+<li><code>-d</code>: run as daemon</li>
+<li><code>-w</code>: use working directory</li>
+</ul>
+<h2 id="detach-from-running-container">Detach from running Container</h2>
+<p><code>CTRL</code>+<code>p</code> <code>CTRL</code>+<code>q</code></p>
+<h2 id="show-running-images">Show Running Images</h2>
+<p>Command: <code>docker ps</code></p>
+<p>To show also containers that are not running: <code>docker ps -a</code></p>
+<h2 id="logs">Logs</h2>
+<p>Command: <code>docker logs &lt;container-id-or-name&gt;</code></p>
+<h2 id="stopping-containers">Stopping Containers</h2>
+<p>Shutdown the container:</p>
+<p>Command: <code>docker stop &lt;container-id-or-name&gt;</code></p>
+<p>Force quit the container:</p>
+<p>Command: <code>docker kill &lt;container-id-or-name&gt;</code></p>
+<h2 id="renaming-containers">Renaming Containers</h2>
+<p>Command: <code>docker rename &lt;old-name&gt; &lt;new-name&gt;</code></p>
+<h2 id="getting-information-from-containers">Getting Information from Containers</h2>
+<p>Command: <code>docker stats &lt;container-name&gt;</code></p>
+<p>Command: <code>docker top &lt;container-name&gt;</code></p>
+<h2 id="removing-containers">Removing Containers</h2>
+<p>Command: <code>docker rm &lt;container-name&gt;</code></p>
+<h1 id="registries">Registries</h1>
+<p>There are three kinds of registries:</p>
+<ul>
+<li>Docker Hub: Hosted registry service by Docker</li>
+<li>Docker Trusted Registry: Hosted or on premise (backend maintained by Docker)</li>
+<li>Docker Registry: For running own Docker registry</li>
+</ul>
+<h1 id="docker-machine">Docker Machine</h1>
+<h2 id="create-machines">Create Machines</h2>
+<p>Create and manage machines running Docker.</p>
+<p>Example (creating a VirtualBox machine running Docker): <code>docker-machine create -d virtualbox node1</code></p>
+<h2 id="list-machines">List Machines</h2>
+<p>Command: <code>docker-machine ls</code></p>
+<p>Columns:</p>
+<ul>
+<li><code>NAME</code>: node name</li>
+<li><code>ACTIVE</code>: docker commands are run on the active node</li>
+<li><code>DRIVER</code>: which driver is used (e.g. virtualbox)</li>
+<li><code>STATE</code>: if it’s running</li>
+<li><code>URL</code>: its <span class="caps">URL</span></li>
+<li><code>SWARM</code>: if it’s part of a Docker Swarm cluster</li>
+<li><code>DOCKER</code>: version of Docker</li>
+<li><code>ERRORS</code>: any errors that occurred</li>
+</ul>
+<h2 id="restart-a-node">Restart a Node</h2>
+<p>Commmand: <code>docker-machine restart &lt;node-name&gt;</code></p>
+<h1 id="dockerfile">Dockerfile</h1>
+<h2 id="instructions">Instructions</h2>
+<ul>
+<li><code>FROM</code>: The base image for this Docker image (<code>scratch</code> for empty base image).</li>
+<li><code>MAINTAINER</code>: Responsible maintainer  (name and e-mail).</li>
+<li><code>RUN</code>: Install packages and run other commands.</li>
+<li><code>ADD</code>: Add files or folders to the Docker image. URLs can be provided. Automatically unpack or untar a compressed files.</li>
+<li><code>COPY</code>: Same as <code>ADD</code> but without <span class="caps">URL</span> handling or unpacking/untarring.</li>
+<li><code>EXPOSE</code>: Expose ports from the image to the outside world.</li>
+<li><code>LABEL</code>: Additional information (version number, text …). Each label add a layer to the image.</li>
+<li><code>CMD</code>: Execute commands and keep the container alive.</li>
+<li><code>ENTRYPOINT</code>: Similar to <code>CMD</code>. Can be used in conjunction with <code>CMD</code>.</li>
+<li><code>USER</code>: Specify which username to use. Influences <code>RUN</code>, <code>CMD</code> and <code>ENTRYPOINT</code> instructions that follow in the Dockerfile.</li>
+<li><code>WORKDIR</code>: Specify the directory where to execute instructions. Influences <code>RUN</code>, <code>CMD</code> and <code>ENTRYPOINT</code> instructions that follow in the Dockerfile</li>
+<li><code>ONBUILD</code>: Used if image is used as base in another Dockerfile. Executed as first statement after <code>FROM</code>. Use in conjunction with <code>ADD</code> or <code>RUN</code>.</li>
+</ul>
+<h2 id="label-informations">Label Informations</h2>
+<p>Command: <code>docker inspect &lt;image-id&gt;</code></p>
+<h2 id="best-practices">Best Practices</h2>
+<ul>
+<li>Use a <code>.dockerignore</code> file.</li>
+<li>Install only necessary packages.</li>
+<li>Limit the number of layers. Every <code>RUN</code> command adds a layer.</li>
+<li>Execute only one process per container.</li>
+</ul>
+<h1 id="docker-build">Docker build</h1>
+<p><code>docker build -t &lt;docker-hub-username&gt;/&lt;repository-name&gt; &lt;directory&gt;</code></p>
+<p>or</p>
+<p><code>docker build -f &lt;path-do-dockerfile&gt; -t &lt;repository&gt;:&lt;tag&gt;</code></p>
+<p><code>&lt;repository&gt;</code>: repository name prefixed by Docker Hub username</p>
+<h2 id="the-dockerignore-file">The <code>.dockerignore</code> file</h2>
+<p>This file can be used to exclude files and folders from being sent to the Docker daemon for the build. It should be placed in the same
+folder as the <code>Dockerfile</code>.</p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./qemu_quickstart.html" title="Previous: QEMU Quickstart">QEMU Quickstart</a></li>
+                <li class="next-article"><a href="./visualization_of_functions.html" title="Next: Visualization of Functions">Visualization of Functions</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2018-03-19T12:12:35+01:00">Mär 19, 2018</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#linux-ref">Linux
+                    <span>13</span>
+</a></li>
+                <li><a href="./tags#os-ref">OS
+                    <span>13</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

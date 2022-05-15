@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, OS, FreeRTOS, Embedded Systems, Programming, " />
+
+<meta property="og:title" content="FreeRTOS "/>
+<meta property="og:url" content="./freertos.html" />
+<meta property="og:description" content="This page contains some random notes for FreeRTOS. See also: FreeRtosExamples and FreeRtos Configuration The configuration of the kernel is set in FreeRTOSConfig.h configTOTAL_HEAP_SIZE: This must be enough space to allocate all tasks including the idle task. If the kernel does’t start it could be that the heap …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2017-08-04T15:56:23+02:00" />
+<meta property="og:article:modified_time" content="2022-04-10T19:21:45+02:00" />
+<meta name="twitter:title" content="FreeRTOS ">
+<meta name="twitter:description" content="This page contains some random notes for FreeRTOS. See also: FreeRtosExamples and FreeRtos Configuration The configuration of the kernel is set in FreeRTOSConfig.h configTOTAL_HEAP_SIZE: This must be enough space to allocate all tasks including the idle task. If the kernel does’t start it could be that the heap …">
+
+        <title>FreeRTOS  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./freertos.html"> FreeRTOS  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#configuration">Configuration</a></li>
+<li><a href="#tasks">Tasks</a><ul>
+<li><a href="#task-stack-and-tcb">Task Stack and <span class="caps">TCB</span></a></li>
+</ul>
+</li>
+<li><a href="#stack-overflow">Stack Overflow</a><ul>
+<li><a href="#high-water-mark">High Water Mark</a></li>
+<li><a href="#runtime-checks">Runtime Checks</a><ul>
+<li><a href="#method-1">Method 1</a></li>
+<li><a href="#method-2">Method 2</a></li>
+<li><a href="#configuration_1">Configuration</a></li>
+</ul>
+</li>
+<li><a href="#task-states">Task States</a></li>
+<li><a href="#task-priorities">Task Priorities</a><ul>
+<li><a href="#selecting-task-priority">Selecting Task Priority</a><ul>
+<li><a href="#rate-monotonic-scheduling-rms">Rate Monotonic Scheduling (<span class="caps">RMS</span>)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#blocking-a-task">Blocking a Task</a></li>
+<li><a href="#idle-task-hook">Idle Task Hook</a></li>
+</ul>
+</li>
+<li><a href="#scheduler">Scheduler</a><ul>
+<li><a href="#scheduling-algorithm">Scheduling Algorithm</a></li>
+</ul>
+</li>
+<li><a href="#synchronization">Synchronization</a><ul>
+<li><a href="#queues">Queues</a></li>
+<li><a href="#semaphores">Semaphores</a><ul>
+<li><a href="#binary-semaphores">Binary Semaphores</a></li>
+<li><a href="#counting-semaphores">Counting Semaphores</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#critical-sections">Critical Sections</a><ul>
+<li><a href="#basic-critical-sections">Basic Critical Sections</a></li>
+<li><a href="#locking-the-scheduler">Locking the Scheduler</a></li>
+<li><a href="#mutexs-and-binary-semaphores">Mutexs and Binary Semaphores</a></li>
+</ul>
+</li>
+<li><a href="#irqs">IRQs</a><ul>
+<li><a href="#irq-nesting"><span class="caps">IRQ</span> Nesting</a></li>
+</ul>
+</li>
+<li><a href="#resources">Resources</a><ul>
+<li><a href="#reentrancy">Reentrancy</a></li>
+</ul>
+</li>
+<li><a href="#general">General</a><ul>
+<li><a href="#real-time-requirements">Real-Time Requirements</a></li>
+<li><a href="#coding-standard">Coding Standard</a><ul>
+<li><a href="#data-types">Data Types</a></li>
+<li><a href="#variable-and-function-names">Variable and Function Names</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <p>This page contains some random notes for FreeRTOS.</p>
+<p>See also: <a href="https://github.com/LukasWoodtli/FreeRtosExamples">FreeRtosExamples</a>
+and <a href="http://www.freertos.org/">FreeRtos</a></p>
+
+<h1 id="configuration">Configuration</h1>
+<p>The configuration of the kernel is set in <code>FreeRTOSConfig.h</code></p>
+<p><code>configTOTAL_HEAP_SIZE</code>: This must be enough space to allocate all 
+tasks including the idle task. If the kernel does’t start it could 
+be that the heap is too small.</p>
+<p><code>vTaskStartScheduler()</code> returns only if there is <em>not</em> enough memory 
+to create the idle task.</p>
+<h1 id="tasks">Tasks</h1>
+<ul>
+<li>Defined as free functions<ul>
+<li>Return type: <code>void</code></li>
+<li>Argument: <code>void *</code></li>
+</ul>
+</li>
+<li>Usally endless loop</li>
+<li>Will never exit (not allowed by kernel)</li>
+<li>A task function can be used to create multiple tasks</li>
+<li>It’s possible to create a task from another task</li>
+</ul>
+<h2 id="task-stack-and-tcb">Task Stack and <span class="caps">TCB</span></h2>
+<p>Each task has its own stack (allocated by the kernel when the 
+task is created).</p>
+<blockquote>
+<p>The stack size is given in <em>number of words</em> and not number of bytes</p>
+</blockquote>
+<p>The stack depth multiplied by the stack width must not be bigger than the maximum value that can be stored in a variable of type size_t.</p>
+<p>The stack size of the idle task is defined by <code>configMINIMAL_STACK_SIZE</code>.</p>
+<p>The scheduler maintains a <em>Task Control Block</em> (<span class="caps">TCB</span>) for each task.
+Each <span class="caps">TCB</span> has the same size.</p>
+<p>Creating a task results in two allocations (<code>pvPortMalloc()</code>):</p>
+<ul>
+<li>Task stack</li>
+<li><span class="caps">TCB</span></li>
+</ul>
+<h1 id="stack-overflow">Stack Overflow</h1>
+<p>FreeRTOS has multiple mechanisms that allow to handle and debug
+stack overflows.</p>
+<h2 id="high-water-mark">High Water Mark</h2>
+<p>The function <code>uxTaskGetStackHighWaterMark()</code> returns the minumum
+of avaliable stack space since the task has been started.</p>
+<h2 id="runtime-checks">Runtime Checks</h2>
+<p>There are runtime checks for stack overflow available.</p>
+<ul>
+<li>Checking at task switch</li>
+<li>Fill stack on creation with a pattern, check top of stack for the pattern</li>
+</ul>
+<h3 id="method-1">Method 1</h3>
+<p>After a context switch the kernel checks that the stack pointer 
+remains within the valid stack range.</p>
+<p>This method is quick but can miss stack overflows that happen 
+between context switches.</p>
+<h3 id="method-2">Method 2</h3>
+<p>This method performes additional checks to the ones of method 1.</p>
+<p>At task creation the stack is filled with a known pattern. The last 
+20 bytes of the stack are checked for that pattern. If it was
+overwritten a stack overflow occured.</p>
+<p>This method is not as quick as method 1. But it will likely find 
+most (if not all) stack overflows.</p>
+<h3 id="configuration_1">Configuration</h3>
+<ul>
+<li>Set the desired method with <code>configCHECK_FOR_STACK_OVERFLOW</code> (value <code>1</code> or <code>2</code>)</li>
+<li>Implement a hook function: <code>vApplicationStackOverflowHook()</code></li>
+</ul>
+<p>The hook function has the prototype:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">vApplicationStackOverflowHook</span><span class="p">(</span><span class="n">xTaskHandle</span><span class="w"> </span><span class="o">*</span><span class="n">pxTask</span><span class="p">,</span><span class="w"> </span><span class="kt">signed</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">pcTaskName</span><span class="p">);</span><span class="w"></span>
+</code></pre></div>
+<p>Real recovery ofter a stack overflow is not possible.
+Since since the <em><span class="caps">TCB</span></em> may be corrupted the data privided to the
+hook function may be useless.</p>
+<h2 id="task-states">Task States</h2>
+<p>Only the FreeRTOS kernel is allowed to change task state.</p>
+<ul>
+<li>Running</li>
+<li>Not running<ul>
+<li>Suspended</li>
+<li>Ready</li>
+<li>Blocked</li>
+</ul>
+</li>
+</ul>
+<p>Events and system calls can influence the scheduler for allowing
+different tasks to run.</p>
+<p>If more than one task of the same priority is able to run, the scheduler will switch each task in and out of the <em>Running</em> state, in turn.</p>
+<h2 id="task-priorities">Task Priorities</h2>
+<p>Can be assigned a valu form <code>0</code> (lowest) to <code>configMAX_PRIORITIES - 1</code> (highest).</p>
+<p>Priority can be changed after the scheduler has started but are never changed by the scheduler itself.</p>
+<h3 id="selecting-task-priority">Selecting Task Priority</h3>
+<p>Rule of thumb:</p>
+<p>Tasks for hard real-time functionalities are assigned priorities above tasks for soft real-time functionalities.</p>
+<h4 id="rate-monotonic-scheduling-rms">Rate Monotonic Scheduling (<span class="caps">RMS</span>)</h4>
+<p>See <a href="https://en.wikipedia.org/wiki/Rate-monotonic_scheduling">Wikipedia:Rate-monotonic scheduling</a></p>
+<p>Each task is assiged a unique static priority. The priorities are assigned according to the cycle duration of the task.</p>
+<ul>
+<li>Task with the highest execution frequency (shorter cycle) is assigned highest priority is assigned </li>
+<li>Task with the lowest execution frequency is assigned lowest priority is assigned </li>
+</ul>
+<p><span class="caps">RMS</span> maximizes the <em>schedulability</em> of an application.</p>
+<h2 id="blocking-a-task">Blocking a Task</h2>
+<ul>
+<li>A task can be blocked if it currently has nothing to do</li>
+<li><code>vTaskDelay()</code> is usually called for a task to enter the blocked state</li>
+<li><code>vTaskDelayUntil()</code> should be used when a <em>fixed</em> execution period is required (e.g. <span class="caps">DSP</span>)</li>
+</ul>
+<h2 id="idle-task-hook">Idle Task Hook</h2>
+<p>It’s possible to add a callback to the idle task.
+It is called automatically once per iteration by the idle task loop.</p>
+<p>Following rules must be followed:</p>
+<ul>
+<li>The hook function must never block or suspend itself</li>
+<li>If the application make use of <code>vTaskDelete()</code> the hook function needs to return to its caller within reasonable time</li>
+</ul>
+<p>The idle task is responsible to clean up resources after a task has been deleted.</p>
+<h1 id="scheduler">Scheduler</h1>
+<p>The scheduler is executed after each time slice to select the next task.
+A periodic (tick) interrupt is used for switching.</p>
+<p>The tick interrupt frequency is set by <code>configTICK_RATE_HZ</code>.</p>
+<p>To convert the number of ticks into milliseconds the constant
+<code>portTICK_RATE_MS</code> can be used.</p>
+<h2 id="scheduling-algorithm">Scheduling Algorithm</h2>
+<p>FreeRTOS uses a <em>fixed priority pre-emptive scheduling</em> algorithm. But it can be configured to use a
+cooperative scheduling algorithm.</p>
+<ul>
+<li>Each task has a priority assigned</li>
+<li>Each task has a state</li>
+<li>Only one task is in running state</li>
+<li>The scheduler selects always the highest priority task (in <em>ready</em> state) to enter <em>running</em> state</li>
+</ul>
+<h1 id="synchronization">Synchronization</h1>
+<p>Tasks or ISRs send information to a queue or to a semaphore.
+These synchronization events are used to signal asynchronous activity.</p>
+<ul>
+<li>Semaphores: communicate events</li>
+<li>Queues: communicate events and data</li>
+</ul>
+<h2 id="queues">Queues</h2>
+<ul>
+<li>Fixed number and size of data items</li>
+<li><span class="caps">FIFO</span></li>
+<li>Writing and reading: byte-for-byte copy</li>
+<li>Accessible from multiple tasks<ul>
+<li>multiple writers is common</li>
+<li>multiple readers is not used often</li>
+</ul>
+</li>
+</ul>
+<h2 id="semaphores">Semaphores</h2>
+<p>Handles to all types of semaphores are stored in variables
+of type <code>xSemaphoreHandle</code>.</p>
+<h3 id="binary-semaphores">Binary Semaphores</h3>
+<p>See <a href="https://en.wikipedia.org/wiki/Semaphore_(programming)">Wikipedia:Semaphore</a></p>
+<ul>
+<li>Unblock a task each time an <span class="caps">IRQ</span> occurs</li>
+<li>Synchronization of tasks with interrupts</li>
+<li>Deferring processing to handler task</li>
+</ul>
+<p>Terminology:</p>
+<ul>
+<li><span class="math">\(P()\)</span> operation: ‘taking’ a semaphore</li>
+<li><span class="math">\(V()\)</span> operation: ‘giving’ a semaphore</li>
+</ul>
+<p><span class="caps">API</span> function <code>xSemaphoreGiveFromISR(..)</code>:</p>
+<ul>
+<li>All types of semapores <em>except recursive semaphores</em> can be
+‘given’ with <code>xSemaphoreGiveFromISR()</code>.</li>
+<li>Output argument <code>pxHigherPriorityTaskWoken</code>:<ul>
+<li>if set to pdTRUE a context switch should be performed before <span class="caps">ISR</span> exits</li>
+<li>this context switch needs to be done manually in <span class="caps">ISR</span> code</li>
+<li>the scheduler will switch to the highes prioriy task (in ready state)</li>
+</ul>
+</li>
+</ul>
+<h3 id="counting-semaphores">Counting Semaphores</h3>
+<p>Use cases:</p>
+<ol>
+<li>Counting events<ul>
+<li>Count value: difference between number of occured events and number of processed events</li>
+<li>Created with an initial count value of zero</li>
+</ul>
+</li>
+<li>Resource management<ul>
+<li>Count value: indicates number of available resources</li>
+<li>Created with an initial count value equal to number of available resources</li>
+</ul>
+</li>
+</ol>
+<h1 id="critical-sections">Critical Sections</h1>
+<p>FreeRTOS provides several mechanisms to implement mutual exclusion. But best is if resources are not shared and each resource is accessed only by one single task.</p>
+<h2 id="basic-critical-sections">Basic Critical Sections</h2>
+<p>Critical sections can be wrapped in calls to <code>taskENTER_CRITICAL()</code> 
+and <code>taskEXIT_CRITICAL()</code>. This is a very rudimentary form of mutual exclusion.</p>
+<ul>
+<li>IRQs with priority above <code>configMAX_SYSCALL_INTERRUPT_PRIORITY</code> are still allowed to execute</li>
+<li>these interrupts are not allowed to call FreeRTOS <span class="caps">API</span> functions</li>
+</ul>
+<p>Critical sections can be nested.</p>
+<h2 id="locking-the-scheduler">Locking the Scheduler</h2>
+<p>The scheduler can be suspended by <code>vTaskSuspendAll()</code> and resumed 
+by <code>xTaskResumeAll()</code>.</p>
+<p>This protects the critical section only from access by other tasks.
+It leaves interrupts enabled.</p>
+<p>If an interrupt requests an context switch the request is performed
+when the scheduler is resumed.</p>
+<blockquote>
+<p>Do not call FreeRTOS <span class="caps">API</span> functions while the scheduler is suspended</p>
+</blockquote>
+<p>Locking the scheduler can be nested.</p>
+<h2 id="mutexs-and-binary-semaphores">Mutexs and Binary Semaphores</h2>
+<ul>
+<li>Token that is associated to a shared resource</li>
+<li>Acquire the token before access to the resource is given</li>
+<li>After using the resource the token has to be released</li>
+</ul>
+<p>Mutual exclusion: the semaphore must be returned
+Synchronization: the semaphore is not returned (discarded)</p>
+<h1 id="irqs">IRQs</h1>
+<p>Event processing:</p>
+<ol>
+<li>Detect event<ul>
+<li>IRQs</li>
+<li>polling</li>
+</ul>
+</li>
+<li>IRQs<ul>
+<li>how much processing in <span class="caps">ISR</span></li>
+<li>how much in main code</li>
+</ul>
+</li>
+<li>Communication of <span class="caps">IRS</span> to main code</li>
+</ol>
+<blockquote>
+<p>Only <span class="caps">API</span> functions and macros ending in <code>FromISR</code> or <code>FROM_ISR</code>
+are allowed to be called from interrupt service routines.</p>
+</blockquote>
+<p>The Cortex-M3 allows up to 256 (8 bits) different interrupt priorities.</p>
+<blockquote>
+<p><em>High</em> numeric priority numbers mean <em>low</em> interrupt priority.</p>
+</blockquote>
+<p>There are <span class="caps">CMSIS</span> functions that provide access to the interrupt controller.</p>
+<p>Interrupt priorities have nothing to do with task priorities.
+Interrupt priorities are provided by the microcontoller architecture.</p>
+<blockquote>
+<p>Interrupts with higher priorites than 
+<code>configMAX_SYSCALL_INTERRUPT_PRIORITY</code> (lower value)
+must not call any FreeRTOS <span class="caps">API</span> functions</p>
+</blockquote>
+<h2 id="irq-nesting"><span class="caps">IRQ</span> Nesting</h2>
+<p>Interrupt nesting is achieved by setting
+<code>configMAX_SYSCALL_INTERRUPT_PRIORITY</code> to a higher priority
+(lower value) than <code>configKERNEL_INTERRUPT_PRIORITY</code>.</p>
+<h1 id="resources">Resources</h1>
+<p>Used interrupts on Cortex-M3:</p>
+<ul>
+<li>SysTick</li>
+<li>PendSV</li>
+<li><span class="caps">SVC</span></li>
+</ul>
+<p>These interrupts are not available for the application.</p>
+<p>Memory (typical sizes):</p>
+<ul>
+<li>Flash: 6 kB</li>
+<li><span class="caps">RAM</span>: 300-500 bytes</li>
+</ul>
+<h2 id="reentrancy">Reentrancy</h2>
+<p>A function that is safe to be called from multiple tasks or ISRs is reentrant.</p>
+<p>Each task has its own stack and its own set of (pushed) registers. If a function only accesses data from its own stack and registers then it is reentrant.</p>
+<h1 id="general">General</h1>
+<h2 id="real-time-requirements">Real-Time Requirements</h2>
+<p>Typically, applications of this type include a mix of both hard and soft real-time requirements</p>
+<ul>
+<li>Soft real-time requirements:<ul>
+<li>time deadline</li>
+<li>but breaching deadline does not render the system useles</li>
+<li>i.e. <span class="caps">GUI</span> (user interaction)</li>
+</ul>
+</li>
+<li>Hard real-time:<ul>
+<li>time deadline</li>
+<li>breaching the deadline: absolute failure of the system</li>
+<li>i.e. security related code in cars</li>
+</ul>
+</li>
+<li>Applications typically combine both types of real-time rocessing</li>
+</ul>
+<h2 id="coding-standard">Coding Standard</h2>
+<p>FreeRTOS has its own coding standard.</p>
+<h3 id="data-types">Data Types</h3>
+<p><code>portBASE_TYPE</code>: Most efficient data type on the architecture</p>
+<p><code>portTickType</code>: Tick count value to specify block times (16-bit or 32-bit)</p>
+<h3 id="variable-and-function-names">Variable and Function Names</h3>
+<p>Variable Prefixes:</p>
+<ul>
+<li><code>c</code>: char</li>
+<li><code>s</code>: short</li>
+<li><code>l</code>: long</li>
+<li><code>x</code>: portBASE_TYPE and others (structs, handles …)</li>
+<li><code>u</code>: unsigend (combined with other prefixes)</li>
+<li><code>p</code>: pointer (combined with other prefixes)</li>
+</ul>
+<p>Function Names:</p>
+<ul>
+<li>Prefixed with return type and file where the function is defined.</li>
+</ul>
+<p>Defines:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Macro</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pdTRUE</td>
+<td>1</td>
+</tr>
+<tr>
+<td>pdFALSE</td>
+<td>0</td>
+</tr>
+<tr>
+<td>pdPASS</td>
+<td>1</td>
+</tr>
+<tr>
+<td>pdFAIL</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./investment_management_(coursera_specialization).html" title="Previous: Investment Management (Coursera Specialization)">Investment Management (Coursera Specialization)</a></li>
+                <li class="next-article"><a href="./git_reset.html" title="Next: Git Reset">Git Reset</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2017-08-04T15:56:23+02:00">Aug 4, 2017</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-10T19:21:45+02:00">Apr 10, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+                <li><a href="./tags#embedded_systems-ref">Embedded Systems
+                    <span>7</span>
+</a></li>
+                <li><a href="./tags#freertos-ref">FreeRTOS
+                    <span>1</span>
+</a></li>
+                <li><a href="./tags#os-ref">OS
+                    <span>13</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

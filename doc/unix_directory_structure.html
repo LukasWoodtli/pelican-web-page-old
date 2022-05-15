@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Computer Science, OS, Linux, Unix, Programming, " />
+
+<meta property="og:title" content="Unix Directory Structure "/>
+<meta property="og:url" content="./unix_directory_structure.html" />
+<meta property="og:description" content="Linux Directory Content /bin/ Essential commands and programs /sbin/ System binaries: mainly system administration programs /boot/ Files for bootloader /dev/ Device files /usr/ System utilities (Unix System Resources) /opt/ Optional software: mainly for users /etc/ System configuration files /home/ User home directories /root/ Root home directory /tmp/ Temporary files, deleted …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2016-09-30T18:16:30+02:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="Unix Directory Structure ">
+<meta name="twitter:description" content="Linux Directory Content /bin/ Essential commands and programs /sbin/ System binaries: mainly system administration programs /boot/ Files for bootloader /dev/ Device files /usr/ System utilities (Unix System Resources) /opt/ Optional software: mainly for users /etc/ System configuration files /home/ User home directories /root/ Root home directory /tmp/ Temporary files, deleted …">
+
+        <title>Unix Directory Structure  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./unix_directory_structure.html"> Unix Directory&nbsp;Structure  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            
+            <h1 id="linux">Linux</h1>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Directory</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/bin/</code></td>
+<td>Essential commands and programs</td>
+</tr>
+<tr>
+<td><code>/sbin/</code></td>
+<td>System binaries: mainly system administration programs</td>
+</tr>
+<tr>
+<td><code>/boot/</code></td>
+<td>Files for bootloader</td>
+</tr>
+<tr>
+<td><code>/dev/</code></td>
+<td>Device files</td>
+</tr>
+<tr>
+<td><code>/usr/</code></td>
+<td>System utilities (Unix System Resources)</td>
+</tr>
+<tr>
+<td><code>/opt/</code></td>
+<td>Optional software: mainly for users</td>
+</tr>
+<tr>
+<td><code>/etc/</code></td>
+<td>System configuration files</td>
+</tr>
+<tr>
+<td><code>/home/</code></td>
+<td>User home directories</td>
+</tr>
+<tr>
+<td><code>/root/</code></td>
+<td>Root home directory</td>
+</tr>
+<tr>
+<td><code>/tmp/</code></td>
+<td>Temporary files, deleted at reboot</td>
+</tr>
+<tr>
+<td><code>/kernel/</code></td>
+<td>The operating system</td>
+</tr>
+<tr>
+<td><code>/srv/</code></td>
+<td>Data for services</td>
+</tr>
+<tr>
+<td><code>/var/</code></td>
+<td>Variable files (logs)</td>
+</tr>
+<tr>
+<td><code>/usr/lib/</code></td>
+<td>Precompiled libraries (shared objects)</td>
+</tr>
+<tr>
+<td><code>/lib/</code></td>
+<td>Precompiled libraries (shared objects)</td>
+</tr>
+<tr>
+<td><code>/media/</code></td>
+<td>Removable devices are mounted here</td>
+</tr>
+<tr>
+<td><code>/mnt/</code></td>
+<td>Temporary filesystems are mounted here</td>
+</tr>
+<tr>
+<td><code>/proc/</code></td>
+<td>Virtual file system with live kernel information</td>
+</tr>
+</tbody>
+</table>
+<p>Any directory ending with <code>bin/</code> contains binary executable files (or links to them)</p>
+<h1 id="procfs">Procfs</h1>
+<p>The <code>/proc</code> file system is a pseudo filesystem that allows to get informations from the kernel.</p>
+<p>The man page can be found with: <code>man 5 proc</code></p>
+<p>There are also informations available in the <code>/sys</code> file system.</p>
+<h2 id="processes">Processes</h2>
+<p>Each running process has a subfolder in <code>/proc</code> which is named after its <span class="caps">PID</span>.</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Directory</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/proc/$pid/cmdline</code></td>
+<td>The command line that was used to start the process.</td>
+</tr>
+<tr>
+<td><code>/proc/$pid/environ</code></td>
+<td>The environment of the process.</td>
+</tr>
+<tr>
+<td><code>/proc/self</code></td>
+<td>A link to the current process (can be used prom the process to get information about itself).</td>
+</tr>
+<tr>
+<td><code>/proc/$pid/fd/</code></td>
+<td>A directory that contains references to file descriptors that the process uses.</td>
+</tr>
+<tr>
+<td><code>/proc/$pid/statm</code></td>
+<td>Information about the process memory.</td>
+</tr>
+<tr>
+<td><code>/proc/$pid/status</code></td>
+<td>General formated information: <span class="caps">PID</span>, real and effective <span class="caps">UID</span> and <span class="caps">GID</span>, memory use, bitmasks …</td>
+</tr>
+<tr>
+<td><code>/proc/$pid/stat</code></td>
+<td>Same as <code>/proc/$pid/status</code>. But not formated.</td>
+</tr>
+<tr>
+<td><code>/proc/$pid/cwd</code></td>
+<td>A symbolic link to the current working directory of the process.</td>
+</tr>
+<tr>
+<td><code>/proc/$pid/exe</code></td>
+<td>A reference to the executable file of the process.</td>
+</tr>
+<tr>
+<td><code>/proc/$pid/root</code></td>
+<td>A link to the root directory of the process (s.a. <code>chroot()</code>).</td>
+</tr>
+<tr>
+<td><code>/proc/$pid/maps</code></td>
+<td>Contains memory mappings to files and libraries used by the process. This file can become very large.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="kernel">Kernel</h2>
+<ul>
+<li>The command that was used to run the kernel at boot time can be found with <code>cat /proc/cmdline</code></li>
+<li>More information about kernel parameters can be found with <code>man bootparam</code></li>
+<li>The current locks can be found under <code>/proc/locks</code></li>
+<li>Loaded kernel modules are listed under <code>/proc/modules</code></li>
+<li>Information about filesystems are found under <code>/proc/filesystems</code> and <code>/proc/mounts</code></li>
+</ul>
+<h2 id="hardware">Hardware</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Directory</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/proc/devices</code></td>
+<td>List devices (character- and block-devices), <span class="caps">HD</span>’s, <span class="caps">SSD</span>’s, ports …</td>
+</tr>
+<tr>
+<td><code>/proc/dma</code></td>
+<td>List of used <span class="caps">DMA</span> channesl and the driver that uses it.</td>
+</tr>
+<tr>
+<td><code>/proc/interrupts</code></td>
+<td>List of used interrupts, type of <span class="caps">IRQ</span>, using modules and number of occureces</td>
+</tr>
+<tr>
+<td><code>/proc/ioports</code></td>
+<td>List of all used I/O port (<span class="caps">HD</span>’s, ethernet, <span class="caps">USB</span> …).</td>
+</tr>
+<tr>
+<td><code>/proc/iomem</code></td>
+<td>Mapped hardware memory regions.</td>
+</tr>
+<tr>
+<td><code>/proc/stat</code></td>
+<td>General informations about processorS states (s.a. <code>procinfo</code>)</td>
+</tr>
+<tr>
+<td><code>/proc/uptime</code></td>
+<td>Number of seconds that the system is running and idle time of <span class="caps">CPU</span>’s.</td>
+</tr>
+<tr>
+<td><code>/proc/scsi/</code></td>
+<td>Directory with informations about <span class="caps">SCSI</span> devices</td>
+</tr>
+<tr>
+<td><code>/proc/scsi/scsi</code></td>
+<td>List of all <span class="caps">SCSI</span> devices.</td>
+</tr>
+<tr>
+<td><code>/proc/net/</code></td>
+<td>Directory with information to networks</td>
+</tr>
+<tr>
+<td><code>/proc/loadavg</code></td>
+<td>Average workload (1 minute, 5 minutes, 15 minutes, active processes / number of processes, last used <span class="caps">PID</span>)</td>
+</tr>
+<tr>
+<td><code>/proc/meminfo</code></td>
+<td>Information about memory.</td>
+</tr>
+<tr>
+<td><code>/proc/cpuinfo</code></td>
+<td>Information about <span class="caps">CPU</span>’s.</td>
+</tr>
+</tbody>
+</table>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./understanding_computation.html" title="Previous: Understanding Computation">Understanding Computation</a></li>
+                <li class="next-article"><a href="./regular_expressions.html" title="Next: Regular Expressions">Regular Expressions</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2016-09-30T18:16:30+02:00">Sep 30, 2016</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#computer_science-ref">Computer Science
+                    <span>25</span>
+</a></li>
+                <li><a href="./tags#linux-ref">Linux
+                    <span>13</span>
+</a></li>
+                <li><a href="./tags#os-ref">OS
+                    <span>13</span>
+</a></li>
+                <li><a href="./tags#unix-ref">Unix
+                    <span>9</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

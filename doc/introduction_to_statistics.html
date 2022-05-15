@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Statistics, Mathematics, " />
+
+<meta property="og:title" content="Introduction to Statistics "/>
+<meta property="og:url" content="./introduction_to_statistics.html" />
+<meta property="og:description" content="This article is still work in progress! The notes on this page are from the Udacity course Intro to Statistics. Statistics and Probability Independent Events Probability of Event: \(P\) Probability of opposite Event: \(1-P\) Probability of composite Events: \(P \cdot P \cdot ... \cdot P\) Dependent Events \(P(A\mid B …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2015-05-22T21:58:48+02:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="Introduction to Statistics ">
+<meta name="twitter:description" content="This article is still work in progress! The notes on this page are from the Udacity course Intro to Statistics. Statistics and Probability Independent Events Probability of Event: \(P\) Probability of opposite Event: \(1-P\) Probability of composite Events: \(P \cdot P \cdot ... \cdot P\) Dependent Events \(P(A\mid B …">
+
+        <title>Introduction to Statistics  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./introduction_to_statistics.html"> Introduction to&nbsp;Statistics  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#statistics-and-probability">Statistics and Probability</a></li>
+<li><a href="#independent-events">Independent Events</a></li>
+<li><a href="#dependent-events">Dependent Events</a></li>
+<li><a href="#bayes-rule">Bayes’ Rule</a><ul>
+<li><a href="#algorithm">Algorithm</a></li>
+</ul>
+</li>
+<li><a href="#probability-distributions">Probability Distributions</a><ul>
+<li><a href="#density">Density</a></li>
+</ul>
+</li>
+<li><a href="#estimation">Estimation</a><ul>
+<li><a href="#maximum-likelihood-estimator-mle">Maximum Likelihood Estimator (<span class="caps">MLE</span>):</a></li>
+<li><a href="#laplace-estimator">Laplace Estimator:</a></li>
+</ul>
+</li>
+<li><a href="#averages">Averages</a><ul>
+<li><a href="#mean">Mean</a></li>
+<li><a href="#median">Median</a></li>
+<li><a href="#mode">Mode</a></li>
+</ul>
+</li>
+<li><a href="#variance">Variance</a></li>
+<li><a href="#standard-deviation">Standard Deviation</a></li>
+<li><a href="#overwiev-of-mean-variance-and-standard-deviation">Overwiev of Mean, Variance and Standard Deviation</a></li>
+<li><a href="#binomial-coefficients">Binomial Coefficients</a></li>
+<li><a href="#binomial-distribution">Binomial Distribution</a></li>
+<li><a href="#the-normal-distribution">The Normal Distribution</a><ul>
+<li><a href="#normaliser">Normaliser</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            <blockquote>
+<p>This article is still work in progress!</p>
+</blockquote>
+<p>The notes on this page are from the Udacity course
+<a href="https://www.udacity.com/course/intro-to-statistics--st101" title="Udacity">Intro to Statistics</a>.</p>
+
+<h1 id="statistics-and-probability">Statistics and Probability</h1>
+<p><img alt="Statistics and Probability" class="img-fluid" src="/images/statistics_probability.svg"/></p>
+<h1 id="independent-events">Independent Events</h1>
+<ul>
+<li>Probability of Event: <span class="math">\(P\)</span></li>
+<li>Probability of opposite Event: <span class="math">\(1-P\)</span></li>
+<li>Probability of composite Events: <span class="math">\(P \cdot P \cdot ... \cdot P\)</span></li>
+</ul>
+<h1 id="dependent-events">Dependent Events</h1>
+<p><span class="math">\(P(A\mid B)\)</span>: Probability of Event <span class="math">\(A\)</span> when <span class="math">\(B\)</span> already occured.</p>
+<h1 id="bayes-rule">Bayes’ Rule</h1>
+<p>See also <a href="http://en.wikipedia.org/wiki/Bayes%27_theorem" title="Bayes' theorem">Wikipedia</a></p>
+<div class="math">$$P(A\mid B) \; = \; \frac {P(B\mid A) \cdot P(A)} {P(B)}$$</div>
+<blockquote>
+<p>Prior Probability  <span class="amp">&amp;</span> Test Evidence -&gt; Posterior Probability</p>
+</blockquote>
+<p>Prior: <span class="math">\(P(A)\)</span></p>
+<p>Posterior: </p>
+<div class="math">$$P(A \mid B) = P(A) \cdot P(B \mid A)\\
+    P(\lnot A\mid B) = P(\lnot A) \cdot P(B \mid \lnot A)$$</div>
+<ul>
+<li><span class="math">\(P(A)\)</span>: the prior, is the initial degree of belief in <span class="math">\(A\)</span>.</li>
+<li><span class="math">\(P(A \mid B)\)</span>: the posterior, is the degree of belief having accounted for <span class="math">\(B\)</span>.</li>
+<li>the quotient <span class="math">\(\frac{P(B \mid A)}{P(B)}\)</span> represents the support <span class="math">\(B\)</span> provides for <span class="math">\(A\)</span>.</li>
+</ul>
+<h2 id="algorithm">Algorithm</h2>
+<p>Imagine there is a disease. The possibility to get this particular disease is <span class="math">\(P(D)\)</span>.</p>
+<p>There is a test to check if someone has that disease. But the test is not completely reliable.</p>
+<p>Prior: <span class="math">\(P(D)\)</span>
+Sensitivity: <span class="math">\(P(Pos \mid D)\)</span>
+Specificity: <span class="math">\(P(Neg \mid \lnot D)\)</span></p>
+<p>The <strong>Prior</strong> says how many people have the disease.</p>
+<p>The <strong>Sensitivity</strong> says how many get a <strong>positive</strong> test if they <strong>have the disease</strong>.</p>
+<p>The <strong>Sensitivity</strong> says how many get a <strong>negative</strong> test if they <strong>don’t have the disease</strong>.</p>
+<p>Imagine someone get’s a <strong>positive</strong> test result. How can we calculate the probability that this person has the disease?</p>
+<p><img alt="Algorithm to calculate Bayes' rule" class="img-fluid" src="/images/bayes_algorithm.svg"/></p>
+<ol>
+<li>Take the <strong>Prior</strong> and multiplicate it with <span class="math">\(P(Pos \mid D)\)</span> (Sensitivity) → <span class="math">\(P(Pos, D)\)</span>.</li>
+<li>Take the <strong>Prior</strong> and multiplicate it with <span class="math">\(P(Pos \mid \lnot D)\)</span> → <span class="math">\(P(Pos, \lnot D)\)</span>.</li>
+<li>Add the results of 1. and 2. up → <span class="math">\(P(Pos)\)</span>.</li>
+<li>Divide the result from 1. <span class="math">\(P(Pos, D)\)</span> by the result of 3. <span class="math">\(P(Pos)\)</span> → <span class="math">\(P(D \mid Pos)\)</span>.</li>
+<li>Divide the result from 2. <span class="math">\(P(Pos, \lnot D)\)</span> by the result of 3. <span class="math">\(P(Pos)\)</span> → <span class="math">\(P(\lnot D \mid Pos)\)</span>.</li>
+<li>Check: add the results of 4. and 5. → <span class="math">\(1\)</span>.</li>
+</ol>
+<p>Note: <span class="math">\(P(A, B) = P(B, A)\)</span></p>
+<p>The calculation for a <strong>negative</strong> test result are analogous. Just replace <span class="math">\(Pos\)</span> with <span class="math">\(Neg\)</span>.</p>
+<h1 id="probability-distributions">Probability Distributions</h1>
+<blockquote>
+<p>In <strong>Continuous Distributions</strong> every outcome has the <strong>Probability</strong> <span class="math">\(0\)</span>.</p>
+</blockquote>
+<h2 id="density">Density</h2>
+<p><span class="caps">PDF</span>: Probability Density Function</p>
+<p>Probability for continuous spaces. Density can be bigger than <span class="math">\(1\)</span>.</p>
+<p>Density:</p>
+<ul>
+<li>Always non-negative</li>
+<li>Doesn’t need to be continuous</li>
+<li>Doesn’t need to be smaller or equal than one</li>
+<li>Integrates to one</li>
+</ul>
+<h1 id="estimation">Estimation</h1>
+<p>Estimation problem is:</p>
+<p>Data → P</p>
+<p>P → P(Data)</p>
+<h2 id="maximum-likelihood-estimator-mle">Maximum Likelihood Estimator (<span class="caps">MLE</span>):</h2>
+<div class="math">$$\frac{1}{N} \cdot \sum_{i}^{} X_i$$</div>
+<p>The sum is always between <span class="math">\(0\)</span> and <span class="math">\(1\)</span>.</p>
+<h2 id="laplace-estimator">Laplace Estimator:</h2>
+<div class="math">$$\frac{1}{N + k} \cdot \left(1 + \sum_{i}^{} X_i \right)$$</div>
+<p><span class="math">\(k\)</span>: Number of Outcomes</p>
+<p><span class="math">\(N\)</span>: Number of Experiments</p>
+<h1 id="averages">Averages</h1>
+<h2 id="mean">Mean</h2>
+<div class="math">$$\mu = \frac{1}{n} \sum_{i=1}^n{x_i}$$</div>
+<p>Sum up all elements and divide by the number of elements.</p>
+<h2 id="median">Median</h2>
+<p>Sort all elements and take the one in the middle.</p>
+<h2 id="mode">Mode</h2>
+<p>The value of the elements that occur most in the data set.</p>
+<h1 id="variance">Variance</h1>
+<p>The variance is a measure how disperse a data set is.</p>
+<p>Subtract the <em>mean</em> from every item. Then sum up the <em>squares</em> of the subtractions
+and devide the result by the number of data items.</p>
+<div class="math">$$Var(X) = \sigma^2_X = \frac{1}{n} \sum_{i}(x_i - \mu)^2$$</div>
+<p>Alternative Formula:</p>
+<div class="math">$$\sigma^2_X = \frac{\sum X_i^2}{N} - \frac{\left( \sum X_i  \right)^2}{N^2}$$</div>
+<h1 id="standard-deviation">Standard Deviation</h1>
+<p>The standard deviation is giving a sense how far away the items in a data set are from the mean.
+</p>
+<div class="math">$$\sigma_X = \sqrt{Var(X)}$$</div>
+<h1 id="overwiev-of-mean-variance-and-standard-deviation">Overwiev of Mean, Variance and Standard Deviation</h1>
+<p>This notes are taken from <a href="https://www.khanacademy.org/math/probability/descriptive-statistics/variance_std_deviation/v/statistics-standard-deviation">Khan Academy</a></p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Concept</th>
+<th>Population</th>
+<th>Samples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mean</td>
+<td><span class="math">\(\mu = \frac{1}{N}\sum_{i=1}^{N} x_i\)</span></td>
+<td><span class="math">\(\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i\)</span></td>
+</tr>
+<tr>
+<td>Variance</td>
+<td><span class="math">\(\sigma^2 = \frac{1}{N} \sum_{i=1}^{N} (x_i - \mu)^2\)</span></td>
+<td><span class="math">\(s^2 = \frac{1}{n-1} \sum_{i=1}^{N} (x_i - \bar{x})^2\)</span></td>
+</tr>
+<tr>
+<td>Standard Deviation</td>
+<td><span class="math">\(\sigma = \sqrt{\sigma^2}\)</span></td>
+<td><span class="math">\(s = \sqrt{s^2}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math">\(N\)</span>: Number of items in Population</p>
+<p><span class="math">\(n\)</span>: Number of items in sample set taken from the population</p>
+<blockquote>
+<p>For an unbiased estimator (Variance of samples) the sum is divided by <span class="math">\(n-1\)</span>!</p>
+</blockquote>
+<p><span class="math">\(s = \sqrt{s^2}\)</span>: is not an unbiased estimator due to the non-linear nature of the square root.</p>
+<h1 id="binomial-coefficients">Binomial Coefficients</h1>
+<p>Choose <span class="math">\(k\)</span> elements from <span class="math">\(n\)</span> possible elements (without putting
+back elements and without caring about the order of the chosen elements):</p>
+<div class="math">$$\binom{n}{k} = \frac{n!}{k! \cdot (n - k)!}$$</div>
+<h1 id="binomial-distribution">Binomial Distribution</h1>
+<p>i.e. Flip a loaded coin:</p>
+<p><span class="math">\(p = P(heads)\)</span>: Probability to get a head from one coin flip.</p>
+<p>Flip coin <span class="math">\(n\)</span> times.</p>
+<p><span class="math">\(P(\#heads = k)\)</span>: Expectation to get <span class="math">\(k\)</span> heads from all the flips.</p>
+<div class="math">$$P(\#heads = k) = \frac{n!}{k! \cdot (n - k)!} \cdot p^k \cdot (1-p)^{n-k} = \binom{n}{k} \cdot p^k \cdot (1-p)^{n-k}$$</div>
+<h1 id="the-normal-distribution">The Normal Distribution</h1>
+<p><span class="math">\(\mu\)</span>: Mean</p>
+<p><span class="math">\(\sigma^2\)</span>: Variance</p>
+<p><span class="math">\(\sigma\)</span>: Standard Deviation</p>
+<div class="math">$$f(x) = \frac{1}{\sqrt{2\pi\sigma^2}}\cdot e^{\left(-\frac{1}{2}\cdot\frac{\left(x-\mu\right)^2}{\sigma^2}\right)}$$</div>
+<h2 id="normaliser">Normaliser</h2>
+<p>The expression <span class="math">\(\frac{1}{\sqrt{2\pi\sigma^2}}\)</span> is needed to normalise the area underneath curve given by the rest of
+the formula (<span class="math">\(e^{\left(-\frac{1}{2}\cdot\frac{\left(x-\mu\right)^2}{\sigma^2}\right)}\)</span>). Otherwise it would not add up to <span class="math">\(1\)</span>.</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML';
+
+    var configscript = document.createElement('script');
+    configscript.type = 'text/x-mathjax-config';
+    configscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'none' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        availableFonts: ['STIX', 'TeX']," +
+        "        preferredFont: 'STIX'," +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(configscript);
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./macro_magic_in_c_and_cpp.html" title="Previous: Macro Magic in C and C++">Macro Magic in C and C++</a></li>
+                <li class="next-article"><a href="./move_actual_work_to_a_new_branch.html" title="Next: Move actual work to a new Branch">Move actual work to a new Branch</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2015-05-22T21:58:48+02:00">Mai 22, 2015</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#mathematics-ref">Mathematics</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#statistics-ref">Statistics
+                    <span>1</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

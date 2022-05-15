@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="Agile, Scrum, XP, Software Development Methodology, Programming, " />
+
+<meta property="og:title" content="Agile Software Development "/>
+<meta property="og:url" content="./agile_software_development.html" />
+<meta property="og:description" content="This article is an overview of Scrum and XP. Roles There are three main roles in Scrum. Each of it has some special responsibility. Product Owner (PO) The Product Owner is the connection between the Team and the stakeholders or clients. He’s the only one who is allowed to …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2015-05-29T18:42:35+02:00" />
+<meta property="og:article:modified_time" content="2022-03-17T10:35:01+01:00" />
+<meta name="twitter:title" content="Agile Software Development ">
+<meta name="twitter:description" content="This article is an overview of Scrum and XP. Roles There are three main roles in Scrum. Each of it has some special responsibility. Product Owner (PO) The Product Owner is the connection between the Team and the stakeholders or clients. He’s the only one who is allowed to …">
+
+        <title>Agile Software Development  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./agile_software_development.html"> Agile Software&nbsp;Development  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#roles">Roles</a><ul>
+<li><a href="#product-owner-po">Product Owner (<span class="caps">PO</span>)</a></li>
+<li><a href="#scrum-master-sm">Scrum Master (<span class="caps">SM</span>)</a></li>
+<li><a href="#team">Team</a></li>
+<li><a href="#other">Other</a><ul>
+<li><a href="#chickens">Chickens</a></li>
+<li><a href="#pigs">Pigs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#timeboxes-rituals">Timeboxes (Rituals)</a><ul>
+<li><a href="#the-sprint">The Sprint</a></li>
+<li><a href="#release-planning-meeting">Release Planning Meeting</a></li>
+<li><a href="#sprint-planning-meeting">Sprint Planning Meeting</a><ul>
+<li><a href="#publish-sprint-goal">Publish Sprint Goal</a></li>
+<li><a href="#product-backlog-refinement">Product Backlog Refinement</a></li>
+<li><a href="#estimation">Estimation</a><ul>
+<li><a href="#planning-poker">Planning poker</a></li>
+<li><a href="#gut-feeling">Gut feeling</a></li>
+<li><a href="#experience-of-previous-sprints">Experience of previous Sprints</a></li>
+</ul>
+</li>
+<li><a href="#stories-and-tasks">Stories and Tasks</a></li>
+</ul>
+</li>
+<li><a href="#overview">Overview</a></li>
+</ul>
+</li>
+<li><a href="#sprint-goal">Sprint Goal</a><ul>
+<li><a href="#daily-scrum">Daily Scrum</a></li>
+<li><a href="#sprint-review-presentation">Sprint Review (Presentation)</a></li>
+<li><a href="#retrospective">Retrospective</a></li>
+</ul>
+</li>
+<li><a href="#artefacts">Artefacts</a><ul>
+<li><a href="#product-backlog">Product Backlog</a><ul>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#user-stories">User Stories</a></li>
+<li><a href="#tasks">Tasks</a></li>
+</ul>
+</li>
+<li><a href="#sprint-backlog">Sprint Backlog</a></li>
+<li><a href="#release-burndown">Release Burndown</a></li>
+</ul>
+</li>
+<li><a href="#tools">Tools</a><ul>
+<li><a href="#scrum-board">Scrum Board</a><ul>
+<li><a href="#index-cards">Index Cards</a></li>
+</ul>
+</li>
+<li><a href="#definition-of-donne">Definition of Donne</a></li>
+<li><a href="#impediment-backlog">Impediment Backlog</a></li>
+</ul>
+</li>
+<li><a href="#extreme-programming-xp">eXtreme Programming (<span class="caps">XP</span>)</a></li>
+<li><a href="#general-notes">General Notes</a><ul>
+<li><a href="#tools-day">Tools Day</a></li>
+<li><a href="#knowledge-sync-up">Knowledge Sync-Up</a></li>
+<li><a href="#pair-programming">Pair Programming</a></li>
+</ul>
+</li>
+<li><a href="#literature-and-links">Literature and Links</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            
+<p>This article is an overview of <strong>Scrum</strong> and <strong><span class="caps">XP</span></strong>.</p>
+<h1 id="roles">Roles</h1>
+<p>There are three main roles in Scrum. Each of it has some special responsibility.</p>
+<h2 id="product-owner-po">Product Owner (<span class="caps">PO</span>)</h2>
+<p>The <strong>Product Owner</strong> is the connection between the <strong>Team</strong> and the
+stakeholders or clients. He’s the only one who is allowed to give tasks
+to the Team. The Product Owner should not be part of the Team.
+The Product Owner maintains and manages the <strong>Product Backlog</strong>, release plane and the <em>Return of Investment</em>.</p>
+<p>The Product Owner is not part of the team and there should be only one Product Owner per product.</p>
+<h2 id="scrum-master-sm">Scrum Master (<span class="caps">SM</span>)</h2>
+<p>The <strong>Scrum Master</strong> is responsible that the Scrum process is working properly and that everybody plays by the rules. He’s also in charge if there are problems in the work progress
+of the Team and to remove any impediments. He has to solve social problems and organize anything that
+helps the Team to work productively. Ideally the Scrum Master isn’t
+part of the Team. But often he is a member of the Developer-Team.</p>
+<h2 id="team">Team</h2>
+<p>The <strong>Team</strong> is the group of people (usually developers) that do the work. They turn the Backlog into an working increment of the product within a sprint.
+The team is self organizing. That means they decide how they do
+something. Ideally every teammember can do anything needed in the team.
+But sometimes there are special roles like teser, documentation writer
+or specialists of any kind.</p>
+<p>The main tasks of the Team are:</p>
+<ul>
+<li>Development (coding)</li>
+<li>Unit Tests</li>
+<li>Definition of Done</li>
+<li>Development Documentation</li>
+<li>Organize themselves</li>
+</ul>
+<h2 id="other">Other</h2>
+<p>There are no other people involved in the productive work cycle than
+the three mentioned above. If someone wants the <strong>Team</strong> do something he has
+to speak with the <strong>Product Owner</strong>. At some presentations and meetings
+there are guests allowed. But they can’t decide anything or delegate any
+work to the team.</p>
+<p>There are some other people that are indirectly involved in the project. They are generally called <strong>Stakeholder</strong>. The most important ones are:</p>
+<ul>
+<li>Customer</li>
+<li>User</li>
+<li>Management</li>
+</ul>
+<p>There are two kind of people involved in a project. In Scrum jargon they
+are called Chickens and Pigs. This roles are based on a comic strip:</p>
+<p><a href="http://www.implementingscrum.com/2006/09/11/the-classic-story-of-the-pig-and-chicken/">Pig and Chicken</a></p>
+<h3 id="chickens">Chickens</h3>
+<p>There are always some people which have ideas, like to criticize, talk a
+lot about the project and try to get the reputation at the end. But they
+don’t do any work or just a little. They are called the Chickens.</p>
+<h3 id="pigs">Pigs</h3>
+<p>On the other hand there are the kind of people that are highly involved
+in and motivated for a project. They do all the hard work and take some
+amount of risk. In Scrum they are called the Pigs.</p>
+<h1 id="timeboxes-rituals">Timeboxes (Rituals)</h1>
+<p>In Scrum all work is donne in time-boxes of defined length. The length of any time-box is defined by the involved people in advance! Adjust the times if needed (retrospective).</p>
+<blockquote>
+<p>Use a timer!</p>
+</blockquote>
+<h2 id="the-sprint">The Sprint</h2>
+<p>The most important timebox is the <strong>Sprint</strong>. It is a time span of two to four weeks (in most Teams it’s 2 weeks). In
+this time the team works on the tasks they have themselves comitted to
+at the <strong>Scrum Planning Meeting</strong>. At the end of this time span the team should be able to present
+a product that can be potentially delivered to the customer.</p>
+<p>The product should be (before the sprint ends):</p>
+<ul>
+<li>thoroughly tested</li>
+<li>documented (developer and customer documentation)</li>
+<li>well developed (architecture, unit tests, design…)</li>
+</ul>
+<p>To achieve
+this goal there are several meetings that help to do the work organized
+and on the right time.</p>
+<p>A Sprint has this pattern:</p>
+<ol>
+<li>Sprint Planing Meeting</li>
+<li>Daily Scrum (every day for 15 minutes)</li>
+<li>Sprint Review</li>
+<li>Retrospective</li>
+</ol>
+<h2 id="release-planning-meeting">Release Planning Meeting</h2>
+<p>In this meeting the team and the product owner discuss when the next
+release should be finished and what requirements shoud be included into
+this release. They discuss the time each requirement needs to be
+implemented. And they discuss the urgency of each requirement. Basically
+the <strong>Team</strong> decides the time needed for implementing a requirement and the
+<strong>Product Owner</strong> decides about the urgency. All the requirements are stored
+in a list called the <strong>Product Backlog</strong>. The <strong>Release Planning Meeting</strong> can
+be merged into the <strong>Sprint Planning Meeting</strong> if after each Sprint a real
+release is created.</p>
+<h2 id="sprint-planning-meeting">Sprint Planning Meeting</h2>
+<blockquote>
+<p>The <strong>Product Backlog</strong> needs to be clean before the Sprint Planning Meeting!</p>
+</blockquote>
+<p>At the beginning of each <strong>Sprint</strong> the <strong>Team</strong>, the <strong>Scrum Master</strong> and the <strong>Product Owner</strong> decide
+which of the requirements of the <strong>Product Backlog</strong> are going to be
+implemented in the new <strong>Sprint</strong>. They are put into the <strong>Sprint Backlog</strong>.
+If needed the User Stories can be split into smaller Tasks.</p>
+<blockquote>
+<p>The Planning Meeting takes about <strong>one day</strong> (take the needed time!)</p>
+</blockquote>
+<p>The meeting has three phases:</p>
+<ol>
+<li>The objective (goal) of the sprint (<span class="caps">PO</span>, 30 minutes)</li>
+<li>Pre-Selection of requirements (<span class="caps">PO</span>, 3 hours)</li>
+<li>Analyze the requirements and split them to smaller tasks (activities)
+→ put them in the Sprint Backlog (Team, 4 hours)</li>
+</ol>
+<p>The output of the meeting is:</p>
+<ul>
+<li>A sprint goal</li>
+<li>A list of team members (and their time commitment)</li>
+<li>A sprint backlog</li>
+<li>A demo date and place</li>
+</ul>
+<p>5 - 15 Stories per Sprint is usually a good number.</p>
+<p>If the Sprint Planning Meeting takes to long the Scrum Master shall cut it short or reschedule it.</p>
+<h3 id="publish-sprint-goal">Publish Sprint Goal</h3>
+<p>Keep the whole company informed about what is going on.</p>
+<p>Publish short notes:</p>
+<ul>
+<li>Web/Intranet</li>
+<li>Wiki</li>
+<li>Printout (on door…)</li>
+</ul>
+<p>If people are not informed they will complain. Or they assume that the team is working on something but it isn’t.</p>
+<h3 id="product-backlog-refinement">Product Backlog Refinement</h3>
+<p>It usually makes sense that <strong>backlog refinement</strong> (estimation, story splitting, etc.) is donne in a separate meeting (one hour per week) so the Sprint Planning can be more focused.</p>
+<p>So the needed time for the sprint planning meeting can be reduced. Rule: Number of weeks per sprint * 1 hour</p>
+<blockquote>
+<p>It’s not accepted to reduce the estimate of the story in exchange of quality!</p>
+</blockquote>
+<p>Some teams estimate only the stories that go in the sprint backlog in the sprint planning meeting.</p>
+<h3 id="estimation">Estimation</h3>
+<p>The effort of each user story has to be estimated by the team (only by the team!).</p>
+<p>It is one of the most difficult parts of Scrum. But there are some techniques for doing the estimation.</p>
+<p>Storypoints
+The user stories are estimated in story points. Don’t bother at first about how much work exactly a story point is. It depends on the team. And after a few sprints it becomes clear how many story points can be acomplished in one sprint.</p>
+<p>So how to define story points? Just chose a really small task (maybe just find the smallest user story in the backlog) and assign it the amount of one story point.</p>
+<p>Now it makes sense to define a range for the possible story points. The fibonacci numbers are a commonly used range:</p>
+<blockquote>
+<p>1, 2, 3, 5, 8, 13, 21, 34, 55, 89 …</p>
+</blockquote>
+<p>For really small tasks the value of <em>1/2</em> can be added.</p>
+<p>If a user story is too big it should be split in smaller stories or tasks.</p>
+<p>When the range is defined the estimation can be done. There are quite a lot of possibilities to do the estimations.</p>
+<h4 id="planning-poker">Planning poker</h4>
+<p>The planning poker is a very good tool for the estimation of story points: <a href="https://en.m.wikipedia.org/wiki/Planning_poker">Planning Poker</a></p>
+<h4 id="gut-feeling">Gut feeling</h4>
+<p>It’s a good practice to ask the team if they have a good feeling about the estimation. Ask it at least at the end of the estimation meeting (Product Backlog Refinement or Sprint Planning).</p>
+<h4 id="experience-of-previous-sprints">Experience of previous Sprints</h4>
+<p>After a few Sprints the team gets some experience in estimating User Stories.</p>
+<h3 id="stories-and-tasks">Stories and Tasks</h3>
+<p>Each story can be divided into smaller tasks by the team. This makes estimation
+easier. And it helps the team when implementing the story.</p>
+<p>The tasks don’t need to be represented in the backlog. It’s too detailed
+and they can change often.</p>
+<h2 id="overview">Overview</h2>
+<p>This is an overview of who attends which meetings and the aproximate time
+that the meeting should take (for a 2 week sprint).</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Meeting</th>
+<th>Sprint Planning</th>
+<th>Daily Scrum</th>
+<th>Sprint Review</th>
+<th>Retrospective</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="caps">PO</span></td>
+<td>Owner</td>
+<td>only if needed</td>
+<td>Paricipant</td>
+<td>Paricipant</td>
+</tr>
+<tr>
+<td><span class="caps">SM</span></td>
+<td>Paricipant</td>
+<td>Owner</td>
+<td>Paricipant</td>
+<td>Owner</td>
+</tr>
+<tr>
+<td>Team</td>
+<td>Paricipants</td>
+<td>Paricipants</td>
+<td>Owner</td>
+<td>Paricipants</td>
+</tr>
+<tr>
+<td>Others</td>
+<td>no</td>
+<td>may silently attend</td>
+<td>yes</td>
+<td>only if invited</td>
+</tr>
+<tr>
+<td>Timebox</td>
+<td>4 hours</td>
+<td>15 minutes</td>
+<td>2 hours</td>
+<td>2 hours</td>
+</tr>
+</tbody>
+</table>
+<h1 id="sprint-goal">Sprint Goal</h1>
+<p>It’s difficult to define a sprint goal. But it should be donne!</p>
+<p>Just ask the question: “Why are we doing this sprint? We could do something else.”</p>
+<p>The sprint goal should be in business terms, not technical terms</p>
+<h2 id="daily-scrum">Daily Scrum</h2>
+<p>Every day the Team gathers for a fifteen minutes standup meeting and every member gives
+answers to the following questions:</p>
+<ul>
+<li>What have I donne since the last meeting.</li>
+<li>What am I going to do until the next meeting.</li>
+<li>What are my actual problems.</li>
+</ul>
+<blockquote>
+<p>There should be no discussions in this meeting</p>
+</blockquote>
+<p>It’s just an information to the coworkers so people with similar interests or some good solutions can connect after the meeting.</p>
+<p>The sprint progress should be checked (by viewing the burndown chart) and adjustment to the sprint shall be made if necessary.</p>
+<h2 id="sprint-review-presentation">Sprint Review (Presentation)</h2>
+<p>When a Sprint is finished the <strong>Team</strong> presents the result. Anyone can join
+the presentation. Everybody is allowed to try out the resulting product.
+It should not be a pure presentation but more like a workshop. In this
+meeting the <strong>Product Owner</strong> (alone) decides if all the requirements are
+implemented completely. For each requirement this is a pure yes or no
+criteria. The product that is shown at the review is potentially shippable to the users (Product increment).</p>
+<p>The review meeting should take about 4 hours and the team should need at most 2 hours to prepare it.</p>
+<blockquote>
+<p>The Sprint Review is about <strong>feedback</strong></p>
+</blockquote>
+<ul>
+<li>Insist on the Sprint Review</li>
+<li>The team gets credit</li>
+</ul>
+<p>Checklist:</p>
+<ul>
+<li>Present Sprint Goal (<span class="caps">PO</span>)</li>
+<li>What was good/bad (team)</li>
+<li>Don’t waste time in preparing the Review</li>
+<li>Show product</li>
+<li>Workshop style: everybody is allowed to check out new features</li>
+<li>Focus on working code</li>
+<li>Fast and not beautiful</li>
+<li>Business oriented<ul>
+<li>leave out technical detaion</li>
+<li><span class="quo">‘</span>what did we do’ (not ‘how did we do it’)</li>
+</ul>
+</li>
+<li>Let the audience try the product (if possible)</li>
+<li>No powerpoint…</li>
+</ul>
+<h2 id="retrospective">Retrospective</h2>
+<p>The <strong>Retrospective</strong> is a very important meeting. All involved people have
+to attend this meeting (<span class="caps">PO</span>, <span class="caps">SM</span>, Team). No other people are allowed in this
+meeting. It is moderated my the Scrum Master. The topic of the meeting is to
+discuss the Scrum process of the last Sprint. There should be discussed
+what was good and what was bad. There have to be decided what steps will
+be donne to improve the production cycle.</p>
+<p>It should take place after the Review.</p>
+<p>No <span class="caps">PC</span>’s are allowed.</p>
+<p>After the retrospective a new Sprint starts with the Sprint Planning Meeting.</p>
+<ul>
+<li>one hour for a two week sprint</li>
+<li>longer (half-, full-day) every few month</li>
+</ul>
+<blockquote>
+<p>It’s the possiblity to improve!</p>
+</blockquote>
+<ul>
+<li>Without Retrospective mistakes are repeated over and over again</li>
+</ul>
+<p>Organisation:</p>
+<ul>
+<li>Members: <span class="caps">OP</span>, team, Scrum Master</li>
+<li>Closed room</li>
+<li>Designated secretary</li>
+<li>Summarize sprint</li>
+<li>Each person gets the chance to talk without getting interrupted<ul>
+<li>respect each other</li>
+<li>be honest</li>
+<li>don’t take things personally (separate person from things)</li>
+<li>talk abut good things and what could be improved</li>
+<li>how they are feeling</li>
+<li>what is expected</li>
+</ul>
+</li>
+<li>It can help if everybody writes down its topics on a card<ul>
+<li>then one after the other presents his/hers card</li>
+<li>write down what was good and what was bad</li>
+<li>feelings</li>
+<li>expectation</li>
+</ul>
+</li>
+<li>Analyze processes and social topics</li>
+<li>Discuss if result (of sprint) is achieved and why (or why not)</li>
+<li>Formulate goals for improvement and make them public (i.e next to Scrum Board)</li>
+<li>If needed reformulate rules<ul>
+<li>Coding standards</li>
+<li>Definition of Done</li>
+<li>Processes</li>
+<li>Documentation rules</li>
+<li>…</li>
+</ul>
+</li>
+<li>Retrospective of Retrospective (5-10 min)</li>
+</ul>
+<blockquote>
+<p>Focus on few improvements for new sprint</p>
+</blockquote>
+<h1 id="artefacts">Artefacts</h1>
+<h2 id="product-backlog">Product Backlog</h2>
+<p>The Product Backlog is a list with all Requirements that have to be
+donne to improve the product. The only person that can put new
+requirements into the Product Backlog is the Product Owner. Each
+requirement has to have several properties when put into the Backlog.</p>
+<ul>
+<li><span class="caps">ID</span> (unambigous)</li>
+<li>Significance/Importance (unambigous, set only by <span class="caps">PO</span>)</li>
+<li>Initial Estimate/Effort (set only by Team in the Refinement Meeting)</li>
+<li>Name</li>
+<li>Label/Topic</li>
+<li>Description (User story / use case, “As X, I want Y, so that Z”)</li>
+<li>Criteria for aceptance</li>
+<li>Notes / References</li>
+<li>Source (who added this requirement)</li>
+<li>Risk</li>
+<li>How to Demo</li>
+<li>Bug tracking <span class="caps">ID</span></li>
+<li>Components (i,e Database, <span class="caps">UI</span>, Business-Logic…)</li>
+</ul>
+<p>The <strong>Product Owner</strong> is responsible for the Product Backlog. He has to understand each item and he has to decide about the significance of
+the items. But he is not allowed to estimate the effort of an item. This can be only done by the team.</p>
+<p>It’s a good practice to estimate the most significant backlog items that
+are not estimated yet once a week.</p>
+<p>There should be only one Product Backlog per product.</p>
+<h3 id="requirements">Requirements</h3>
+<ul>
+<li><em>S</em>imple</li>
+<li><em>M</em>easurable</li>
+<li><em>A</em>chievable</li>
+<li><em>R</em>ealisitc</li>
+<li><em>T</em>raceable</li>
+</ul>
+<h3 id="user-stories">User Stories</h3>
+<ul>
+<li><em>I</em>ndependant</li>
+<li><em>N</em>egotiable</li>
+<li><em>V</em>aluable</li>
+<li><em>E</em>stimatable</li>
+<li><em>S</em>mall</li>
+<li><em>T</em>raceable</li>
+</ul>
+<h3 id="tasks">Tasks</h3>
+<ul>
+<li><em>T</em>ime boxed</li>
+<li><em>E</em>verybody can do it</li>
+<li><em>C</em>omplete</li>
+<li><em>H</em>uman readable</li>
+</ul>
+<h2 id="sprint-backlog">Sprint Backlog</h2>
+<p>The whole team should be involved in maintaining the Sprint Backlog</p>
+<p>Sprint Burndown Chart</p>
+<p><img alt="Sprint Burndown" class="img-fluid" src="/images/burndown.png"/></p>
+<p>There’s a good <a href="http://www.methodsandtools.com/archive/scrumburndown.php">article</a> about the Burndown Chart.</p>
+<hr/>
+<h2 id="release-burndown">Release Burndown</h2>
+<h1 id="tools">Tools</h1>
+<h2 id="scrum-board">Scrum Board</h2>
+<p>The <strong>Scrum Board</strong> (Task Board) helps the Team (and the <span class="caps">PO</span>) to have an overview about the actual ongoing work. It’s inspired by Kanban.
+Each team has a slightly different Scrum board but they have similarities.</p>
+<p>There are three main sections on the Scrum Board:</p>
+<ul>
+<li>Backlog</li>
+<li>In Progress</li>
+<li>Donne</li>
+</ul>
+<p>A backlog item moves from <em>Backlog</em> to <em>In Progress</em> when someone has started to work on it. After it’s finished it moves to the section <em>Donne</em> (see <em>Definition of Donne</em>).</p>
+<p>The items should be sorted by importance from top to bottom.</p>
+<p>It’s possible to add additional information:</p>
+<ul>
+<li>Sort by importance (top to down)</li>
+<li>Add subtasks</li>
+<li>Add colors (issue, bug, test, documentatin …)</li>
+<li>Add a mark on the cards for each day that was worked on the topic</li>
+</ul>
+<h3 id="index-cards">Index Cards</h3>
+<p>All the Backlog items should be printed (or written) on index cards. So it’s easier to handle them on the Scrum Board.</p>
+<p>Handling items on index cards can also simplify the Sprint Planning Meeting or the Backlog Refinement.</p>
+<p>It’s a good idea to add a mark (sticker) on a index card for each day the issue is in the progress state. The marks can have different colors (i.e Coding, Testing, Documentation …)</p>
+<blockquote>
+<p>The index card is a promise to have a disussion about the topic on it.</p>
+</blockquote>
+<p>The index card forms the basis of discussion with the team, <span class="caps">PO</span>, stakeholders …</p>
+<h2 id="definition-of-donne">Definition of Donne</h2>
+<p>The team with the <span class="caps">PO</span> need to decide what requirements need to be fulfiled
+for a story to be marked as <em>done</em>.</p>
+<blockquote>
+<p>Code complete is not feature complete!</p>
+</blockquote>
+<p>The best approach is to define a checklist for the stories. i.e:</p>
+<ul>
+<li>Feature/Bug is completely implemented</li>
+<li>Unit Tests are written</li>
+<li>Developer documentation is written</li>
+<li>Customer documentation is written</li>
+<li>…</li>
+</ul>
+<p>Maybe for different kind of stories (features, bugs, …) a different
+checklist is needed.</p>
+<h2 id="impediment-backlog">Impediment Backlog</h2>
+<ul>
+<li>What do I need to fulfill my task. i.e<ul>
+<li>A server</li>
+<li>WiFi isn’t working</li>
+<li>Order a book</li>
+</ul>
+</li>
+</ul>
+<h1 id="extreme-programming-xp">eXtreme Programming (<span class="caps">XP</span>)</h1>
+<p>Extreme Programming has no roles and no process. There are just a few artefacts and about 25 rules:</p>
+<ul>
+<li>Pair Programing<ul>
+<li>Developers should thing loud</li>
+<li>Switch roles every 20 minutes</li>
+<li>It’s very tiring (exhausting)</li>
+</ul>
+</li>
+<li>No overtime (because it’s tiring)</li>
+<li>Refactoring<ul>
+<li>Regularly</li>
+<li>After small development steps</li>
+</ul>
+</li>
+<li><span class="caps">TDD</span>/Testing<ul>
+<li>Code coverage: 100%</li>
+</ul>
+</li>
+<li>Continous integration</li>
+</ul>
+<h1 id="general-notes">General Notes</h1>
+<h2 id="tools-day">Tools Day</h2>
+<p>Plan a fixed timebox each Sprint (i.e each Friday Afternoon) for working on tools and internal tasks.
+This allows to improve and fix internal tools that otherwise would be postponed regurarly (even endlessly).</p>
+<p>This doesn’t mean nobody is allowed to work on tools in the usual working time. But it’s not allowed
+to work on stories on Tools Day.</p>
+<h2 id="knowledge-sync-up">Knowledge Sync-Up</h2>
+<p>Take regularly some time to synchronize internal knowledge between team members. Imagine for each team member
+what knowledge he/she has that wold be lost/missed if that memer leaves the company. Then try to share this
+knowledge with as many other team members as possible.</p>
+<h2 id="pair-programming">Pair Programming</h2>
+<ul>
+<li>Improve code quality</li>
+<li>Improve team focus</li>
+<li>Should not be done all day (exhausting)</li>
+<li>Changing pairs frequently</li>
+<li>Spread knowledge fast in team</li>
+<li>Both developer should have a computer at hand</li>
+<li>Don’t force pair programming, encourage people</li>
+</ul>
+<h1 id="literature-and-links">Literature and Links</h1>
+<p><a href="http://www.scrumguides.org/index.html">The official Scrum Guide</a></p>
+<p><a href="http://www.infoq.com/minibooks/scrum-xp-from-the-trenches">Scrum <span class="amp">&amp;</span> <span class="caps">XP</span> from the Trenches</a></p>
+<p><a href="http://scrum-master.de/Scrum-Rollen/Scrum-Rollen_Pigs_Chickens">Pigs and Chickens</a></p>
+<p><a href="http://www.scrumidable.de/">A good page with Podcasts (German)</a></p>
+<p><a href="http://media.agile42.com/content/Scrum_in_a_nutshell.pdf">Cheat Sheet</a></p>
+<p><a href="https://www.crisp.se/gratis-material-och-guider/scrum-checklist">Scrum Checklist</a></p>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./move_actual_work_to_a_new_branch.html" title="Previous: Move actual work to a new Branch">Move actual work to a new Branch</a></li>
+                <li class="next-article"><a href="./memory_layout.html" title="Next: Memory Layout">Memory Layout</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2015-05-29T18:42:35+02:00">Mai 29, 2015</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-03-17T10:35:01+01:00">Mär 17, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#agile-ref">Agile
+                    <span>2</span>
+</a></li>
+                <li><a href="./tags#scrum-ref">Scrum
+                    <span>2</span>
+</a></li>
+                <li><a href="./tags#software_development_methodology-ref">Software Development Methodology
+                    <span>3</span>
+</a></li>
+                <li><a href="./tags#xp-ref">XP
+                    <span>2</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

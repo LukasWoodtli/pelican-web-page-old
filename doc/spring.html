@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="OOP, Programming, " />
+
+<meta property="og:title" content="Spring "/>
+<meta property="og:url" content="./spring.html" />
+<meta property="og:description" content="Dependency Injection and Inversion of Control The Spring IoC container needs to know which beans to create for Dependency Injection. Define Beans Class Annotation Use @Component generic Spring bean @Service business service components @Repository Data Access Objects (DAO) with automatic transaction management Inject Beans Annotation Use @Autowired Class member to …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2021-09-30T09:20:11+02:00" />
+<meta property="og:article:modified_time" content="2022-04-10T22:08:00+02:00" />
+<meta name="twitter:title" content="Spring ">
+<meta name="twitter:description" content="Dependency Injection and Inversion of Control The Spring IoC container needs to know which beans to create for Dependency Injection. Define Beans Class Annotation Use @Component generic Spring bean @Service business service components @Repository Data Access Objects (DAO) with automatic transaction management Inject Beans Annotation Use @Autowired Class member to …">
+
+        <title>Spring  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./spring.html"> Spring  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+        <div class="span8 offset2 article-content">
+
+            
+            <h1 id="dependency-injection-and-inversion-of-control">Dependency Injection and Inversion of Control</h1>
+<p>The Spring IoC container needs to know which beans to create for Dependency Injection.</p>
+<h2 id="define-beans">Define Beans</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Class Annotation</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Component</code></td>
+<td>generic Spring bean</td>
+</tr>
+<tr>
+<td><code>@Service</code></td>
+<td>business service components</td>
+</tr>
+<tr>
+<td><code>@Repository</code></td>
+<td>Data Access Objects (<span class="caps">DAO</span>) with automatic transaction management</td>
+</tr>
+</tbody>
+</table>
+<h2 id="inject-beans">Inject Beans</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Autowired</code></td>
+<td>Class member to be injected</td>
+</tr>
+<tr>
+<td><code>@Primary</code></td>
+<td>This bean is selected even if multiple are valid</td>
+</tr>
+<tr>
+<td><code>@Qualifier</code></td>
+<td>Can be added to the bean and the field for selection</td>
+</tr>
+</tbody>
+</table>
+<p><code>@Autowired</code> can be added to class member fields or to constructors.</p>
+<p>Auto-wiring is successful if exactly one match is found.
+If multiple candidate beans are available the expected one can be
+annotated with <code>@Primary</code>.</p>
+<p>Use <code>@Qualifier</code> for manual selection of a bean implementation:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Component</span>
+<span class="nd">@Qualifier</span><span class="p">(</span><span class="s">"bubblesort"</span><span class="p">)</span>
+<span class="kd">class</span> <span class="nc">BubbleSort</span> <span class="kd">implements</span> <span class="n">Sort</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span>
+<span class="nd">@Component</span>
+<span class="kd">class</span> <span class="nc">SimpleSort</span> <span class="kd">implements</span> <span class="n">Sort</span> <span class="p">{</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span>
+<span class="nd">@Component</span>
+<span class="kd">class</span> <span class="nc">MyBean</span> <span class="p">{</span>
+  <span class="nd">@Autowired</span>
+  <span class="nd">@Qualifier</span><span class="p">(</span><span class="s">"bubblesort"</span><span class="p">)</span>
+  <span class="n">Sort</span> <span class="n">algorithm</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="scopes">Scopes</h2>
+<h3 id="generic-scopes">Generic Scopes</h3>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Scope</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>singleton</code> (default)</td>
+<td>Only one instance of the bean in a IoC container</td>
+</tr>
+<tr>
+<td><code>prototype</code></td>
+<td>A new instance of the bean is created each time it is requested from the IoC container</td>
+</tr>
+</tbody>
+</table>
+<h3 id="web-context-scopes">Web Context Scopes</h3>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Scope</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>request</code></td>
+<td>A new instance of the bean is created for each <span class="caps">HTTP</span> request</td>
+</tr>
+<tr>
+<td><code>session</code></td>
+<td>A new instance of the bean is created for every <span class="caps">HTTP</span> session</td>
+</tr>
+<tr>
+<td><code>application</code></td>
+<td>One instance of the bean for a web application</td>
+</tr>
+</tbody>
+</table>
+<h3 id="usage">Usage</h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@Service</span>
+<span class="nd">@Scope</span><span class="p">(</span><span class="s">"singleton"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyServiceImpl</span> <span class="kd">implements</span> <span class="n">MyService</span> <span class="p">{}</span>
+</code></pre></div>
+<h2 id="lifecycle-hooks">Lifecycle Hooks</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@PostConstruct</code></td>
+<td>Method that is called once the bean is fully initialized with dependencies</td>
+</tr>
+<tr>
+<td><code>@PreDestroy</code></td>
+<td>Method that is called before the bean is removed from the IoC container</td>
+</tr>
+</tbody>
+</table>
+<h2 id="run-spring-ioc-container">Run Spring IoC container</h2>
+<p>Use <code>ApplicationContext</code> to launch an IoC container:</p>
+<h3 id="configuration-for-application-context">Configuration for Application Context</h3>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Class Annotation</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Configuration</code></td>
+<td>Define a Spring configuration</td>
+</tr>
+<tr>
+<td><code>@ComponentScan</code></td>
+<td>Add information on where to search for beans</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="nd">@Configuration</span>
+<span class="nd">@ComponentScan</span><span class="p">(</span><span class="n">basePackages</span> <span class="o">=</span> <span class="p">{</span> <span class="s">"com.mycompany.mypackage"</span> <span class="p">})</span>
+<span class="kd">class</span> <span class="nc">SpringContext</span> <span class="p">{</span>
+<span class="p">}</span>
+</code></pre></div>
+<h1 id="spring-boot">Spring Boot</h1>
+<p><code>@SpringBootApplication</code> is a shortcut for:</p>
+<ul>
+<li><code>@Configuration</code>: Spring application context cofiguration</li>
+<li><code>@EnableAutoConfiguration</code>: Automatic configuration with sensible (opiniated) defaults</li>
+<li><code>@ComponentScan</code>: Scans for Spring beans in the package of this class and all its subpackages</li>
+</ul>
+<h1 id="custom-configuration">Custom Configuration</h1>
+<p>Put a configuration variable as key-value pair into <code>src/main/resources/application.properties</code>:</p>
+<div class="highlight"><pre><span></span><code>myservice.url=http://myservice
+</code></pre></div>
+<p>The value can be read from Java:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Component</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyService</span> <span class="p">{</span>
+  <span class="nd">@Value</span><span class="p">(</span><span class="s">"${myservice.url}"</span><span class="p">)</span>
+  <span class="kd">private</span> <span class="n">String</span> <span class="n">url</span><span class="p">;</span>  <span class="c1">// this will contain: http://myservice</span>
+<span class="p">}</span>
+</code></pre></div>
+<h1 id="rest-services"><span class="caps">REST</span> Services</h1>
+<h2 id="controller">Controller</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Class Annotation</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@RestController</code></td>
+<td>Create <span class="caps">REST</span> controller, combination of <code>@ResponseBody</code> and <code>@Controller</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="handler-methods">Handler Methods</h2>
+<p>There are method annotations for handling a path with a <span class="caps">HTTP</span> method:</p>
+<ul>
+<li><code>@GetMapping("/path")</code></li>
+<li><code>@PostMapping("/path")</code></li>
+<li><code>@PutMapping("/path")</code></li>
+<li><code>@DeleteMapping("/path")</code></li>
+<li>…</li>
+</ul>
+<h3 id="parameters-to-handler-methods">Parameters to Handler Methods</h3>
+<p>These annotations can be added to the arguments of the handler method:</p>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Argument Annotation</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@PathVariable</code></td>
+<td>Capture a path argument</td>
+</tr>
+<tr>
+<td><code>@PathVariable</code></td>
+<td>Capture a path argument</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="nd">@GetMapping</span><span class="p">(</span><span class="s">"/hello/{name}"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="n">MyBean</span> <span class="nf">hello</span><span class="p">(</span><span class="nd">@PathVariable</span> <span class="n">String</span> <span class="n">name</span><span class="p">,</span>
+                    <span class="nd">@RequestBody</span> <span class="n">MyDto</span> <span class="n">body</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">new</span> <span class="n">MyBean</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="return-values">Return Values</h3>
+<p>Usually either a bean (<span class="caps">DTO</span>) is returned (which is usually converted to a <span class="caps">JSON</span>) or
+a <code>ResponseEntity&lt;&gt;</code> can be used to provide some information to the client.</p>
+<h2 id="validation">Validation</h2>
+<table class="table-striped table">
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Valid</code></td>
+<td>Argument annotation of a handler method to validate incoming data</td>
+</tr>
+<tr>
+<td><code>@AssertTrue</code></td>
+<td>Checks if boolean field is true</td>
+</tr>
+<tr>
+<td><code>@AssertFalse</code></td>
+<td>Checks if boolean field is false</td>
+</tr>
+<tr>
+<td><code>@Future</code></td>
+<td>Date must be in the future</td>
+</tr>
+<tr>
+<td><code>@Past</code></td>
+<td>Date must be in the past</td>
+</tr>
+<tr>
+<td><code>@Max</code></td>
+<td>Number must be lower or equal to the given maximum</td>
+</tr>
+<tr>
+<td><code>@Min</code></td>
+<td>Number must be lower or equal to the given minimum</td>
+</tr>
+<tr>
+<td><code>@NotNull</code></td>
+<td>Element cannot be <code>null</code></td>
+</tr>
+<tr>
+<td><code>@Pattern</code></td>
+<td>Element must match the given regular expression</td>
+</tr>
+<tr>
+<td><code>@Size</code></td>
+<td>Element size must be within given boundaries</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="c1">// contoller</span>
+<span class="nd">@GetMapping</span><span class="p">(</span><span class="s">"/hello/{name}"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="n">MyBean</span> <span class="nf">hello</span><span class="p">(</span><span class="nd">@PathVariable</span> <span class="n">String</span> <span class="n">name</span><span class="p">,</span>
+                    <span class="nd">@Valid</span> <span class="nd">@RequestBody</span> <span class="n">MyDto</span> <span class="n">body</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// validate MyDto here</span>
+  <span class="c1">// ...</span>
+<span class="p">}</span>
+
+<span class="c1">// bean</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyDto</span> <span class="p">{</span>
+  <span class="nd">@NotNull</span>
+  <span class="kd">private</span> <span class="n">Date</span> <span class="n">date</span><span class="p">;</span>
+
+  <span class="nd">@Size</span><span class="p">(</span><span class="n">min</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span>
+  <span class="kd">private</span> <span class="n">String</span> <span class="n">string</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="testing">Testing</h2>
+<h3 id="unit-testing-the-controller">Unit Testing the Controller</h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">SpringExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>  <span class="c1">// before Junit 5 use `@RunWith(SpringRunner.class)`</span>
+<span class="nd">@WebMvcTest</span><span class="p">(</span><span class="n">value</span> <span class="o">=</span> <span class="n">MyController</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyControllerTest</span> <span class="p">{</span>
+  <span class="nd">@Autowired</span>
+  <span class="kd">private</span> <span class="n">MockMvc</span> <span class="n">mvc</span><span class="p">;</span>
+
+  <span class="nd">@MockBean</span>  <span class="c1">// mocking with Mockito</span>
+  <span class="kd">private</span> <span class="n">MyService</span> <span class="n">service</span><span class="p">;</span>
+
+  <span class="c1">// write tests with `@Test`</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="integration-testing">Integration Testing</h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@ExtendWith</span><span class="p">(</span><span class="n">SpringExtension</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>  <span class="c1">// before Junit 5 use `@RunWith(SpringRunner.class)`</span>
+<span class="nd">@SpringBootTest</span><span class="p">(</span><span class="n">classes</span> <span class="o">=</span> <span class="n">MyApplication</span><span class="p">.</span><span class="na">class</span><span class="p">,</span>
+                <span class="n">webEnvironment</span> <span class="o">=</span> <span class="n">SpringBootTest</span><span class="p">.</span><span class="na">WebEnvironment</span><span class="p">.</span><span class="na">RANDOM_PORT</span><span class="p">)</span>
+  <span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyControllerIT</span> <span class="p">{</span>
+
+  <span class="nd">@Autowired</span>
+  <span class="kd">private</span> <span class="n">TestRestTemplate</span> <span class="n">template</span><span class="p">;</span>
+
+  <span class="c1">// We are testing also the service layer. So it is not mocked here.</span>
+  <span class="c1">// Data access could be mocked with @MockBean</span>
+<span class="p">}</span>
+</code></pre></div>
+<h1 id="spring-security">Spring Security</h1>
+<p>The Spring Security Filter Chain checks authentication and authorization for every request.</p>
+<p>Most important filters:</p>
+<ul>
+<li><code>UsernamePasswordAuthenticationFilter</code>: executed for request with authentication form form submission (<code>POST</code>). Responds to the <span class="caps">URL</span> <code>/login</code> per default.</li>
+<li><code>BasicAuthenticationFilter</code>: for requests with basic authentication header.</li>
+<li><code>AnonymousAuthenticationFilter</code>: if no authentication credentials are provided.</li>
+<li><code>ExceptionTranslationFilter</code>: translates authentication exceptions to <span class="caps">HTTP</span> responses.</li>
+<li><code>FilterSecurityInterceptor</code>: implements security handling via filter implementations.</li>
+<li><code>HeaderWriterFilter</code>: add security related headers to responses (<code>X-Frame-Options</code>, <code>X-XSS-Protection</code>, <code>X-Content-Type-Options</code>, …)</li>
+<li><code>CsrfFilter</code>: enforces Cross-Site Request Forgery (<span class="caps">CSRF</span>) protection.</li>
+</ul>
+<p>The filters usually call a <code>Authentication Manager</code> (default implementation: <code>ProviderManager</code>) which itself calls multiple <code>AuthenticationProvider</code>s.
+Each authentication provider authenticates the user with a different backend technology:</p>
+<ul>
+<li><code>DaoAuthenticationProvider</code>: uses <code>UserDetailsService</code> to authenticate the user.<ul>
+<li>Spring Security provides <em>in-memory</em> and <em><span class="caps">JDBC</span></em> implementations of <code>UserDetailsService</code></li>
+</ul>
+</li>
+<li><span class="caps">LDAP</span> support is implemented using the <code>LdapAuthenticator</code></li>
+</ul>
+<h2 id="authorization">Authorization</h2>
+<p><code>AccessDecisionManager</code> uses multiple <code>AccessDecisionVoter</code> implementations to make access decisions.</p>
+<p>Each voter returns one of these results:</p>
+<ul>
+<li><code>ACCESS_GRANTED</code></li>
+<li><code>ACCESS_ABSTAIN</code></li>
+<li><code>ACCESS_DENIED</code></li>
+</ul>
+<p>Default implementations of <code>AccessDecisionManager</code>:</p>
+<ul>
+<li><code>AffirmativeBased</code>: grants access if any <code>AccessDecisionManager</code> returns a positive response</li>
+<li><code>ConsensusBased</code>: grants access if the majority of <code>AccessDecisionManager</code>s returns a positive response</li>
+<li><code>UnanimousBased</code>: grants access if all <code>AccessDecisionManager</code>s returns a positive response</li>
+</ul>
+<p>Some implementations of <code>AccessDecisionVoter</code>:</p>
+<ul>
+<li><code>RoleVoter</code>: returns a vote based on the role of the user</li>
+<li><code>AuthenticatedVoter</code>: returns a vote based authentication status of the user</li>
+<li><code>Jsr250Voter</code>: returns vote based on <span class="caps">JSR</span>-250 annotations</li>
+</ul>
+<h2 id="spring-security-annotations">Spring Security Annotations</h2>
+<p>Method level security:</p>
+<ul>
+<li>Add <code>@EnableGlobalMethodSecurity</code> on a Spring configuration class.</li>
+<li>Use <code>@Secured("ROLE_ADMIN)</code> on a service method (it’s also possible to provide multiple roles).</li>
+</ul>
+<h3 id="jsr-250-annotations"><span class="caps">JSR</span>-250 Annotations</h3>
+<ul>
+<li>Add <code>@EnableGlobalMethodSecurity(jsr250Enabled = true)</code> on a Spring configuration class.</li>
+<li>Use <code>@RolesAllowed("ROLE_ADMIN)</code> on a service method (it’s also possible to provide multiple roles).</li>
+</ul>
+<h3 id="pre-and-post-annotation">Pre and Post Annotation</h3>
+<ul>
+<li>Add <code>@EnableGlobalMethodSecurity(prePostEnabled = true)</code> on a Spring configuration class.</li>
+<li>Use <code>@PreAuthorize(..)</code> or <code>@PostAuthorize(..)</code> to provide extensive checks.</li>
+</ul>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./solid_design_principles.html" title="Previous: SOLID Design Principles">SOLID Design Principles</a></li>
+                <li class="next-article"><a href="./a_brief_history_of_test_driven_development.html" title="Next: A brief History of Test Driven Development">A brief History of Test Driven Development</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2021-09-30T09:20:11+02:00">Sep 30, 2021</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-10T22:08:00+02:00">Apr 10, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#oop-ref">OOP
+                    <span>7</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>

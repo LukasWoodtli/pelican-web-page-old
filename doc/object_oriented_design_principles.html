@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="author" content="Lukas Woodtli" />
+
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary">
+
+<meta name="keywords" content="C++, Python, OOP, Programming, " />
+
+<meta property="og:title" content="Object Oriented Design Principles "/>
+<meta property="og:url" content="./object_oriented_design_principles.html" />
+<meta property="og:description" content="General Use Coding conventions Keep it simple, stupid (KISS) Boy Scout Rule: “Always leave the campground cleaner than you found it” - Robert C. Martin Broken Window Theory: Don’t Live with Broken Windows Fix root cause (root cause analysis, no workaraounds): otherwise it will get you again You aren’t …" />
+<meta property="og:site_name" content="Lukas Woodtli" />
+<meta property="og:article:author" content="Lukas Woodtli" />
+<meta property="og:article:published_time" content="2018-05-31T17:28:46+02:00" />
+<meta property="og:article:modified_time" content="2022-04-04T14:29:27+02:00" />
+<meta name="twitter:title" content="Object Oriented Design Principles ">
+<meta name="twitter:description" content="General Use Coding conventions Keep it simple, stupid (KISS) Boy Scout Rule: “Always leave the campground cleaner than you found it” - Robert C. Martin Broken Window Theory: Don’t Live with Broken Windows Fix root cause (root cause analysis, no workaraounds): otherwise it will get you again You aren’t …">
+
+        <title>Object Oriented Design Principles  · Lukas Woodtli
+</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="./theme/css/pygments.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/tipuesearch/tipuesearch.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/elegant.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/admonition.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="./theme/css/custom.css" media="screen">
+
+
+
+    </head>
+    <body>
+        <div id="content-sans-footer">
+        <div class="navbar navbar-static-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="./"><span class=site-name>Lukas Woodtli</span></a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav pull-right top-menu">
+                            <li ><a href=".">Home</a></li>
+                            <li><a href="./pages/resume.html">Resume</a></li>
+                            <li><a href="./pages/skills.html">Skills</a></li>
+                            <li><a href="./pages/books.html">Books</a></li>
+                            <li><a href="./pages/courses.html">Courses</a></li>
+                            <li><a href="./pages/projects.html">Projects</a></li>
+                            <li><a href="./pages/blog.html">Blog</a></li>
+                            <li><a href="./pages/contact.html">Contact</a></li>
+                            <!-- <li ><a href="./categories">Categories</a></li> -->
+                            <!-- <li ><a href="./tags">Tags</a></li> -->
+                            <!-- <li ><a href="./archives">Archives</a></li> -->
+
+                            <li><form class="navbar-search" action="./search.html" onsubmit="return validateForm(this.elements['q'].value);"> <input type="text" class="search-query" placeholder="Search" name="q" id="tipue_search_input"></form></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span1"></div>
+                <div class="span10">
+<article itemscope>
+<div class="row-fluid">
+    <header class="page-header span10 offset2">
+    <h1><a href="./object_oriented_design_principles.html"> Object Oriented Design&nbsp;Principles  </a></h1>
+    </header>
+</div>
+
+<div class="row-fluid">
+    <div class="span2 table-of-content">
+        <nav>
+        <h4>Contents</h4>
+        <div class="toc">
+<ul>
+<li><a href="#general">General</a></li>
+<li><a href="#class-design">Class Design</a><ul>
+<li><a href="#solid"><span class="caps">SOLID</span></a></li>
+</ul>
+</li>
+<li><a href="#package-design">Package Design</a><ul>
+<li><a href="#package-cohesion">Package Cohesion</a><ul>
+<li><a href="#reuse-release-equivalence-principle-rep">Reuse-release Equivalence Principle (<span class="caps">REP</span>)</a></li>
+<li><a href="#common-reuse-principle-crp">Common-Reuse Principle (<span class="caps">CRP</span>)</a></li>
+<li><a href="#common-closure-principle-ccp">Common-Closure Principle (<span class="caps">CCP</span>)</a></li>
+</ul>
+</li>
+<li><a href="#package-coupling">Package Coupling</a><ul>
+<li><a href="#acyclic-dependencies-principle-adp">Acyclic Dependencies Principle (<span class="caps">ADP</span>)</a></li>
+</ul>
+</li>
+<li><a href="#stable-dependencies-principle-sdp">Stable-Dependencies Principle (<span class="caps">SDP</span>)</a></li>
+<li><a href="#stable-abstractions-principle-sap">Stable-Abstractions Principle (<span class="caps">SAP</span>)</a></li>
+</ul>
+</li>
+<li><a href="#development-environment-and-infrastructure">Development Environment and Infrastructure</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+        </nav>
+    </div>
+    <div class="span8 article-content">
+
+            
+            
+<h1 id="general">General</h1>
+<ul>
+<li>Use <a href="https://en.wikipedia.org/wiki/Coding_conventions">Coding conventions</a></li>
+<li><a href="https://en.wikipedia.org/wiki/KISS_principle">Keep it simple, stupid (<span class="caps">KISS</span>)</a></li>
+<li>Boy Scout Rule: “Always leave the campground cleaner than you found it” - Robert C. Martin</li>
+<li><a href="https://pragprog.com/the-pragmatic-programmer/extracts/software-entropy">Broken Window Theory</a>: Don’t Live with Broken Windows</li>
+<li>Fix root cause (root cause analysis, no workaraounds): otherwise it will get you again</li>
+<li><a href="https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it">You aren’t gonna need it (<span class="caps">YAGNI</span>)</a>: implement things when you need them</li>
+</ul>
+<h1 id="class-design">Class Design</h1>
+<h2 id="solid"><span class="caps">SOLID</span></h2>
+<ul>
+<li><em>S</em>: Single responsibility principle (only one reason to change)</li>
+<li><em>O</em>: Open/closed principle (open for extension, closed for modification)</li>
+<li><em>L</em>: Liskov substitution principle</li>
+<li><em>I</em>: Interface segregation principle</li>
+<li><em>D</em>: Dependency inversion principle (dependency injection can be used)</li>
+</ul>
+<p>See <a href="https://en.wikipedia.org/wiki/SOLID"><span class="caps">SOLID</span></a> and <a href="./solid_design_principles.html"><span class="caps">SOLID</span> Design Principles</a>.</p>
+<h1 id="package-design">Package Design</h1>
+<p>See <a href="https://en.wikipedia.org/wiki/Package_principles">Package principles</a></p>
+<h2 id="package-cohesion">Package Cohesion</h2>
+<h3 id="reuse-release-equivalence-principle-rep">Reuse-release Equivalence Principle (<span class="caps">REP</span>)</h3>
+<ul>
+<li>A package must contain reusable classes</li>
+<li>All of the classes inside the package are reusable (or none of them are)</li>
+<li>The classes must be of the same family</li>
+</ul>
+<h3 id="common-reuse-principle-crp">Common-Reuse Principle (<span class="caps">CRP</span>)</h3>
+<p>Classes that are reused together belong in the same package</p>
+<h3 id="common-closure-principle-ccp">Common-Closure Principle (<span class="caps">CCP</span>)</h3>
+<ul>
+<li>A package should not have more than one reason to change</li>
+<li>Changes to an application shall occur only in one package</li>
+<li>If classes are tightly coupled, they belong to the same package</li>
+</ul>
+<h2 id="package-coupling">Package Coupling</h2>
+<h3 id="acyclic-dependencies-principle-adp">Acyclic Dependencies Principle (<span class="caps">ADP</span>)</h3>
+<ul>
+<li>No cycles are allowed in the dependency structure</li>
+<li>Dependencies form a tree (or <span class="caps">DAG</span>)</li>
+</ul>
+<h2 id="stable-dependencies-principle-sdp">Stable-Dependencies Principle (<span class="caps">SDP</span>)</h2>
+<ul>
+<li>Packages that are changed frequently shall not depend on packages that are difficult to change</li>
+</ul>
+<h2 id="stable-abstractions-principle-sap">Stable-Abstractions Principle (<span class="caps">SAP</span>)</h2>
+<ul>
+<li>Stable packages should be abstract, so that it can be easier extended</li>
+<li>Unstable packages should be concrete, it’s easier to change</li>
+</ul>
+<h1 id="development-environment-and-infrastructure">Development Environment and Infrastructure</h1>
+<ul>
+<li>Building the software needs to be possible with just one command</li>
+<li>Running a single test needs to be possible with just one command</li>
+<li>Running all tests needs to be possible with just one command</li>
+<li>Integrate unit tests into build</li>
+<li>Source control (e.g. git) for everything: source, docs, reference data, tools…</li>
+<li>Use static and dynamic analysis tools</li>
+<li>Set highest warning level of compilers, use multiple different compilers</li>
+<li>Write documentation: Wiki, Doxygen, Markdown…</li>
+<li>Apply <span class="caps">CI</span>/<span class="caps">CD</span>, pipeline as code</li>
+</ul>
+<h1 id="references">References</h1>
+<ul>
+<li><a href="https://97-things-every-x-should-know.gitbooks.io/97-things-every-programmer-should-know/content/en/index.html">97 Things Every Programmer Should Know</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Encapsulation_%28computer_programming%29">Encapsulate</a> what varies (<a href="http://c2.com/cgi/wiki?EncapsulationIsNotInformationHiding">Encapsulation Is Not Information Hiding</a>)</li>
+<li><a href="https://en.wikipedia.org/wiki/Composition_over_inheritance">Prefer Composition to inheritance</a></li>
+<li>Program to Interface, not Implementation: <a href="https://en.wikipedia.org/wiki/Liskov_substitution_principle">Liskov substitution principle</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Cohesion_%28computer_science%29">Cohesion</a>: Objects should only interact with ‘friends’ (objects in their neighborhood)</li>
+<li>Ineracting Objects should aim for <a href="https://en.wikipedia.org/wiki/Loose_coupling">loose coupling</a></li>
+<li><a href="http://martinfowler.com/bliki/TellDontAsk.html">Tell don’t ask</a>: Tell Objects what to do with their data, don’t ask for the data to operate on it</li>
+<li><a href="./list_of_design_patterns.html">List of Design Patterns</a></li>
+</ul>
+            <!--             <div>
+            <span class="author_blurb"><a href=""><span class="author_name">Lukas Woodtli</span></a> -
+                </span><br />
+</div>
+ -->
+            
+            
+            <hr/>
+            <aside>
+            <nav>
+            <ul class="articles-timeline">
+                <li class="previous-article">« <a href="./blender_basics.html" title="Previous: Blender Basics">Blender Basics</a></li>
+                <li class="next-article"><a href="./midnight_commander.html" title="Next: Midnight Commander">Midnight Commander</a> »</li>
+            </ul>
+            </nav>
+            </aside>
+        </div>
+        <section>
+        <div class="span2" style="float:right;font-size:0.9em;">
+            <h4>Published</h4>
+            <time itemprop="dateCreated" datetime="2018-05-31T17:28:46+02:00">Mai 31, 2018</time>
+
+<h4>Last Updated</h4>
+<time datetime="2022-04-04T14:29:27+02:00">Apr 4, 2022</time>
+
+            <h4>Category</h4>
+            <a class="category-link" href="./categories.html#programming-ref">Programming</a>
+            <h4>Tags</h4>
+            <ul class="list-of-tags tags-in-article">
+                <li><a href="./tags#cpp-ref">C++
+                    <span>19</span>
+</a></li>
+                <li><a href="./tags#oop-ref">OOP
+                    <span>7</span>
+</a></li>
+                <li><a href="./tags#python-ref">Python
+                    <span>4</span>
+</a></li>
+            </ul>
+<h4>Contact</h4>
+    <a href="https://www.linkedin.com/in/lukaswoodtli" title="My LinkedIn Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-linkedin sidebar-social-links"></i></a>
+    <a href="https://github.com/LukasWoodtli" title="My github Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-github sidebar-social-links"></i></a>
+    <a href="https://stackoverflow.com/cv/lukaswoodtli" title="My stack-overflow Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-stack-overflow sidebar-social-links"></i></a>
+    <a href="https://www.xing.com/profile/Lukas_Woodtli" title="My XING Profile" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-xing sidebar-social-links"></i></a>
+    <a href="/pages/contact.html" title="My email Address" class="sidebar-social-links" target="_blank">
+    <i class="fa fa-envelope sidebar-social-links"></i></a>
+        </div>
+        </section>
+</div>
+</article>
+                </div>
+                <div class="span1"></div>
+            </div>
+        </div>
+        <div id="push"></div>
+    </div>
+<footer>
+<div id="footer">
+    <ul class="footer-content">
+        <li class="elegant-power">Powered by <a href="http://getpelican.com/" title="Pelican Home Page">Pelican</a>. Theme: <a href="https://github.com/Pelican-Elegant/elegant/" title="Theme Elegant Home Page">Elegant</a></li>
+    </ul>
+</div>
+</footer>            <script src="//code.jquery.com/jquery.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+        <script>
+            function validateForm(query)
+            {
+                return (query.length > 0);
+            }
+        </script>
+
+    
+    </body>
+    <!-- Theme: Elegant built for Pelican
+    License : MIT -->
+</html>
